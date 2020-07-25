@@ -2,7 +2,7 @@
 
 import numpy
 
-# these contain the published (x, y) rgbw_to_xy of the SRGB system
+# these contain the published (x, y) primaries of the SRGB system
 # see https://en.wikipedia.org/wiki/SRGB
 # across is R, G, B, W and down is x, y
 # the last one is not actually a primary but the so-called white point
@@ -21,7 +21,7 @@ x = rgbw_to_xy[0, :]
 y = rgbw_to_xy[1, :]
 rgbw_to_XYZ = numpy.stack([x, y, 1. - x - y], 0)
 
-# find the linear combination of R, G, B rgbw_to_xy to make the white point
+# find the linear combination of R, G, B primaries to make the white point
 x = numpy.linalg.solve(rgbw_to_XYZ[:, :3], rgbw_to_XYZ[:, 3])
 
 # then scale R, G, B by those factors so the primaries sum to the white point

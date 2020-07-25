@@ -100,7 +100,6 @@ def hsbk_to_rgb(hsbk):
 
   # do the scaling in gamma-encoded RGB space
   # this is not very principled and can corrupt the chromaticities
-  # user is supposed to pass 0..1 values, we will allow a little slack
   rgb *= br
 
   return rgb
