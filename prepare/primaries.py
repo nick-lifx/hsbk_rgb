@@ -46,7 +46,15 @@ UVW_to_rgb = numpy.linalg.inv(rgb_to_UVW)
 
 # print it out as Python code that can be inserted into hsbk_to_rgb.py
 print(
-  f'''UVW_to_rgb = numpy.array(
+  f'''rgb_to_UVW = numpy.array(
+  [
+    [{rgb_to_UVW[0, 0]:.8f}, {rgb_to_UVW[0, 1]:.8f}, {rgb_to_UVW[0, 2]:.8f}],
+    [{rgb_to_UVW[1, 0]:.8f}, {rgb_to_UVW[1, 1]:.8f}, {rgb_to_UVW[1, 2]:.8f}],
+    [{rgb_to_UVW[2, 0]:.8f}, {rgb_to_UVW[2, 1]:.8f}, {rgb_to_UVW[2, 2]:.8f}]
+  ],
+  numpy.double
+)
+UVW_to_rgb = numpy.array(
   [
     [{UVW_to_rgb[0, 0]:.8f}, {UVW_to_rgb[0, 1]:.8f}, {UVW_to_rgb[0, 2]:.8f}],
     [{UVW_to_rgb[1, 0]:.8f}, {UVW_to_rgb[1, 1]:.8f}, {UVW_to_rgb[1, 2]:.8f}],

@@ -30,7 +30,7 @@ There are 3 basic utilities to try:
 
 There are also some test programs:
 
-* `test.py` -- checks the RGB -> HSBK -> RGB invertibility for random RGB.
+* `inv_test.py` -- checks the RGB -> HSBK -> RGB invertibility for random RGB.
 
 * `image.py` -- creates an image showing all hue and Kelvin combinations, for
   a given saturation and brightness which you specify at the command line.
@@ -71,7 +71,7 @@ which should print something like this (the CIE 1960 u, v coordinates at 3500K)
 ```
 
 For the more sophisticated subroutines `hsbk_to_rgb()` and `rgb_to_hsbk()` we
-recommend that you look in the code of `test.py` or `image.py` as a usage
+recommend that you look in the code of `inv_test.py` or `image.py` as a usage
 example. We will give some basic tips here, on the use of `numpy` to call them.
 
 HSBK values are passed as a 4-entry `numpy` array which can be constructed by:
