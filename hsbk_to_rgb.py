@@ -3,7 +3,12 @@
 import math
 import numpy
 import sys
-from kelv_to_uv import kelv_to_uv
+
+# old way:
+#from kelv_to_uv import kelv_to_uv
+
+# new way (more efficient):
+from mired_to_rgb_srgb import mired_to_rgb_srgb
 
 # define hues as red->yellow->green->cyan->blue->magenta->red again
 # across is hue 0, 60, 120, 180, 240, 300, 360, down is R, G, B
@@ -17,16 +22,17 @@ hue_sequence = numpy.array(
   numpy.double
 )
 
-# this allows us to convert chromaticity to RGB, in the SRGB system
-# see primaries.py in this repository for how this matrix is calculated
-UVW_to_rgb = numpy.array(
-  [
-    [12.50315736, -0.12629452, -3.03106845],
-    [-4.22958319, 5.32310738, 0.25261433],
-    [5.07265164, -10.25802888, 6.42535875]
-  ],
-  numpy.double
-)
+# old way:
+## this allows us to convert chromaticity to RGB, in the SRGB system
+## see primaries.py in this repository for how this matrix is calculated
+#UVW_to_rgb = numpy.array(
+#  [
+#    [12.50315736, -0.12629452, -3.03106845],
+#    [-4.22958319, 5.32310738, 0.25261433],
+#    [5.07265164, -10.25802888, 6.42535875]
+#  ],
+#  numpy.double
+#)
 
 EPSILON = 1e-6
 
@@ -59,30 +65,34 @@ def hsbk_to_rgb(hsbk):
 
   # this section computes kelv_rgb from kelv
 
-  # find the approximate (u, v) chromaticity of the given Kelvin value
-  uv = kelv_to_uv(kelv)
+  # old way:
+  ## find the approximate (u, v) chromaticity of the given Kelvin value
+  #uv = kelv_to_uv(kelv)
+  #
+  ## add the missing w, to convert the chromaticity from (u, v) to (U, V, W)
+  ## see https://en.wikipedia.org/wiki/CIE_1960_color_space
+  #u = uv[0]
+  #v = uv[1]
+  #UVW = numpy.array([u, v, 1. - u - v], numpy.double)
+  #
+  ## convert to rgb in the SRGB system (the brightness will be arbitrary)
+  #kelv_rgb = UVW_to_rgb @ UVW
+  #
+  ## low Kelvins are outside the gamut of SRGB and thus must be interpreted,
+  ## in this simplistic approach we simply clip off the negative blue value
+  #kelv_rgb[kelv_rgb < 0.] = 0.
+  #
+  ## normalize the brightness, so that at least one of R, G, or B = 1
+  #kelv_rgb /= numpy.max(kelv_rgb)
+  #
+  ## gamma-encode the R, G, B tuple according to the SRGB gamma curve
+  ## because displaying it on a monitor will gamma-decode it in the process
+  #mask = kelv_rgb < .0031308
+  #kelv_rgb[mask] *= 12.92
+  #kelv_rgb[~mask] = 1.055 * kelv_rgb[~mask] ** (1. / 2.4) - 0.055
 
-  # add the missing w, to convert the chromaticity from (u, v) to (U, V, W)
-  # see https://en.wikipedia.org/wiki/CIE_1960_color_space
-  u = uv[0]
-  v = uv[1]
-  UVW = numpy.array([u, v, 1. - u - v], numpy.double)
-
-  # convert to rgb in the SRGB system (the brightness will be arbitrary)
-  kelv_rgb = UVW_to_rgb @ UVW
-
-  # low Kelvins are outside the gamut of SRGB and thus must be interpreted,
-  # in this simplistic approach we simply clip off the negative blue value
-  kelv_rgb[kelv_rgb < 0.] = 0.
-
-  # normalize the brightness, so that at least one of R, G, or B = 1
-  kelv_rgb /= numpy.max(kelv_rgb)
-
-  # gamma-encode the R, G, B tuple according to the SRGB gamma curve
-  # because displaying it on a monitor will gamma-decode it in the process
-  mask = kelv_rgb < .0031308
-  kelv_rgb[mask] *= 12.92
-  kelv_rgb[~mask] = 1.055 * kelv_rgb[~mask] ** (1. / 2.4) - 0.055
+  # new way (more efficient):
+  kelv_rgb = mired_to_rgb_srgb(1e6 / kelv)
 
   # this section applies the saturation
 

@@ -1,2 +1,5 @@
 *.png
 __pycache__
+/prepare/mired_to_uv_data.yml
+/prepare/mired_to_rgb_fit_srgb.yml
+/prepare/mired_to_rgb_srgb.py

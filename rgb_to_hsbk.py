@@ -29,7 +29,12 @@ hue_table = [
 #   ./hsbk_to_rgb.py 0 0 1 6504
 # ideally it would be [1, 1, 1] but unfortunately D65 whitepoint != 6504K
 kelv_rgb = numpy.array(
-  [1.000000000000000, 0.974069550010795, 0.996829660858958],
+  # old way
+  #[1.000000000000000, 0.974069550010795, 0.996829660858958],
+
+  # new way (more efficient)
+  [1.000000000000000, 0.976013921677787, 0.995894521802491],
+
   numpy.double
 )
 
