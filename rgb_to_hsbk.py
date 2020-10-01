@@ -28,7 +28,10 @@ hue_table = [
 # the following is a more accurate version of what would be printed by
 #   ./hsbk_to_rgb.py 0 0 1 6504
 # ideally it would be [1, 1, 1] but unfortunately D65 whitepoint != 6504K
-kelv_rgb = numpy.array([.89204658, .85383616, 1.], numpy.double)
+kelv_rgb = numpy.array(
+  [1.000000000000000, 0.974069550010795, 0.996829660858958],
+  numpy.double
+)
 
 def rgb_to_hsbk(rgb):
   # validate inputs, allowing a little slack
