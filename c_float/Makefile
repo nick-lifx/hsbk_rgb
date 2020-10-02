@@ -6,7 +6,7 @@ CFLAGS=-g -Wall
 %_standalone.o: %.c
 	${CC} ${CFLAGS} ${CPPFLAGS} -DSTANDALONE -o $@ -c $<
 
-all: hsbk_to_rgb rgb_to_hsbk kelv_to_rgb kelv_to_uv mired_to_rgb inv_test
+all: hsbk_to_rgb rgb_to_hsbk kelv_to_rgb kelv_to_uv mired_to_rgb hue_kelv_test inv_test sat_test
 
 hsbk_to_rgb: hsbk_to_rgb_standalone.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
@@ -23,8 +23,14 @@ kelv_to_uv: kelv_to_uv_standalone.o
 mired_to_rgb: mired_to_rgb_standalone.o
 	${CC} ${CFLAGS} -o $@ $^
 
+hue_kelv_test: hue_kelv_test.o hsbk_to_rgb.o mired_to_rgb.o
+	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
+
 inv_test: inv_test.o hsbk_to_rgb.o rgb_to_hsbk.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
+sat_test: sat_test.o hsbk_to_rgb.o mired_to_rgb.o
+	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
+
 clean:
-	rm -f hsbk_to_rgb rgb_to_hsbk kelv_to_rgb kelv_to_uv mired_to_rgb inv_test *.o
+	rm -f hsbk_to_rgb rgb_to_hsbk kelv_to_rgb kelv_to_uv mired_to_rgb hue_kelv_test inv_test sat_test *.o
