@@ -14,6 +14,7 @@ __pycache__
 /c_float/rgb_to_hsbk
 /c_float/rgb_to_hsv
 /c_float/sat_test
+/c_fixed/kelv_to_rgb
 /c_fixed/kelv_to_uv
 /prepare/mired_to_rgb_fit_srgb.yml
 /prepare/mired_to_uv_data.yml

@@ -7,46 +7,46 @@ EPSILON = 1e-6
 
 def mired_to_rgb(mired):
   # validate inputs, allowing a little slack
-  assert mired >= 66.6666666666667 - EPSILON
-  assert mired < 1000 + EPSILON
+  assert mired >= 6.6666666666666671e+01 - EPSILON
+  assert mired < 1.0000000000000000e+03 + EPSILON
 
   # calculate red channel
-  if mired < 153.014204073907:
-    r = 3.75228927004191e-09
-    r = r * mired + 8.87539162481851e-06
-    r = r * mired + 0.0012814326446354
-    r = r * mired + 0.582677126816255
+  if mired < 1.5301420407390705e+02:
+    r = 3.7522892700419094e-09
+    r = r * mired + 8.8753916248185056e-06
+    r = r * mired + 1.2814326446353968e-03
+    r = r * mired + 5.8267712681625528e-01
   else:
-    r = 1
+    r = 1.0000000000000000e+00
 
   # calculate green channel
-  if mired < 153.389630135797:
-    g = -3.1793151306219e-09
-    g = g * mired + 5.60217181087732e-06
-    g = g * mired + 0.00107609627512111
-    g = g * mired + 0.691243100448387
+  if mired < 1.5338963013579743e+02:
+    g = -3.1793151306219023e-09
+    g = g * mired + 5.6021718108773232e-06
+    g = g * mired + 1.0760962751211111e-03
+    g = g * mired + 6.9124310044838655e-01
   else:
-    g = -2.89635036578811e-15
-    g = g * mired + 7.50927775397408e-12
-    g = g * mired + -8.13001567830012e-09
-    g = g * mired + 5.12561863637464e-06
-    g = g * mired + -0.00283237945006104
-    g = g * mired + 1.31593131471919
+    g = -2.8963503657881069e-15
+    g = g * mired + 7.5092777539740826e-12
+    g = g * mired + -8.1300156783001217e-09
+    g = g * mired + 5.1256186363746367e-06
+    g = g * mired + -2.8323794500610352e-03
+    g = g * mired + 1.3159313147191867e+00
 
   # calculate blue channel
-  if mired < 152.740533596145:
-    b = 1
-  elif mired < 525.947680278181:
-    b = -2.77865265294972e-18
-    b = b * mired + 4.58804157412273e-15
-    b = b * mired + -2.67958426105153e-12
-    b = b * mired + 4.88020519177214e-10
-    b = b * mired + 1.20547996848463e-07
-    b = b * mired + -6.02756589897739e-05
-    b = b * mired + 0.00420936766200165
-    b = b * mired + 1.23798675622197
+  if mired < 1.5274053359614493e+02:
+    b = 1.0000000000000000e+00
+  elif mired < 5.2594768027818066e+02:
+    b = -2.7786526529497227e-18
+    b = b * mired + 4.5880415741227275e-15
+    b = b * mired + -2.6795842610515310e-12
+    b = b * mired + 4.8802051917721417e-10
+    b = b * mired + 1.2054799684846307e-07
+    b = b * mired + -6.0275658989773891e-05
+    b = b * mired + 4.2093676620016474e-03
+    b = b * mired + 1.2379867562219662e+00
   else:
-    b = 0
+    b = 0.0000000000000000e+00
 
   return numpy.array([r, g, b], numpy.double)
 

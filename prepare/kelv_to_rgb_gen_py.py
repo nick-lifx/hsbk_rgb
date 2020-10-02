@@ -31,9 +31,9 @@ from kelv_to_uv import kelv_to_uv
 # this is precomputed for the particular primaries in use
 UVW_to_rgb = numpy.array(
   [
-    [{0:.15g}, {1:.15g}, {2:.15g}],
-    [{3:.15g}, {4:.15g}, {5:.15g}],
-    [{6:.15g}, {7:.15g}, {8:.15g}]
+    [{0:.16e}, {1:.16e}, {2:.16e}],
+    [{3:.16e}, {4:.16e}, {5:.16e}],
+    [{6:.16e}, {7:.16e}, {8:.16e}]
   ],
   numpy.double
 )
