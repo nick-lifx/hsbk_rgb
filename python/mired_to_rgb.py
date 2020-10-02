@@ -5,7 +5,7 @@ import numpy
 
 EPSILON = 1e-6
 
-def mired_to_rgb_srgb(mired):
+def mired_to_rgb(mired):
   # validate inputs, allowing a little slack
   assert mired >= 66.6666666666667 - EPSILON
   assert mired < 1000 + EPSILON
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     sys.exit(EXIT_FAILURE)
   mired = float(sys.argv[1])
 
-  rgb = mired_to_rgb_srgb(mired)
+  rgb = mired_to_rgb(mired)
   print(
     f'mired {mired:.3f} -> RGB ({rgb[RGB_RED]:.6f}, {rgb[RGB_GREEN]:.6f}, {rgb[RGB_BLUE]:.6f})'
   )

@@ -14,7 +14,7 @@ UVW_to_rgb = numpy.array(
   numpy.double
 )
 
-def kelv_to_rgb_srgb(kelv):
+def kelv_to_rgb(kelv):
   # find the approximate (u, v) chromaticity of the given Kelvin value
   uv = kelv_to_uv(kelv)
   
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     sys.exit(EXIT_FAILURE)
   kelv = float(sys.argv[1])
 
-  rgb = kelv_to_rgb_srgb(kelv)
+  rgb = kelv_to_rgb(kelv)
   print(
     f'kelv {kelv:.3f} -> RGB ({rgb[RGB_RED]:.6f}, {rgb[RGB_GREEN]:.6f}, {rgb[RGB_BLUE]:.6f})'
   )

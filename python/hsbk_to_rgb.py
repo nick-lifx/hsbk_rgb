@@ -5,10 +5,10 @@ import numpy
 import sys
 
 # old way (slower):
-#from kelv_to_rgb_srgb import kelv_to_rgb_srgb
+#from kelv_to_rgb import kelv_to_rgb
 
 # new way (faster):
-from mired_to_rgb_srgb import mired_to_rgb_srgb
+from mired_to_rgb import mired_to_rgb
 
 HSBK_HUE = 0
 HSBK_SAT = 1
@@ -60,10 +60,10 @@ def hsbk_to_rgb(hsbk):
   # this section computes kelv_rgb from kelv
 
   # old way (slower):
-  #kelv_rgb = kelv_to_rgb_srgb(kelv)
+  #kelv_rgb = kelv_to_rgb(kelv)
 
   # new way (faster):
-  kelv_rgb = mired_to_rgb_srgb(1e6 / kelv)
+  kelv_rgb = mired_to_rgb(1e6 / kelv)
 
   # this section applies the saturation
 

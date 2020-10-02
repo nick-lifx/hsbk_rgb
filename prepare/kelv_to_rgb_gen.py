@@ -10,10 +10,11 @@ EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
 if len(sys.argv) < 3:
-  print(f'usage: {sys.argv[0]:s} UVW_to_rgb_in.yml kelv_to_rgb_out.py')
+  print(f'usage: {sys.argv[0]:s} UVW_to_rgb_in.yml kelv_to_rgb_out.py [func_name]')
   sys.exit(EXIT_FAILURE)
 UVW_to_rgb_in = sys.argv[1]
 kelv_to_rgb_py_out = sys.argv[2]
+func_name = sys.argv[3] if len(sys.argv) >= 4 else 'kelv_to_rgb'
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -21,9 +22,6 @@ yaml = ruamel.yaml.YAML(typ = 'safe')
 with open(UVW_to_rgb_in) as fin:
   UVW_to_rgb = python_to_numpy(yaml.load(fin))
 
-func_name = os.path.basename(kelv_to_rgb_py_out)
-assert func_name[-3:] == '.py'
-func_name = func_name[:-3]
 with open(kelv_to_rgb_py_out, 'w') as fout:
   fout.write(
     '''#!/usr/bin/env python3

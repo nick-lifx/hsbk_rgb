@@ -21,4 +21,5 @@ clean:
 	rm -f kelv_to_rgb_srgb.py mired_to_rgb_srgb.py mired_to_rgb_fit_srgb.yml mired_to_uv.yml UVW_to_rgb_srgb.yml
 
 install:
-	cp kelv_to_rgb_srgb.py mired_to_rgb_srgb.py ..
+	cp kelv_to_rgb_srgb.py ../python/kelv_to_rgb.py
+	cp mired_to_rgb_srgb.py ../python/mired_to_rgb.py

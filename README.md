@@ -31,20 +31,20 @@ There are a number of command-line utilities to try:
   15000, and converts it to a (u, v) value in the CIE 1960 colour space, using
   an approximation by Krystek (see CIE 1960 colour space in Wikipedia).
 
-* `kelv_to_rgb_srgb` -- this takes a Kelvin value, which can be in the range
-  1000 to 15000, and converts it to a gamma-encoded (R, G, B) value in the SRGB
-  colour space, using the `kelv_to_uv` algorithm as a backend. The result is
-  the same as calling `hsbk_to_rgb` with saturation 0 and brightness 1.
-  Kelvin below some minimum are outside the SRGB gamut and must be interpreted.
+* `kelv_to_rgb` -- this takes a Kelvin value, which can be in the range 1000 to
+  15000, and converts it to a gamma-encoded (R, G, B) value in the SRGB colour
+  space, using the `kelv_to_uv` algorithm as a backend. The result is the same
+  as calling `hsbk_to_rgb` with saturation 0 and brightness 1. Kelvin below
+  some minimum are outside the SRGB gamut and must be interpreted.
 
-* `mired_to_rgb_srgb` -- this is essentially the same as `kelv_to_rgb_srgb`
-  except that it takes the argument in mireds (micro reciprocal degrees; equal
-  to 1e6 / Kelvin) and directly computes (R, G, B) from mireds instead of going
-  via chromaticities and applying various clipping and normalization steps as
-  the simpler but slower `kelv_to_rgb_srgb` algorithm does. It uses tables of
-  pre-computed polynomial approximations to achieve this. It does not have the
+* `mired_to_rgb` -- this is essentially the same as `kelv_to_rgb` except that
+  it takes the argument in mireds (micro reciprocal degrees; equal to 1e6 /
+  Kelvin) and directly computes (R, G, B) from mireds instead of going via
+  chromaticities and applying various clipping and normalization steps as the
+  simpler but slower `kelv_to_rgb_srgb` algorithm does. It uses tables of pre-
+  computed polynomial approximations to achieve this. It does not have the
   Krystek (u, v) approximation error, but it does introduce its own errors of
-  about the same magnitude, so results differ slightly from `kelv_to_rgb_srgb`.
+  about the same magnitude, so results differ slightly from `kelv_to_rgb`.
 
 * `rgb_to_hsbk` -- this is the inverse conversion to `hsbk_to_rgb` and should
   be lossless, except to say that you must provide a Kelvin value to use in the
@@ -87,14 +87,15 @@ run these, but if you do then `cd` into `prepare/`, run `make` and then `make
 install`. This will auto-generate some of the Python files in the main solver
 directory. Basically it pre-computes various constants which are derived from
 the chromaticities of the SRGB primaries and D65 white point. It uses a Remez
-exchange algorithm to find optimized polynomials for `mired_to_rgb_srgb.py`.
-A case where you might want to re-run the preparation scripts is if you are
-using a non-standard monitor such as an Apple (Display P3) or HDTV (rec.2020).
+exchange algorithm to find optimized polynomials for `mired_to_rgb.py`. A case
+where you might want to re-run the preparation scripts is if you are using a
+non-standard monitor such as an Apple (Display P3) or recent HDTV (rec.2020).
 
 ### Running from the command line
 
 You can run each utility from the command line for testing purposes, e.g.
 ```
+cd python
 ./hsbk_to_rgb.py 60 1 1 3500
 ```
 should produce output similar to the following

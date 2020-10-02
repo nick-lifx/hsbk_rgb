@@ -10,11 +10,12 @@ EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
 if len(sys.argv) < 3:
-  print(f'usage: {sys.argv[0]:s} mired_to_rgb_fit_in.yml mired_to_rgb_out.py')
+  print(f'usage: {sys.argv[0]:s} mired_to_rgb_fit_in.yml mired_to_rgb_out.py [func_name]')
   sys.exit(EXIT_FAILURE)
 mired_to_rgb_fit_in = sys.argv[1]
 mired_to_rgb_py_out = sys.argv[2]
-
+func_name = sys.argv[3] if len(sys.argv) >= 4 else 'mired_to_rgb'
+ 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
 
@@ -34,9 +35,6 @@ p_blue_ab = mired_to_rgb_fit['p_blue_ab']
 p_blue_bc = mired_to_rgb_fit['p_blue_bc']
 p_blue_cd = mired_to_rgb_fit['p_blue_cd']
 
-func_name = os.path.basename(mired_to_rgb_py_out)
-assert func_name[-3:] == '.py'
-func_name = func_name[:-3]
 with open(mired_to_rgb_py_out, 'w') as fout:
   fout.write(
     '''#!/usr/bin/env python3
