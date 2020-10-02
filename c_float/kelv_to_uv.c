@@ -1,3 +1,5 @@
+#include <stdio.h> // temp
+
 #include <assert.h>
 #include "kelv_to_uv.h"
 
@@ -14,12 +16,21 @@ void kelv_to_uv(float kelv, float *uv) {
   // find the approximate (u, v) chromaticity of the given Kelvin value
   // see http://en.wikipedia.org/wiki/Planckian_locus#Approximation (Krystek)
   // we evaluate this with Horner's rule for better numerical stability
-  uv[UV_u] =
-    ((1.28641212e-7f * kelv + 1.54118254e-4f) * kelv + .860117757f) /
-      ((7.08145163e-7f * kelv + 8.42420235e-4f) * kelv + 1.f);
-  uv[UV_v] =
-    ((4.20481691e-8f * kelv + 4.22806245e-5f) * kelv + .317398726f) /
-      ((1.61456053e-7f * kelv - 2.89741816e-5f) * kelv + 1.f);
+  float u = 1.28641212e-7f;
+  u = u * kelv + 1.54118254e-4f;
+  u = u * kelv + .860117757f;
+  float u_denom = 7.08145163e-7f;
+  u_denom = u_denom * kelv + 8.42420235e-4f;
+  u_denom = u_denom * kelv + 1.f;
+  uv[UV_u] = u / u_denom;
+
+  float v = 4.20481691e-8f;
+  v = v * kelv + 4.22806245e-5f;
+  v = v * kelv + .317398726f;
+  float v_denom = 1.61456053e-7f;
+  v_denom = v_denom * kelv - 2.89741816e-5f;
+  v_denom = v_denom * kelv + 1.f;
+  uv[UV_v] = v / v_denom;
 }
 
 #ifdef STANDALONE

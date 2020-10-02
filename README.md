@@ -3,7 +3,8 @@
 ### Introduction
 
 This has been written to illustrate some points about the LIFX HSBK colour
-and how it relates to the SRGB RGB colour space used for common PC monitors.
+space and how it relates to the SRGB RGB colour space used for common PC
+monitors.
 
 The utilities are written in Python 3.6+ and are importable as subroutines in
 your code. They communicate using `numpy`, so you need to be able to construct
@@ -17,9 +18,9 @@ There are a number of command-line utilities to try:
 * `hsbk_to_rgb` -- this takes an HSBK tuple where hue is in degrees, saturation
   and brightness are fractional and Kelvin is in the range 1500 to 9000, and
   converts to a gamma-encoded (R, G, B) value in the SRGB colour space, using
-  the 'mired_to_rgb_srgb` algorithm as a backend for the Kelvin computation.
-  If you don't provide a Kelvin value it will default to 6504K and thus convert
-  an HSV tuple as used by Photoshop or Gimp to RGB in a fairly compatible way.
+  the 'mired_to_rgb` algorithm as a backend for the Kelvin computation. If you
+  don't provide a Kelvin value it will default to 6504K and thus convert an HSV
+  tuple as used by Photoshop or Gimp to RGB in a fairly compatible way.
 
 * `hsv_to_rgb` -- this is similar to `rgb_to_hsbk` except that it provides bulk
   conversion of all pixels in an image to produce a new image (usually in PNG
@@ -41,7 +42,7 @@ There are a number of command-line utilities to try:
   it takes the argument in mireds (micro reciprocal degrees; equal to 1e6 /
   Kelvin) and directly computes (R, G, B) from mireds instead of going via
   chromaticities and applying various clipping and normalization steps as the
-  simpler but slower `kelv_to_rgb_srgb` algorithm does. It uses tables of pre-
+  simpler but slower `kelv_to_rgb` algorithm does. It uses tables of pre-
   computed polynomial approximations to achieve this. It does not have the
   Krystek (u, v) approximation error, but it does introduce its own errors of
   about the same magnitude, so results differ slightly from `kelv_to_rgb`.

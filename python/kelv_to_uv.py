@@ -13,14 +13,21 @@ def kelv_to_uv(kelv):
   # find the approximate (u, v) chromaticity of the given Kelvin value
   # see http://en.wikipedia.org/wiki/Planckian_locus#Approximation (Krystek)
   # we evaluate this with Horner's rule for better numerical stability
-  u = (
-    ((1.28641212e-7 * kelv + 1.54118254e-4) * kelv + .860117757) /
-      ((7.08145163e-7 * kelv + 8.42420235e-4) * kelv + 1.)
-  )
-  v = (
-    ((4.20481691e-8 * kelv + 4.22806245e-5) * kelv + .317398726) /
-      ((1.61456053e-7 * kelv - 2.89741816e-5) * kelv + 1.)
-  )
+  u = 1.28641212e-7
+  u = u * kelv + 1.54118254e-4
+  u = u * kelv + .860117757
+  u_denom = 7.08145163e-7
+  u_denom = u_denom * kelv + 8.42420235e-4
+  u_denom = u_denom * kelv + 1.
+  u /= u_denom
+
+  v = 4.20481691e-8
+  v = v * kelv + 4.22806245e-5
+  v = v * kelv + .317398726
+  v_denom = 1.61456053e-7
+  v_denom = v_denom * kelv - 2.89741816e-5
+  v_denom = v_denom * kelv + 1.
+  v /= v_denom
 
   return numpy.array([u, v], numpy.double)
 
