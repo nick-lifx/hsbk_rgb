@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
   if (argc < 2) {
     printf(
       "usage: %s image_out\n"
-        "image_out = name of .png file to create (will be overwritten)\n"
+        "image_out = name of PNG file to create (will be overwritten)\n"
         "creates 361 x 376 x 3 image with 0..360 degrees by 1, 1500..9000 Kelvin by 20\n",
       argv[0]
     );
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   // convert each chromaticity to a weighting between hue_uv and kelv_uv
   float image[376][361];
   for (int i = 0; i < 376; ++i) {
-    printf("%d / 376\n", i);
+    //printf("%d / 376\n", i);
     float kelv = 1500.f + 20.f * i;
     float v0[N_UV] = {
       kelv_uv[i][UV_u],

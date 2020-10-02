@@ -27,7 +27,7 @@ rgb_to_UVW = numpy.array(
 
 if len(sys.argv) < 2:
   print(f'usage: {sys.argv[0]:s} image_out')
-  print('image_out = name of .jpg or .png file to create (will be overwritten)')
+  print('image_out = name of PNG file to create (will be overwritten)')
   print('creates 361 x 376 x 3 image with 0..360 degrees by 1, 1500..9000 Kelvin by 20')
   sys.exit(EXIT_FAILURE)
 image_out = sys.argv[1]

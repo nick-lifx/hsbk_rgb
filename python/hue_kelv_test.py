@@ -15,7 +15,7 @@ if len(sys.argv) < 4:
   print(f'usage: {sys.argv[0]:s} sat br image_out')
   print('sat = saturation as fraction (0 to 1)')
   print('br = brightness as fraction (0 to 1)')
-  print('image_out = name of .jpg or .png file to create (will be overwritten)')
+  print('image_out = name of PNG file to create (will be overwritten)')
   print('creates 361 x 376 x 3 image with 0..360 degrees by 1, 1500..9000 Kelvin by 20')
   sys.exit(EXIT_FAILURE)
 sat = float(sys.argv[1])

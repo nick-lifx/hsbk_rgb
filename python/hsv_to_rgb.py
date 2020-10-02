@@ -17,15 +17,15 @@ N_HSBK = 4
 
 EPSILON = 1e-6
 
-if len(sys.argv) < 4:
-  print(f'usage: {sys.argv[0]:s} image_in kelv image_out')
-  print('image_in = name of .png file (HSV pixels) to read')
-  print('kelv = implicit colour temperature to apply to HSV pixels, in degrees Kelvin')
-  print('image_out = name of .jpg or .png file to create (will be overwritten)')
+if len(sys.argv) < 3:
+  print(f'usage: {sys.argv[0]:s} image_in image_out [kelv]')
+  print('image_in = name of PNG file (HSV pixels) to read')
+  print('image_out = name of PNG file to create (will be overwritten)')
+  print('kelv = implicit colour temperature to apply to HSV pixels (default 6504K)')
   sys.exit(EXIT_FAILURE)
 image_in = sys.argv[1]
-kelv = float(sys.argv[2])
-image_out = sys.argv[3]
+image_out = sys.argv[2]
+kelv = float(sys.argv[3]) if len(sys.argv) >= 4 else 6504.
 
 image = imageio.imread(image_in).astype(numpy.double) / numpy.array(
   [256. / 360., 255., 255.],

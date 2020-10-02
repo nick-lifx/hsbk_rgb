@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
       "usage: %s sat br image_out\n"
         "sat = saturation as fraction (0 to 1)\n"
         "br = brightness as fraction (0 to 1)\n"
-        "image_out = name of .png file to create (will be overwritten)\n"
+        "image_out = name of PNG file to create (will be overwritten)\n"
         "creates 361 x 376 x 3 image with 0..360 degrees by 1, 1500..9000 Kelvin by 20\n",
       argv[0]
     );
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
   float image[376][361][N_RGB];
   for (int i = 0; i < 376; ++i) {
-    printf("%d / 376\n", i);
+    //printf("%d / 376\n", i);
     float kelv = 1500.f + 20.f * i;
     for (int j = 0; j < 361; ++j) {
       float hue = 1.f * j;
