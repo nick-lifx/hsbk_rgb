@@ -4,6 +4,18 @@ import math
 import numpy
 import sys
 
+# old way (slower):
+#from kelv_to_rgb_srgb import kelv_to_rgb_srgb
+
+# new way (faster):
+from mired_to_rgb_srgb import mired_to_rgb_srgb
+
+HSBK_HUE = 0
+HSBK_SAT = 1
+HSBK_BR = 2
+HSBK_KELV = 3
+N_HSBK = 4
+
 EPSILON = 1e-6
 
 # table for looking up hues when rgb[i] == 0 and rgb[j] == 1
@@ -26,7 +38,7 @@ hue_table = [
 ]
 
 # ideally below would be [1, 1, 1] but unfortunately D65 whitepoint != 6504K
-kelv_rgb = numpy.array(
+kelv_rgb_6504K = numpy.array(
   # old way (slower):
   # a more accurate version of what would be printed by
   #   ./kelv_to_rgb.py 6504
@@ -40,13 +52,23 @@ kelv_rgb = numpy.array(
   numpy.double
 )
 
-def rgb_to_hsbk(rgb):
+def rgb_to_hsbk(rgb, kelv = None):
   # validate inputs, allowing a little slack
   assert numpy.all(rgb >= -EPSILON) and numpy.all(rgb < 1. + EPSILON)
 
-  # the Kelvin will always be 6504 with this simplified algorithm
+  # the Kelvin is always constant with this simplified algorithm
   # we will set the other values if we are able to calculate them
   hsbk = numpy.array([0., 0., 0., 6504.], numpy.double)
+  kelv_rgb = kelv_rgb_6504K
+
+  if kelv is not None:
+    hsbk[HSBK_KELV] = kelv
+
+    # old way (slower):
+    #kelv_rgb = kelv_to_rgb_srgb(kelv)
+
+    # new way (faster):
+    kelv_rgb = mired_to_rgb_srgb(1e6 / kelv)
 
   br = numpy.max(rgb)
   if br >= EPSILON:
@@ -86,27 +108,35 @@ def rgb_to_hsbk(rgb):
       hue_base, hue_delta, k = hue_table[i][j]
       hue = hue_base + hue_delta * hue_rgb[k]
 
-      hsbk[0] = hue
-      hsbk[1] = sat
+      hsbk[HSBK_HUE] = hue
+      hsbk[HSBK_SAT] = sat
 
-    hsbk[2] = br
+    hsbk[HSBK_BR] = br
 
   return hsbk
 
 if __name__ == '__main__':
   import sys
 
+  EXIT_SUCCESS = 0
   EXIT_FAILURE = 1
 
+  RGB_RED = 0
+  RGB_GREEN = 1
+  RGB_BLUE = 2
+  N_RGB = 3
+
   if len(sys.argv) < 4:
-    print(f'usage: {sys.argv[0]:s} R G B')
+    print(f'usage: {sys.argv[0]:s} R G B [kelv]')
     print('R = red channel as fraction (0 to 1)')
     print('G = green channel as fraction (0 to 1)')
     print('B = blue channel as fraction (0 to 1)')
+    print('kelv = white point to use in conversion (in degrees Kelvin; default 6504K)')
     sys.exit(EXIT_FAILURE)
   rgb = numpy.array([float(i) for i in sys.argv[1:4]], numpy.double)
+  kelv = float(sys.argv[4]) if len(sys.argv) >= 5 else None
 
-  hsbk = rgb_to_hsbk(rgb)
+  hsbk = rgb_to_hsbk(rgb, kelv)
   print(
-    f'RGB ({rgb[0]:.6f}, {rgb[1]:.6f}, {rgb[2]:.6f}) -> HSBK ({hsbk[0]:.3f}, {hsbk[1]:.6f}, {hsbk[2]:.6f}, {hsbk[3]:.3f})'
+    f'RGB ({rgb[RGB_RED]:.6f}, {rgb[RGB_GREEN]:.6f}, {rgb[RGB_BLUE]:.6f}) -> HSBK ({hsbk[HSBK_HUE]:.3f}, {hsbk[HSBK_SAT]:.6f}, {hsbk[HSBK_BR]:.6f}, {hsbk[HSBK_KELV]:.3f})'
   )

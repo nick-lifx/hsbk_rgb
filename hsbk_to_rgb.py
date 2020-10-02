@@ -10,6 +10,12 @@ import sys
 # new way (faster):
 from mired_to_rgb_srgb import mired_to_rgb_srgb
 
+HSBK_HUE = 0
+HSBK_SAT = 1
+HSBK_BR = 2
+HSBK_KELV = 3
+N_HSBK = 4
+
 # define hues as red->yellow->green->cyan->blue->magenta->red again
 # across is hue 0, 60, 120, 180, 240, 300, 360, down is R, G, B
 # for interpolation, e.g. hue of 10 = column 1 + 10/60 * (column 2 - column 1)
@@ -27,12 +33,12 @@ EPSILON = 1e-6
 def hsbk_to_rgb(hsbk):
   # validate inputs, allowing a little slack
   # the hue does not matter as it will be normalized modulo 360
-  hue = hsbk[0]
-  sat = hsbk[1]
+  hue = hsbk[HSBK_HUE]
+  sat = hsbk[HSBK_SAT]
   assert sat >= -EPSILON and sat < 1. + EPSILON
-  br = hsbk[2]
+  br = hsbk[HSBK_BR]
   assert br >= -EPSILON and br < 1. + EPSILON
-  kelv = hsbk[3]
+  kelv = hsbk[HSBK_KELV]
   assert kelv >= 1500. - EPSILON and kelv < 9000. + EPSILON
 
   # this section computes hue_rgb from hue
@@ -82,18 +88,26 @@ def hsbk_to_rgb(hsbk):
 if __name__ == '__main__':
   import sys
 
+  EXIT_SUCCESS = 0
   EXIT_FAILURE = 1
 
-  if len(sys.argv) < 5:
-    print(f'usage: {sys.argv[0]:s} hue sat br kelv')
+  RGB_RED = 0
+  RGB_GREEN = 1
+  RGB_BLUE = 2
+  N_RGB = 3
+
+  if len(sys.argv) < 4:
+    print(f'usage: {sys.argv[0]:s} hue sat br [kelv]')
     print('hue = hue in degrees (0 to 360)')
     print('sat = saturation as fraction (0 to 1)')
     print('br = brightness as fraction (0 to 1)')
-    print('kelv = colour temperature in degrees Kelvin')
+    print('kelv = white point in degrees Kelvin')
     sys.exit(EXIT_FAILURE)
   hsbk = numpy.array([float(i) for i in sys.argv[1:5]], numpy.double)
+  if hsbk.shape[0] < N_HSBK:
+    hsbk = numpy.concatenate([hsbk, numpy.array([6504.], numpy.double)], 0)
 
   rgb = hsbk_to_rgb(hsbk)
   print(
-    f'HSBK ({hsbk[0]:.3f}, {hsbk[1]:.6f}, {hsbk[2]:.6f}, {hsbk[3]:.3f}) -> RGB ({rgb[0]:.6f}, {rgb[1]:.6f}, {rgb[2]:.6f})'
+    f'HSBK ({hsbk[HSBK_HUE]:.3f}, {hsbk[HSBK_SAT]:.6f}, {hsbk[HSBK_BR]:.6f}, {hsbk[HSBK_KELV]:.3f}) -> RGB ({rgb[RGB_RED]:.6f}, {rgb[RGB_GREEN]:.6f}, {rgb[RGB_BLUE]:.6f})'
   )

@@ -6,6 +6,11 @@ import sys
 from hsbk_to_rgb import hsbk_to_rgb
 from rgb_to_hsbk import rgb_to_hsbk
 
+EXIT_SUCCESS = 0
+EXIT_FAILURE = 1
+
+EPSILON = 1e-6
+
 rgb_to_UVW = numpy.array(
   [
     [0.09045105, 0.07843017, 0.03958545],
@@ -14,10 +19,6 @@ rgb_to_UVW = numpy.array(
   ],
   numpy.double
 )
-
-EPSILON = 1e-6
-
-EXIT_FAILURE = 1
 
 if len(sys.argv) < 2:
   print(f'usage: {sys.argv[0]:s} image_out')
@@ -55,10 +56,18 @@ for i in range(376):
   v0 = kelv_uv[:, i]
   for j in range(361):
     hue = 1. * j
-    UVW = rgb_to_UVW @ hsbk_to_rgb(
-      numpy.array([hue, .5, 1., kelv], numpy.double)
-    )
+    rgb = hsbk_to_rgb(numpy.array([hue, .5, 1., kelv], numpy.double))
+    mask = rgb < 12.92 * .0031308
+    rgb[mask] /= 12.92
+    rgb[~mask] = ((rgb[~mask] + .055) / 1.055) ** 2.4
+    UVW = rgb_to_UVW @ rgb
     uv = UVW[:2] / UVW[2]
     v1 = hue_uv[:, j] - v0
     image[i, j] = ((uv - v0) @ v1) / (v1 @ v1)
+
+# due to the corruption of chromaticities that occurs when hue and
+# Kelvin get combined, the weighting factor can be outside [0, 1]
+image[image < 0.] = 0.
+image[image > 1.] = 1.
+
 imageio.imwrite(image_out, numpy.round(image * 255.).astype(numpy.uint8))
