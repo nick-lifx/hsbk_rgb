@@ -27,7 +27,12 @@ def kelv_to_uv(kelv):
 if __name__ == '__main__':
   import sys
 
+  EXIT_SUCCESS = 0
   EXIT_FAILURE = 1
+
+  UV_u = 0
+  UV_v = 1
+  N_UV = 2
 
   if len(sys.argv) < 2:
     print(f'usage: {sys.argv[0]:s} kelv')
@@ -37,5 +42,5 @@ if __name__ == '__main__':
 
   uv = kelv_to_uv(kelv)
   print(
-    f'kelv {kelv:.3f} -> uv ({uv[0]:.6f}, {uv[1]:.6f})'
+    f'kelv {kelv:.3f} -> uv ({uv[UV_u]:.6f}, {uv[UV_v]:.6f})'
   )

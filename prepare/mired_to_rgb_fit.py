@@ -61,10 +61,10 @@ if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
   diag = True
   del sys.argv[1]
 if len(sys.argv) < 4:
-  print(f'usage: {sys.argv[0]:s} [--diag] mired_to_uv_data_in.yml rgb(w)_to_(xy|XYZ)_in.yml mired_to_rgb_fit_out.yml')
+  print(f'usage: {sys.argv[0]:s} [--diag] mired_to_uv_data_in.yml UVW_to_rgb_in.yml mired_to_rgb_fit_out.yml')
   sys.exit(EXIT_FAILURE)
 mired_to_uv_data_in = sys.argv[1]
-rgbw_to_XYZ_in = sys.argv[2]
+UVW_to_rgb_in = sys.argv[2]
 mired_to_rgb_fit_out = sys.argv[3]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
@@ -76,23 +76,8 @@ mired_scale = mired_to_uv_data['mired_scale']
 data_points = mired_to_uv_data['data_points']
 n_mired, _ = data_points.shape
 
-with open(rgbw_to_XYZ_in) as fin:
-  rgbw_to_XYZ = python_to_numpy(yaml.load(fin))
-if rgbw_to_XYZ.shape[0] < N_XYZ:
-  # it is only chromaticities, add the missing z coordinate
-  x = rgbw_to_XYZ[XY_x, :]
-  y = rgbw_to_XYZ[XY_y, :]
-  rgbw_to_XYZ = numpy.stack([x, y, 1. - x - y], 0)
-
-# ignore white LED/point, fudge intensities to give it a D65 white point
-intensity_fudge = numpy.linalg.solve(rgbw_to_XYZ[:, :RGBW_WHITE], D65_XYZ)
-#print('intensity_fudge', intensity_fudge)
-rgb_to_XYZ = rgbw_to_XYZ[:, :RGBW_WHITE] * intensity_fudge[numpy.newaxis, :]
-#print('rgb_to_XYZ', rgb_to_XYZ)
-rgb_to_UVW = XYZ_to_UVW @ rgb_to_XYZ
-#print('rgb_to_UVW', rgb_to_UVW)
-UVW_to_rgb = numpy.linalg.inv(rgb_to_UVW)
-#print('UVW_to_rgb', UVW_to_rgb)
+with open(UVW_to_rgb_in) as fin:
+  UVW_to_rgb = python_to_numpy(yaml.load(fin))
 
 # convert mired scale to around 1 and data points uv -> UVW -> rgb
 u = data_points[:, 0]
@@ -451,8 +436,6 @@ if diag:
   matplotlib.pyplot.show()
 
 mired_to_rgb_fit = {
-  'red_boost': float(intensity_fudge[RGB_GREEN] / intensity_fudge[RGB_RED]),
-  'blue_boost': float(intensity_fudge[RGB_GREEN] / intensity_fudge[RGB_BLUE]),
   'mired_a': float(mired_a),
   'mired_b_red': float(mired_b_red),
   'mired_b_green': float(mired_b_green),
