@@ -24,4 +24,4 @@ for i in range(count):
   rgb = numpy.random.random(3)
   hsbk = rgb_to_hsbk(rgb, kelv)
   rgb1 = hsbk_to_rgb(hsbk)
-  assert numpy.all(numpy.abs(rgb - rgb1) < EPSILON)
+  assert numpy.all(numpy.abs(rgb1 - rgb) < EPSILON)

@@ -2,6 +2,9 @@
 *.png
 __pycache__
 /c_float/hsbk_to_rgb
+/c_float/inv_test
+/c_float/kelv_to_rgb
+/c_float/kelv_to_uv
 /c_float/mired_to_rgb
 /c_float/rgb_to_hsbk
 /prepare/kelv_to_rgb_srgb.py

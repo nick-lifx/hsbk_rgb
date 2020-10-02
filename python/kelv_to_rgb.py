@@ -38,7 +38,7 @@ def kelv_to_rgb(kelv):
   # because displaying it on a monitor will gamma-decode it in the process
   mask = rgb < .0031308
   rgb[mask] *= 12.92
-  rgb[~mask] = 1.055 * rgb[~mask] ** (1. / 2.4) - 0.055
+  rgb[~mask] = 1.055 * rgb[~mask] ** (1. / 2.4) - .055
 
   return rgb
 
