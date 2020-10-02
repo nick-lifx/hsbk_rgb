@@ -105,8 +105,8 @@ def rgb_to_hsbk(rgb, kelv = None):
       # at this point hue_rgb[i] == 0 and hue_rgb[j] == 1 and i != j
       # using the (i, j) we can resolve the hue down to a 60 degree segment,
       # then rgb[k] such that k != i and k != j tells us where in the segment
-      hue_base, hue_delta, k = hue_table[i][j]
-      hue = hue_base + hue_delta * hue_rgb[k]
+      hue_base, hue_delta, channel = hue_table[i][j]
+      hue = hue_base + hue_delta * hue_rgb[channel]
 
       hsbk[HSBK_HUE] = hue
       hsbk[HSBK_SAT] = sat

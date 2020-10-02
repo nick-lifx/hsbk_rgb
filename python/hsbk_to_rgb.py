@@ -101,11 +101,17 @@ if __name__ == '__main__':
     print('hue = hue in degrees (0 to 360)')
     print('sat = saturation as fraction (0 to 1)')
     print('br = brightness as fraction (0 to 1)')
-    print('kelv = white point in degrees Kelvin')
+    print('kelv = white point in degrees Kelvin (defaults to 6504K)')
     sys.exit(EXIT_FAILURE)
-  hsbk = numpy.array([float(i) for i in sys.argv[1:5]], numpy.double)
-  if hsbk.shape[0] < N_HSBK:
-    hsbk = numpy.concatenate([hsbk, numpy.array([6504.], numpy.double)], 0)
+  hsbk = numpy.array(
+    [
+      float(sys.argv[1]),
+      float(sys.argv[2]),
+      float(sys.argv[3]),
+      float(sys.argv[4]) if len(sys.argv) >= 5 else 6504.
+    ],
+    numpy.double
+  )
 
   rgb = hsbk_to_rgb(hsbk)
   print(

@@ -1,5 +1,9 @@
+*.o
 *.png
 __pycache__
+/c_float/hsbk_to_rgb
+/c_float/mired_to_rgb
+/c_float/rgb_to_hsbk
 /prepare/kelv_to_rgb_srgb.py
 /prepare/mired_to_rgb_fit_srgb.yml
 /prepare/mired_to_rgb_srgb.py
