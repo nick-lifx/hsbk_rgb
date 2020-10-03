@@ -19,12 +19,12 @@ yaml = ruamel.yaml.YAML(typ = 'safe')
 
 with open(mired_to_rgb_fit_in) as fin:
   mired_to_rgb_fit = python_to_numpy(yaml.load(fin))
-mired_a = mired_to_rgb_fit['mired_a']
-mired_b_red = mired_to_rgb_fit['mired_b_red']
-mired_b_green = mired_to_rgb_fit['mired_b_green']
-mired_b_blue = mired_to_rgb_fit['mired_b_blue']
-mired_c = mired_to_rgb_fit['mired_c']
-mired_d = mired_to_rgb_fit['mired_d']
+a = mired_to_rgb_fit['a']
+b_red = mired_to_rgb_fit['b_red']
+b_green = mired_to_rgb_fit['b_green']
+b_blue = mired_to_rgb_fit['b_blue']
+c_blue = mired_to_rgb_fit['c_blue']
+d = mired_to_rgb_fit['d']
 p_red_ab = mired_to_rgb_fit['p_red_ab']
 p_red_bd = mired_to_rgb_fit['p_red_bd']
 p_green_ab = mired_to_rgb_fit['p_green_ab']
@@ -115,9 +115,9 @@ int main(int argc, char **argv) {{
 }}
 #endif'''.format(
     name,
-    mired_a,
-    mired_d,
-    mired_b_red,
+    a,
+    d,
+    b_red,
     p_red_ab[-1],
     ''.join(
       [
@@ -132,7 +132,7 @@ int main(int argc, char **argv) {{
         for i in range(p_red_bd.shape[0] - 2, -1, -1)
       ]
     ),
-    mired_b_green,
+    b_green,
     p_green_ab[-1],
     ''.join(
       [
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {{
         for i in range(p_green_bd.shape[0] - 2, -1, -1)
       ]
     ),
-    mired_b_blue,
+    b_blue,
     p_blue_ab[-1],
     ''.join(
       [
@@ -155,7 +155,7 @@ int main(int argc, char **argv) {{
         for i in range(p_blue_ab.shape[0] - 2, -1, -1)
       ]
     ),
-    mired_c,
+    c_blue,
     p_blue_bc[-1],
     ''.join(
       [

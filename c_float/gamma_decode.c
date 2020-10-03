@@ -15,19 +15,19 @@ static float post_factor[] = {
 //   x < 12.92f * .0031308f ? x / 12.92f : powf((x + .055f) / 1.055f, 2.4f)
 // allowed domain (-inf, 1.945), recommended domain [-epsilon, 1 + epsilon]
 // do not call with argument >= 1.945 due to table lookup overflow (unchecked)
-// minimax error is up to 8.360671e-09 on domain [.445, .945]
+// minimax error is up to 8.360670e-09 on domain [.445, .945]
 float gamma_decode(float x) {
   if (x < 4.04499360e-02f)
     return x * 7.73993808e-02f;
   int exp;
   x = frexpf(x + .055f, &exp);
   float y = -1.24606922e-02f;
-  y = y * x + 7.69625871e-02f;
+  y = y * x + 7.69625872e-02f;
   y = y * x - 2.30250550e-01f;
   y = y * x + 5.97047280e-01f;
   y = y * x + 4.85016736e-01f;
   y = y * x - 3.96263437e-02f;
-  y = y * x + 2.72643611e-03f;
+  y = y * x + 2.72643610e-03f;
   return y * post_factor[exp + 3];
 }
 

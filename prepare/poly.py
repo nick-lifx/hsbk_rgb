@@ -50,6 +50,15 @@ def compose(p, x):
 #  c[:, -1] = -p[:n - 1] / p[n - 1]
 #  return numpy.linalg.eigvals(c)
 
+# this has no protection from division by zero
+# it should only be called when properties of function are known in advance
+def newton(p, x, iters = 10):
+  p_deriv = deriv(p)
+  for i in range(iters):
+    x -= eval(p, x) / eval(p_deriv, x)
+    print('i', i, 'x', x, 'p(x)', eval(p, x))
+  return x
+
 def real_root(p, p_deriv, a, b, increasing):
   #print('real_root: p', p, 'p_deriv', p_deriv)
   #y_a = eval(p, a)
@@ -142,10 +151,11 @@ def real_roots(p, a, b, epsilon = EPSILON):
           out.append(x[i + 1])
   if out[-1] < b:
     out.append(b)
+  #print('real_roots: n', n, 'returning', numpy.array(out, numpy.double))
   return numpy.array(out, numpy.double)
 
-def extrema(p, a, b, espilon = EPSILON):
-  x = real_roots(deriv(p), a, b)
+def extrema(p, a, b, epsilon = EPSILON):
+  x = real_roots(deriv(p), a, b, epsilon)
   return x, eval(p, x)
 
 # returns the extrema of a list of contiguous intervals of x
@@ -153,21 +163,25 @@ def extrema(p, a, b, espilon = EPSILON):
 def interval_extrema(p, interval_x, epsilon = EPSILON):
   n_intervals = interval_x.shape[0] - 1
   extrema_x, extrema_y = extrema(p, interval_x[0], interval_x[-1], epsilon)
+  #print('extrema_x', extrema_x)
+  #print('extrema_y', extrema_y)
+  #print('interval_x', interval_x)
   interval_y = eval(p, interval_x) # first and last will match extrema_y
+  #print('interval_y', interval_y)
   out = []
-  j = 0
+  j = 1
   for i in range(n_intervals):
     k = j
-    while extrema_x[k] < interval_x[j + 1]:
+    while extrema_x[k] < interval_x[i + 1]:
       k += 1
     out.append(
       (
         numpy.array(
-          [interval_x[j]] + list(extrema_x[j:k]) + [interval_x[j + 1]],
+          [interval_x[i]] + list(extrema_x[j:k]) + [interval_x[i + 1]],
           numpy.double
         ),
         numpy.array(
-          [interval_y[j]] + list(extrema_y[j:k]) + [interval_y[j + 1]],
+          [interval_y[i]] + list(extrema_y[j:k]) + [interval_y[i + 1]],
           numpy.double
         )
       )

@@ -23,5 +23,4 @@ __pycache__
 /prepare/gamma_decode_fit_srgb.yml
 /prepare/gamma_encode_fit_srgb.yml
 /prepare/mired_to_rgb_fit_srgb.yml
-/prepare/mired_to_uv_data.yml
 /prepare/UVW_to_rgb_srgb.yml

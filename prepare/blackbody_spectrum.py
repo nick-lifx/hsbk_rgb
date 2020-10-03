@@ -11,6 +11,11 @@ standard_observer_lambda = numpy.linspace(360e-9, 830e-9, 471, numpy.double)
 c1_on_lambda_5 = CONST_c1 / standard_observer_lambda ** 5
 c2_on_lambda = CONST_c2 / standard_observer_lambda
 
+def blackbody_spectra(kelv):
+  return c1_on_lambda_5[:, numpy.newaxis] / (
+    numpy.exp(c2_on_lambda[:, numpy.newaxis] / kelv[numpy.newaxis, :]) - 1.
+  )
+
 def blackbody_spectrum(kelv):
   return c1_on_lambda_5 / (numpy.exp(c2_on_lambda / kelv) - 1.)
 

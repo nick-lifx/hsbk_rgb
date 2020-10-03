@@ -17,11 +17,11 @@ void mired_to_rgb(float mired, float *rgb) {
 
   // calculate red channel
   float r;
-  if (mired < 1.53014204e+02f) {
-    r = 3.75228927e-09f;
-    r = r * mired + 8.87539162e-06f;
-    r = r * mired + 1.28143264e-03f;
-    r = r * mired + 5.82677127e-01f;
+  if (mired < 1.53013836e+02f) {
+    r = 3.95709293e-09f;
+    r = r * mired + 8.80761693e-06f;
+    r = r * mired + 1.28870339e-03f;
+    r = r * mired + 5.82419278e-01f;
   }
   else {
     r = 1.00000000e+00f;
@@ -29,35 +29,35 @@ void mired_to_rgb(float mired, float *rgb) {
 
   // calculate green channel
   float g;
-  if (mired < 1.53389630e+02f) {
-    g = -3.17931513e-09f;
-    g = g * mired + 5.60217181e-06f;
-    g = g * mired + 1.07609628e-03f;
-    g = g * mired + 6.91243100e-01f;
+  if (mired < 1.53387541e+02f) {
+    g = -3.23218972e-09f;
+    g = g * mired + 5.62298595e-06f;
+    g = g * mired + 1.07366847e-03f;
+    g = g * mired + 6.91329676e-01f;
   }
   else {
-    g = -2.89635037e-15f;
-    g = g * mired + 7.50927775e-12f;
-    g = g * mired + -8.13001568e-09f;
-    g = g * mired + 5.12561864e-06f;
-    g = g * mired + -2.83237945e-03f;
-    g = g * mired + 1.31593131e+00f;
+    g = -2.89707394e-15f;
+    g = g * mired + 7.51189207e-12f;
+    g = g * mired + -8.13341497e-09f;
+    g = g * mired + 5.12759027e-06f;
+    g = g * mired + -2.83288365e-03f;
+    g = g * mired + 1.31597723e+00f;
   }
 
   // calculate blue channel
   float b;
-  if (mired < 1.52740534e+02f) {
+  if (mired < 1.52670731e+02f) {
     b = 1.00000000e+00f;
   }
-  else if (mired < 5.25947680e+02f) {
-    b = -2.77865265e-18f;
-    b = b * mired + 4.58804157e-15f;
-    b = b * mired + -2.67958426e-12f;
-    b = b * mired + 4.88020519e-10f;
-    b = b * mired + 1.20547997e-07f;
-    b = b * mired + -6.02756590e-05f;
-    b = b * mired + 4.20936766e-03f;
-    b = b * mired + 1.23798676e+00f;
+  else if (mired < 5.26023882e+02f) {
+    b = -3.67366905e-19f;
+    b = b * mired + -1.18020309e-15f;
+    b = b * mired + 3.08433598e-12f;
+    b = b * mired + -2.62366557e-09f;
+    b = b * mired + 1.09853905e-06f;
+    b = b * mired + -2.38867759e-04f;
+    b = b * mired + 2.17272679e-02f;
+    b = b * mired + 5.26555890e-01f;
   }
   else {
     b = 0.00000000e+00f;

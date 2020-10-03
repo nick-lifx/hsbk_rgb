@@ -39,9 +39,11 @@ def remez(p, a, b, order, iters = 10, epsilon = EPSILON):
 
     # let r be the error function
     r = poly.add(q, -p)
+    #print('r', r)
+    #print('r(x)', poly.eval(r, x))
 
     # partition domain into intervals where r is positive or negative
-    intervals = poly.real_roots(r, a, b)
+    intervals = poly.real_roots(r, a, b, epsilon)
     print('intervals', intervals)
     n_intervals = intervals.shape[0] - 1
     print('n_intervals', n_intervals)
@@ -56,9 +58,9 @@ def remez(p, a, b, order, iters = 10, epsilon = EPSILON):
     # have n_intervals - 1 boundaries, must produce n_intervals signs
     # then check that the intervals are actually alternating in sign
     interval_pos = poly.eval(poly.deriv(r), intervals[1:-1]) >= 0.
-    print('interval_pos', interval_pos)
+    #print('interval_pos', interval_pos)
     interval_polarity = not interval_pos[0] # sign of first interval
-    print('interval_polarity', interval_polarity)
+    #print('interval_polarity', interval_polarity)
     if numpy.any(
       numpy.logical_xor(
         interval_pos,
@@ -68,16 +70,17 @@ def remez(p, a, b, order, iters = 10, epsilon = EPSILON):
         ).astype(numpy.bool)
       ) == interval_polarity
     ):
+      # see above
       print('warning: intervals not alternating -- we say good enough')
       break
 
     # within each interval, find the "global" maximum or minimum of r
-    interval_extrema = poly.interval_extrema(r, intervals)
+    interval_extrema = poly.interval_extrema(r, intervals, epsilon)
     x = []
     y = []
     for i in range(n_intervals):
       extrema_x, extrema_y = interval_extrema[i]
-      print('i', i, 'extrema_x', extrema_x, 'extrema_y', extrema_y)
+      #print('i', i, 'extrema_x', extrema_x, 'extrema_y', extrema_y)
       j = (
         numpy.argmax if (i & 1) != interval_polarity else numpy.argmin
       )(extrema_y)
@@ -102,12 +105,12 @@ def remez(p, a, b, order, iters = 10, epsilon = EPSILON):
       n_intervals -= 1
 
     # checking
-    err = poly.eval(p, x)
+    err = poly.eval(q, x)
     print('err', err)
   print('q', q)
 
   # final minimax error analysis
-  _, y = poly.extrema(poly.add(q, -p), a, b)
+  _, y = poly.extrema(poly.add(q, -p), a, b, epsilon)
   err = numpy.max(numpy.abs(y))
   print('err', err)
 
