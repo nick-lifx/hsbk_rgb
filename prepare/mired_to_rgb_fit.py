@@ -3,12 +3,12 @@
 import numpy
 import numpy.linalg
 import math
-import matplotlib.pyplot
 import poly
 import ruamel.yaml
 import sys
 from numpy_to_python import numpy_to_python
 from python_to_numpy import python_to_numpy
+from solve_scaled import solve_scaled
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -85,12 +85,6 @@ v = data_points[:, 1]
 UVW = numpy.stack([u, v, 1. - u - v], 1)
 mired_rgb = numpy.einsum('ij,kj->ki', UVW_to_rgb, UVW)
 #print('mired_rgb', mired_rgb)
-
-#if diag:
-#  matplotlib.pyplot.plot(x, mired_rgb[:, RGB_RED])
-#  matplotlib.pyplot.plot(x, mired_rgb[:, RGB_GREEN])
-#  matplotlib.pyplot.plot(x, mired_rgb[:, RGB_BLUE])
-#  matplotlib.pyplot.show()
 
 # mired scale must meet the following specification:
 #   a <= x <= b: blue is at 1, red and green are increasing
@@ -190,15 +184,6 @@ def remez(channel, limiting_channel, a, b, order):
       numpy.double
     )
     #print('x', x)
-    A = numpy.concatenate(
-      [
-        x[:, numpy.newaxis] ** numpy.arange(order, dtype = numpy.int32),
-        (
-          (-1.) ** numpy.arange(order + 1, dtype = numpy.int32)
-        )[:, numpy.newaxis]
-      ],
-      1
-    )
     y = numpy.array(
       [
         eval_y0(channel, limiting_channel, x_index[i])
@@ -207,12 +192,18 @@ def remez(channel, limiting_channel, a, b, order):
       numpy.double
     )
     #print('y', y)
-    col_scale = numpy.min(numpy.abs(A), 0) ** -.5
-    row_scale = numpy.min(numpy.abs(A), 1) ** -.5
-    p = numpy.linalg.solve(
-      A * (col_scale[numpy.newaxis, :] * row_scale[:, numpy.newaxis]),
-      y * row_scale
-    ) * col_scale
+    p = solve_scaled(
+      numpy.concatenate(
+        [
+          x[:, numpy.newaxis] ** numpy.arange(order, dtype = numpy.int32),
+          (
+            (-1.) ** numpy.arange(order + 1, dtype = numpy.int32)
+          )[:, numpy.newaxis]
+        ],
+        1
+      ),
+      y
+    )
     osc = p[-1]
     print('osc', osc)
     p = p[:-1]
@@ -382,6 +373,8 @@ mired_b_blue = newton(poly.add(p_blue_ab, -p_blue_bc), mired_b)
 mired_c = newton(poly.add(p_blue_bc, -p_blue_cd), mired_c)
 
 if diag:
+  import matplotlib.pyplot
+
   # ideal
   x_ab = numpy.linspace(mired_a_index, mired_b_index, 1000, numpy.double)
   x_bd = numpy.linspace(mired_b_index, mired_d_index, 1000, numpy.double)

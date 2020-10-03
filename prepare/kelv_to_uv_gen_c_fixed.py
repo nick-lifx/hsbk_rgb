@@ -2,7 +2,7 @@
 
 import math
 import numpy
-import poly
+from poly_fixed import poly_fixed
 
 ORDER = 3
 EPSILON = 1e-8
@@ -16,98 +16,37 @@ KELV_MAX = 15000.
 U_EXP = -30
 V_EXP = -30
 
-# find exponents of coefficients and intermediate results, then decide
-# on the shift amounts to align each intermediate result with next stage
-# (the shift also removes the effect of the independent variable exponent)
-# return the aligned cofficients, the shifts, and exponent of final result
-def process(p, a, b, independent_exp, bits):
-  intermediate_exp = poly.intermediate_exp(p, a, b, EPSILON) - bits
-  #print('intermediate_exp', intermediate_exp)
-  shr = intermediate_exp[:-1] - intermediate_exp[1:] - independent_exp
-  #print('shr', shr)
-  return numpy.ldexp(p, -intermediate_exp), shr, intermediate_exp[0]
-
-# if we round the coefficients to integer as-is, the algorithm would be
-#   y = c[-1]
-#   y = round(ldexp(y * x, -shr[-1])) + c[-2]
-#   y = round(ldexp(y * x, -shr[-2])) + c[-3]
-#   ...
-# or, if we move the coefficients inside the round() then it would be
-#   y = c[-1]
-#   y = round(ldexp(y * x, -shr[-1]) + c[-2])
-#   y = round(ldexp(y * x, -shr[-2]) + c[-3])
-#   ...
-# this lets us add an offset of .5 to each coefficient and use floor()
-#   y = c[-1]
-#   y = floor(ldexp(y * x, -shr[-1]) + c[-2])
-#   y = floor(ldexp(y * x, -shr[-2]) + c[-3])
-#   ...
-# and we then move coefficients inside ldexp(), shifting to compensate
-#   y = c[-1]
-#   y = floor(ldexp(y * x + c[-2], -shr[-1])
-#   y = floor(ldexp(y * x + c[-3], -shr[-2])
-#   ...
-# then provided the shr is at least 1, the coefficients can be integer
-def quantize(c, shr):
-  assert numpy.all(shr >= 1)
-  c = numpy.copy(c)
-  c[:-1] = numpy.ldexp(c[:-1] + .5, shr)
-  return numpy.round(c).astype(numpy.int64)
- 
-p_u_num = numpy.array(
-  [.860117757, 1.54118254e-4, 1.28641212e-7],
-  numpy.double
-)
-c_u_num, shr_u_num, exp_u_num = process(
-  p_u_num,
+c_u_num, shr_u_num, exp_u_num = poly_fixed(
+  numpy.array([.860117757, 1.54118254e-4, 1.28641212e-7], numpy.double),
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
   31
 )
-c_u_num = quantize(c_u_num, shr_u_num)
-
-p_u_denom = numpy.array(
-  [1., 8.42420235e-4, 7.08145163e-7],
-  numpy.double
-)
-c_u_denom, shr_u_denom, exp_u_denom = process(
-  p_u_denom,
+c_u_denom, shr_u_denom, exp_u_denom = poly_fixed(
+  numpy.array([1., 8.42420235e-4, 7.08145163e-7], numpy.double),
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
   31
 )
-c_u_denom = quantize(c_u_denom, shr_u_denom)
-
-p_v_num = numpy.array(
-  [.317398726, 4.22806245e-5, 4.20481691e-8],
-  numpy.double
-)
-c_v_num, shr_v_num, exp_v_num = process(
-  p_v_num,
+c_v_num, shr_v_num, exp_v_num = poly_fixed(
+  numpy.array([.317398726, 4.22806245e-5, 4.20481691e-8], numpy.double),
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
   31
 )
-c_v_num = quantize(c_v_num, shr_v_num)
-
-p_v_denom = numpy.array(
-  [1., -2.89741816e-5, 1.61456053e-7],
-  numpy.double
-)
-c_v_denom, shr_v_denom, exp_v_denom = process(
-  p_v_denom,
+c_v_denom, shr_v_denom, exp_v_denom = poly_fixed(
+  numpy.array([1., -2.89741816e-5, 1.61456053e-7], numpy.double),
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
   31
 )
-c_v_denom = quantize(c_v_denom, shr_v_denom)
 
-# make sure we can divide u_num by u_denom, v_num by v_denom
-#  maximum we can shift by is 32, but allow one less for rounding
+# make sure we can divide u_num by u_denom and v_num by v_denom
+# maximum we can shift by is 32, but allow one less for rounding
 div_shift_u = exp_u_num - exp_u_denom - U_EXP
 assert div_shift_u >= 0 and div_shift_u < 32
 div_shift_v = exp_v_num - exp_v_denom - V_EXP

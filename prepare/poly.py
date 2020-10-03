@@ -59,7 +59,7 @@ def real_root(p, p_deriv, a, b, increasing):
   x = .5 * (a + b)
   for i in range(15):
     y = eval(p, x)
-    print('i', i, 'x', x, 'p(x)', y)
+    #print('i', i, 'x', x, 'p(x)', y)
     if y < 0.:
       y1 = eval(p_deriv, x)
       if y1 < 0.:
@@ -139,27 +139,42 @@ def real_roots(p, a, b, epsilon = EPSILON):
           if y[i] <= 0.:
             out.append(real_root(p, p_deriv, x[i], x[i + 1], True))
         else:
-          out.append(x[i + 1]) 
-  if out[-1] < b:  
+          out.append(x[i + 1])
+  if out[-1] < b:
     out.append(b)
   return numpy.array(out, numpy.double)
 
-def _range(p, a, b, epsilon = EPSILON):
-  y = eval(p, real_roots(deriv(p), a, b))
-  return numpy.min(y), numpy.max(y)
+def extrema(p, a, b, espilon = EPSILON):
+  x = real_roots(deriv(p), a, b)
+  return x, eval(p, x)
 
-# find range of each sub-polynomial encountered in Horner's rule evaluation,
-# return ceil of log2 of highest the magnitude of the endpoints of each range
-def intermediate_exp(p, a, b, slop, epsilon = EPSILON):
-  _, exp = numpy.frexp(
-    numpy.max(
-      numpy.abs(
+# returns the extrema of a list of contiguous intervals of x
+# similar to calling extrema() on each interval, but more efficient
+def interval_extrema(p, interval_x, epsilon = EPSILON):
+  n_intervals = interval_x.shape[0] - 1
+  extrema_x, extrema_y = extrema(p, interval_x[0], interval_x[-1], epsilon)
+  interval_y = eval(p, interval_x) # first and last will match extrema_y
+  out = []
+  j = 0
+  for i in range(n_intervals):
+    k = j
+    while extrema_x[k] < interval_x[j + 1]:
+      k += 1
+    out.append(
+      (
         numpy.array(
-          [_range(p[i:], a, b, epsilon) for i in range(p.shape[0])],
+          [interval_x[j]] + list(extrema_x[j:k]) + [interval_x[j + 1]],
+          numpy.double
+        ),
+        numpy.array(
+          [interval_y[j]] + list(extrema_y[j:k]) + [interval_y[j + 1]],
           numpy.double
         )
-      ),
-      1
-    ) * (1. + slop)
-  )
-  return exp
+      )
+    )
+    j = k
+  return out
+
+def _range(p, a, b, epsilon = EPSILON):
+  _, y = extrema(p, a, b, epsilon)
+  return numpy.min(y), numpy.max(y)
