@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import numpy
-import os
 import ruamel.yaml
 import sys
 from python_to_numpy import python_to_numpy

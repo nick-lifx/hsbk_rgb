@@ -7,6 +7,7 @@ __pycache__
 /c_float/hsbk_to_rgb
 /c_float/hsv_to_rgb
 /c_float/hue_kelv_test
+/c_float/gamma_decode
 /c_float/inv_test
 /c_float/kelv_to_rgb
 /c_float/kelv_to_uv
@@ -14,8 +15,10 @@ __pycache__
 /c_float/rgb_to_hsbk
 /c_float/rgb_to_hsv
 /c_float/sat_test
+/c_fixed/gamma_decode
 /c_fixed/kelv_to_rgb
 /c_fixed/kelv_to_uv
+/prepare/gamma_decode_fit_srgb.yml
 /prepare/mired_to_rgb_fit_srgb.yml
 /prepare/mired_to_uv_data.yml
 /prepare/UVW_to_rgb_srgb.yml

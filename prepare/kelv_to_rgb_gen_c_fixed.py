@@ -2,7 +2,6 @@
 
 import math
 import numpy
-import os
 import ruamel.yaml
 import sys
 from python_to_numpy import python_to_numpy
@@ -24,17 +23,12 @@ yaml = ruamel.yaml.YAML(typ = 'safe')
 with open(UVW_to_rgb_in) as fin:
   UVW_to_rgb = python_to_numpy(yaml.load(fin))
 
-# assess extreme combinations of u, v to find the range of R, G, B --
-# extrema can only occur at U, V, W = (0, 0, 1), (0, 1, 0) or (1, 0, 0)
-_, exp = numpy.frexp(
-  numpy.max(
-    numpy.abs(
-      numpy.stack([numpy.min(UVW_to_rgb, 1), numpy.max(UVW_to_rgb, 1)], 1)
-    ),
-    1
-  ) * (1. + EPSILON)
-)
-exp = int(numpy.max(exp)) - 31 # must be Python integer for math.ldexp
+# RGB extrema can only occur at UVW = (0, 0, 1), (0, 1, 0) or (1, 0, 0)
+_, exp = numpy.frexp(UVW_to_rgb * (1. + EPSILON))
+UVW_to_rgb_exp = numpy.max(exp) - 31
+UVW_to_rgb = numpy.round(
+  numpy.ldexp(UVW_to_rgb, -UVW_to_rgb_exp)
+).astype(numpy.int32)
 
 def to_hex(x):
   return '{0:s}0x{1:x}'.format('' if x >= 0 else '-', abs(x))
@@ -139,15 +133,15 @@ int main(int argc, char **argv) {{
   return EXIT_SUCCESS;
 }}
 #endif'''.format(
-    to_hex(int(round(math.ldexp(UVW_to_rgb[0, 0], -exp)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[0, 1], -exp)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[0, 2], -exp)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[1, 0], -exp)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[1, 1], -exp)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[1, 2], -exp)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[2, 0], -exp)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[2, 1], -exp)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[2, 2], -exp)))),
+    to_hex(UVW_to_rgb[0, 0]),
+    to_hex(UVW_to_rgb[0, 1]),
+    to_hex(UVW_to_rgb[0, 2]),
+    to_hex(UVW_to_rgb[1, 0]),
+    to_hex(UVW_to_rgb[1, 1]),
+    to_hex(UVW_to_rgb[1, 2]),
+    to_hex(UVW_to_rgb[2, 0]),
+    to_hex(UVW_to_rgb[2, 1]),
+    to_hex(UVW_to_rgb[2, 2]),
     name,
     name
   )
