@@ -8,29 +8,29 @@
 #define UV_v 1
 #define N_UV 2
 
-// kelv in 16:16 fixed point, uv in 2:32 fixed point
+// kelv in 16:16 fixed point, results in 2:30 fixed point
 void kelv_to_uv(int32_t kelv, int32_t *uv) {
   // validate inputs, allowing a little slack
-  assert(kelv >= 0x3e7fff9 && kelv < 0x3a980007);
+  assert(kelv >= 0x3e7ffff && kelv < 0x3a98000a);
 
   // find the approximate (u, v) chromaticity of the given Kelvin value
   // see http://en.wikipedia.org/wiki/Planckian_locus#Approximation (Krystek)
   // we evaluate this with Horner's rule for better numerical stability
-  int32_t u = 0x22883;
-  u = (int32_t)(((int64_t)u * kelv + 0xa19aedc5356LL) >> 26);
-  u = (int32_t)(((int64_t)u * kelv + 0x370c2d594187LL) >> 26);
-  int32_t u_denom = 0xbe176;
-  u_denom = (int32_t)(((int64_t)u_denom * kelv + 0x3735795bdb36LL) >> 26);
-  u_denom = (int32_t)(((int64_t)u_denom * kelv + 0x400002000000LL) >> 26);
-  uv[UV_u] = (int32_t)((((int64_t)u << 31) / u_denom + 1) >> 1);
+  int32_t u = 0x45105045;
+  u = (int32_t)(((int64_t)u * kelv + 0x143359baa6ac870LL) >> 30);
+  u = (int32_t)(((int64_t)u * kelv + 0x6e1856d2830e58LL) >> 30);
+  int32_t u_denom = 0x5f0baeba;
+  u_denom = (int32_t)(((int64_t)u_denom * kelv + 0x1b9abbafed9aed0LL) >> 30);
+  u_denom = (int32_t)(((int64_t)u_denom * kelv + 0x20000020000000LL) >> 30);
+  uv[UV_u] = (int32_t)((((int64_t)u << 29) / u_denom + 1) >> 1);
 
-  int32_t v = 0xb498;
-  v = (int32_t)(((int64_t)v * kelv + 0x2c55be64473LL) >> 26);
-  v = (int32_t)(((int64_t)v * kelv + 0x145044befd92LL) >> 26);
-  int32_t v_denom = 0x2b573;
-  v_denom = (int32_t)(((int64_t)v_denom * kelv - 0x1e619299312LL) >> 26);
-  v_denom = (int32_t)(((int64_t)v_denom * kelv + 0x400002000000LL) >> 26);
-  uv[UV_v] = (int32_t)((((int64_t)v << 31) / v_denom + 1) >> 1);
+  int32_t v = 0x5a4c39b6;
+  v = (int32_t)(((int64_t)v * kelv + 0x162acf3423988f0LL) >> 30);
+  v = (int32_t)(((int64_t)v * kelv + 0xa2821617ec93c8LL) >> 30);
+  int32_t v_denom = 0x56ae59d8;
+  v_denom = (int32_t)(((int64_t)v_denom * kelv - 0x3cc3651262400aLL) >> 30);
+  v_denom = (int32_t)(((int64_t)v_denom * kelv + 0x80000020000000LL) >> 30);
+  uv[UV_v] = (int32_t)((((int64_t)v << 29) / v_denom + 1) >> 1);
 }
 
 #ifdef STANDALONE
@@ -60,4 +60,3 @@ int main(int argc, char **argv) {
   return EXIT_SUCCESS;
 }
 #endif
-

@@ -142,4 +142,24 @@ def real_roots(p, a, b, epsilon = EPSILON):
           out.append(x[i + 1]) 
   if out[-1] < b:  
     out.append(b)
-  return numpy.array(out, numpy.double) 
+  return numpy.array(out, numpy.double)
+
+def _range(p, a, b, epsilon = EPSILON):
+  y = eval(p, real_roots(deriv(p), a, b))
+  return numpy.min(y), numpy.max(y)
+
+# find range of each sub-polynomial encountered in Horner's rule evaluation,
+# return ceil of log2 of highest the magnitude of the endpoints of each range
+def intermediate_exp(p, a, b, slop, epsilon = EPSILON):
+  _, exp = numpy.frexp(
+    numpy.max(
+      numpy.abs(
+        numpy.array(
+          [_range(p[i:], a, b, epsilon) for i in range(p.shape[0])],
+          numpy.double
+        )
+      ),
+      1
+    ) * (1. + slop)
+  )
+  return exp

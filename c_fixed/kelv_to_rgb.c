@@ -14,14 +14,14 @@
 #define RGB_BLUE 2
 #define N_RGB 3
 
-// 8:24 fixed point
 // this is precomputed for the particular primaries in use
 int32_t UVW_to_rgb[N_RGB][N_UVW] = {
-  {0xc80ceec, -0x2054d6, -0x307f41a},
-  {-0x43ac5f7, 0x552b72a, 0x40ab55},
-  {0x512994c, -0xa420e2e, 0x66ce450}
+  {0x6406775e, -0x102a6b3, -0x183fa0d1},
+  {-0x21d62fb6, 0x2a95b953, 0x2055aaa},
+  {0x2894ca63, -0x52107172, 0x3367227d}
 };
 
+// kelv in 16:16 fixed point, results in 2:30 fixed point
 void kelv_to_rgb(int32_t kelv, int32_t *rgb) {
   // find the approximate (u, v) chromaticity of the given Kelvin value
   int32_t UVW[N_UVW];
@@ -32,14 +32,12 @@ void kelv_to_rgb(int32_t kelv, int32_t *rgb) {
   UVW[UVW_W] = (1 << 30) - UVW[UVW_U] - UVW[UVW_V];
 
   // convert to rgb in the given system (the brightness will be arbitrary)
-  // rgb is normally in 2:30 fixed point but temporarily use 6:26, this is
-  // because UVW was generated so that RGB = (1, 1, 1) gives U + V + W = 1,
-  // so RGB can be about 3 times UVW (normalization will remove this below)
+  // rgb has the scaling of columns of UVW_to_rgb until normalization below
   for (int i = 0; i < N_RGB; ++i) {
-    int64_t v = 1 << 27;
+    int64_t v = 1 << 29;
     for (int j = 0; j < N_UVW; ++j)
       v += (int64_t)UVW_to_rgb[i][j] * UVW[j];
-    rgb[i] = (int32_t)(v >> 28);
+    rgb[i] = (int32_t)(v >> 30);
   }
 
   // low Kelvins are outside the gamut of SRGB and thus must be interpreted,

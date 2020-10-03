@@ -10,6 +10,8 @@ from python_to_numpy import python_to_numpy
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
+EPSILON = 1e-8
+
 if len(sys.argv) < 2:
   print(f'usage: {sys.argv[0]:s} UVW_to_rgb_in.yml [name]')
   sys.exit(EXIT_FAILURE)
@@ -21,6 +23,18 @@ yaml = ruamel.yaml.YAML(typ = 'safe')
 
 with open(UVW_to_rgb_in) as fin:
   UVW_to_rgb = python_to_numpy(yaml.load(fin))
+
+# assess extreme combinations of u, v to find the range of R, G, B --
+# extrema can only occur at U, V, W = (0, 0, 1), (0, 1, 0) or (1, 0, 0)
+_, exp = numpy.frexp(
+  numpy.max(
+    numpy.abs(
+      numpy.stack([numpy.min(UVW_to_rgb, 1), numpy.max(UVW_to_rgb, 1)], 1)
+    ),
+    1
+  ) * (1. + EPSILON)
+)
+exp = int(numpy.max(exp)) - 31 # must be Python integer for math.ldexp
 
 def to_hex(x):
   return '{0:s}0x{1:x}'.format('' if x >= 0 else '-', abs(x))
@@ -41,7 +55,6 @@ print(
 #define RGB_BLUE 2
 #define N_RGB 3
 
-// 8:24 fixed point
 // this is precomputed for the particular primaries in use
 int32_t UVW_to_rgb[N_RGB][N_UVW] = {{
   {{{0:s}, {1:s}, {2:s}}},
@@ -49,6 +62,7 @@ int32_t UVW_to_rgb[N_RGB][N_UVW] = {{
   {{{6:s}, {7:s}, {8:s}}}
 }};
 
+// kelv in 16:16 fixed point, results in 2:30 fixed point
 void {9:s}(int32_t kelv, int32_t *rgb) {{
   // find the approximate (u, v) chromaticity of the given Kelvin value
   int32_t UVW[N_UVW];
@@ -59,11 +73,12 @@ void {9:s}(int32_t kelv, int32_t *rgb) {{
   UVW[UVW_W] = (1 << 30) - UVW[UVW_U] - UVW[UVW_V];
 
   // convert to rgb in the given system (the brightness will be arbitrary)
+  // rgb has the scaling of columns of UVW_to_rgb until normalization below
   for (int i = 0; i < N_RGB; ++i) {{
-    int64_t v = 1 << 23;
+    int64_t v = 1 << 29;
     for (int j = 0; j < N_UVW; ++j)
       v += (int64_t)UVW_to_rgb[i][j] * UVW[j];
-    rgb[i] = (int32_t)(v >> 24);
+    rgb[i] = (int32_t)(v >> 30);
   }}
 
   // low Kelvins are outside the gamut of SRGB and thus must be interpreted,
@@ -124,15 +139,15 @@ int main(int argc, char **argv) {{
   return EXIT_SUCCESS;
 }}
 #endif'''.format(
-    to_hex(int(round(math.ldexp(UVW_to_rgb[0, 0], 24)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[0, 1], 24)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[0, 2], 24)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[1, 0], 24)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[1, 1], 24)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[1, 2], 24)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[2, 0], 24)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[2, 1], 24)))),
-    to_hex(int(round(math.ldexp(UVW_to_rgb[2, 2], 24)))),
+    to_hex(int(round(math.ldexp(UVW_to_rgb[0, 0], -exp)))),
+    to_hex(int(round(math.ldexp(UVW_to_rgb[0, 1], -exp)))),
+    to_hex(int(round(math.ldexp(UVW_to_rgb[0, 2], -exp)))),
+    to_hex(int(round(math.ldexp(UVW_to_rgb[1, 0], -exp)))),
+    to_hex(int(round(math.ldexp(UVW_to_rgb[1, 1], -exp)))),
+    to_hex(int(round(math.ldexp(UVW_to_rgb[1, 2], -exp)))),
+    to_hex(int(round(math.ldexp(UVW_to_rgb[2, 0], -exp)))),
+    to_hex(int(round(math.ldexp(UVW_to_rgb[2, 1], -exp)))),
+    to_hex(int(round(math.ldexp(UVW_to_rgb[2, 2], -exp)))),
     name,
     name
   )
