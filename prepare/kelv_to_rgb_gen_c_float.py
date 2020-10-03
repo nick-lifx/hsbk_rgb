@@ -27,6 +27,9 @@ print(
 #include "kelv_to_rgb.h"
 #include "kelv_to_uv.h"
 
+// new way: (faster)
+#include "gamma_encode.h"
+
 #define UVW_U 0
 #define UVW_V 1
 #define UVW_W 2
@@ -78,11 +81,17 @@ void {9:s}(float kelv, float *rgb) {{
 
   // gamma-encode the R, G, B tuple according to the SRGB gamma curve
   // because displaying it on a monitor will gamma-decode it in the process
+
+  // old way: (slower)
+  //for (int i = 0; i < N_RGB; ++i)
+  //  rgb[i] =
+  //    rgb[i] < .0031308 ?
+  //      rgb[i] * 12.92f :
+  //      powf(rgb[i], 1.f / 2.4f) * 1.055f - .055f;
+
+  // new way: (faster)
   for (int i = 0; i < N_RGB; ++i)
-    rgb[i] =
-      rgb[i] < .0031308 ?
-        rgb[i] * 12.92f :
-        1.055f * powf(rgb[i], 1.f / 2.4f) - .055f;
+    rgb[i] = gamma_encode(rgb[i]);
 }}
 
 #ifdef STANDALONE

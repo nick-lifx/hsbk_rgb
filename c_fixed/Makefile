@@ -27,7 +27,7 @@ gamma_decode: gamma_decode_standalone.o
 gamma_encode: gamma_encode_standalone.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
-kelv_to_rgb: kelv_to_rgb_standalone.o kelv_to_uv.o
+kelv_to_rgb: kelv_to_rgb_standalone.o kelv_to_uv.o gamma_encode.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 kelv_to_uv: kelv_to_uv_standalone.o

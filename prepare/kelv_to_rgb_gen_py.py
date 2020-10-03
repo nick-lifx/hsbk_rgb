@@ -27,6 +27,9 @@ print(
 import numpy
 from kelv_to_uv import kelv_to_uv
 
+# new way: (faster, at least up to interpreter overhead)
+from gamma_encode import gamma_encode
+
 # this is precomputed for the particular primaries in use
 UVW_to_rgb = numpy.array(
   [
@@ -40,28 +43,34 @@ UVW_to_rgb = numpy.array(
 def {9:s}(kelv):
   # find the approximate (u, v) chromaticity of the given Kelvin value
   uv = kelv_to_uv(kelv)
-  
+
   # add the missing w, to convert the chromaticity from (u, v) to (U, V, W)
   # see https://en.wikipedia.org/wiki/CIE_1960_color_space
   u = uv[0]
   v = uv[1]
   UVW = numpy.array([u, v, 1. - u - v], numpy.double)
-  
+
   # convert to rgb in the given system (the brightness will be arbitrary)
   rgb = UVW_to_rgb @ UVW
-  
+
   # low Kelvins are outside the gamut of SRGB and thus must be interpreted,
   # in this simplistic approach we simply clip off the negative blue value
   rgb[rgb < 0.] = 0.
-  
+
   # normalize the brightness, so that at least one of R, G, or B = 1
   rgb /= numpy.max(rgb)
-  
+
   # gamma-encode the R, G, B tuple according to the SRGB gamma curve
   # because displaying it on a monitor will gamma-decode it in the process
-  mask = rgb < .0031308
-  rgb[mask] *= 12.92
-  rgb[~mask] = 1.055 * rgb[~mask] ** (1. / 2.4) - 0.055
+
+  # old way: (slower)
+  #mask = rgb < .0031308
+  #rgb[mask] *= 12.92
+  #rgb[~mask] = rgb[~mask] ** (1. / 2.4) * 1.055 - 0.055
+
+  # new way: (faster, at least up to interpreter overhead)
+  for i in range(N_RGB):
+    rgb[i] = gamma_encode(rgb[i])
 
   return rgb
 

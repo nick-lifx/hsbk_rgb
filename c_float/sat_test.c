@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "gamma_decode.h"
 #include "hsbk_to_rgb.h"
 
 #define RGB_RED 0
@@ -39,12 +40,8 @@ void hsbk_to_uv(const float *hsbk, float *uv) {
   float rgb[N_RGB];
   hsbk_to_rgb(hsbk, rgb);
 
-  for (int i = 0; i < N_RGB; ++i) {
-    rgb[i] =
-      rgb[i] < 12.92f * .0031308f ?
-        rgb[i] / 12.92f :
-        powf((rgb[i] + .055f) / 1.055f, 2.4f);
-  }
+  for (int i = 0; i < N_RGB; ++i)
+    rgb[i] = gamma_decode(rgb[i]);
 
   float UVW[N_UVW];
   for (int i = 0; i < N_UVW; ++i) {

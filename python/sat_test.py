@@ -3,10 +3,16 @@
 import imageio
 import numpy
 import sys
+from gamma_decode import gamma_decode
 from hsbk_to_rgb import hsbk_to_rgb
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
+
+RGB_RED = 0
+RGB_GREEN = 1
+RGB_BLUE = 2
+N_RGB = 3
 
 UVW_U = 0
 UVW_V = 1
@@ -34,9 +40,8 @@ image_out = sys.argv[1]
 
 def hsbk_to_uv(hsbk):
   rgb = hsbk_to_rgb(hsbk)
-  mask = rgb < 12.92 * .0031308
-  rgb[mask] /= 12.92
-  rgb[~mask] = ((rgb[~mask] + .055) / 1.055) ** 2.4
+  for i in range(N_RGB):
+    rgb[i] = gamma_decode(rgb[i])
   UVW = rgb_to_UVW @ rgb
   return UVW[:UVW_W] / numpy.sum(UVW)
 

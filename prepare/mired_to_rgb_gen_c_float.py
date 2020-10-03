@@ -13,7 +13,7 @@ if len(sys.argv) < 2:
   sys.exit(EXIT_FAILURE)
 mired_to_rgb_fit_in = sys.argv[1]
 name = sys.argv[2] if len(sys.argv) >= 3 else 'mired_to_rgb'
- 
+
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
 

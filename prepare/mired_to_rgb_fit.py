@@ -423,7 +423,7 @@ if diag:
       poly.eval(p_blue_cd, x_cd)
     ],
     0
-  ) 
+  )
   matplotlib.pyplot.plot(x, y)
 
   matplotlib.pyplot.show()
