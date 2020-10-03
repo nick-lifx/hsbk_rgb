@@ -6,7 +6,7 @@ CFLAGS=-g -Wall
 %_standalone.o: %.c
 	${CC} ${CFLAGS} ${CPPFLAGS} -DSTANDALONE -o $@ -c $<
 
-all: hsbk_to_rgb hsv_to_rgb rgb_to_hsbk rgb_to_hsv gamma_decode kelv_to_rgb kelv_to_uv mired_to_rgb hue_kelv_test inv_test sat_test
+all: hsbk_to_rgb hsv_to_rgb rgb_to_hsbk rgb_to_hsv gamma_decode gamma_encode kelv_to_rgb kelv_to_uv mired_to_rgb hue_kelv_test inv_test sat_test
 
 hsbk_to_rgb: hsbk_to_rgb_standalone.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
@@ -21,6 +21,9 @@ rgb_to_hsv: rgb_to_hsv.o rgb_to_hsbk.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
 gamma_decode: gamma_decode_standalone.o
+	${CC} ${CFLAGS} -o $@ $^
+
+gamma_encode: gamma_encode_standalone.o
 	${CC} ${CFLAGS} -o $@ $^
 
 kelv_to_rgb: kelv_to_rgb_standalone.o kelv_to_uv.o
@@ -42,4 +45,4 @@ sat_test: sat_test.o hsbk_to_rgb.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
 clean:
-	rm -f hsbk_to_rgb hsv_to_rgb rgb_to_hsbk rgb_to_hsv gamma_decode kelv_to_rgb kelv_to_uv mired_to_rgb hue_kelv_test inv_test sat_test *.o
+	rm -f hsbk_to_rgb hsv_to_rgb rgb_to_hsbk rgb_to_hsv gamma_decode gamma_encode kelv_to_rgb kelv_to_uv mired_to_rgb hue_kelv_test inv_test sat_test *.o

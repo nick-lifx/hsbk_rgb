@@ -19,7 +19,7 @@ post_factor = numpy.array(
 #   x / 12.92 if x < 12.92 * .0031308 else ((x + .055) / 1.055) ** 2.4
 # allowed domain (-inf, 1.945), recommended domain [-epsilon, 1 + epsilon]
 # do not call with argument >= 1.945 due to table lookup overflow (unchecked)
-# minimax error is up to 0.000000 on domain [.445, .945]
+# minimax error is up to 8.360671e-09 on domain [.445, .945]
 def gamma_decode(x):
   if x < 4.0449935999999999e-02:
     return x * 7.7399380804953566e-02

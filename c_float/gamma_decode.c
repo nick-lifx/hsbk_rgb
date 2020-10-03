@@ -15,7 +15,7 @@ static float post_factor[] = {
 //   x < 12.92f * .0031308f ? x / 12.92f : powf((x + .055f) / 1.055f, 2.4f)
 // allowed domain (-inf, 1.945), recommended domain [-epsilon, 1 + epsilon]
 // do not call with argument >= 1.945 due to table lookup overflow (unchecked)
-// minimax error is up to 0.000000 on domain [.445, .945]
+// minimax error is up to 8.360671e-09 on domain [.445, .945]
 float gamma_decode(float x) {
   if (x < 4.04499360e-02f)
     return x * 7.73993808e-02f;
