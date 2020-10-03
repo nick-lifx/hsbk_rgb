@@ -12,8 +12,7 @@
 
 void mired_to_rgb(float mired, float *rgb) {
   // validate inputs, allowing a little slack
-  assert(mired >= 6.66666667e+01f - EPSILON);
-  assert(mired < 1.00000000e+03f + EPSILON);
+  assert(mired >= 6.66666667e+01f * (1.f - EPSILON) && mired < 1.00000000e+03f * (1.f + EPSILON));
 
   // calculate red channel
   float r;
@@ -26,6 +25,7 @@ void mired_to_rgb(float mired, float *rgb) {
   else {
     r = 1.00000000e+00f;
   }
+  rgb[RGB_RED] = r;
 
   // calculate green channel
   float g;
@@ -38,11 +38,12 @@ void mired_to_rgb(float mired, float *rgb) {
   else {
     g = -2.89707394e-15f;
     g = g * mired + 7.51189207e-12f;
-    g = g * mired + -8.13341497e-09f;
+    g = g * mired - 8.13341497e-09f;
     g = g * mired + 5.12759027e-06f;
-    g = g * mired + -2.83288365e-03f;
+    g = g * mired - 2.83288365e-03f;
     g = g * mired + 1.31597723e+00f;
   }
+  rgb[RGB_GREEN] = g;
 
   // calculate blue channel
   float b;
@@ -51,20 +52,17 @@ void mired_to_rgb(float mired, float *rgb) {
   }
   else if (mired < 5.26023882e+02f) {
     b = -3.67366905e-19f;
-    b = b * mired + -1.18020309e-15f;
+    b = b * mired - 1.18020309e-15f;
     b = b * mired + 3.08433598e-12f;
-    b = b * mired + -2.62366557e-09f;
+    b = b * mired - 2.62366557e-09f;
     b = b * mired + 1.09853905e-06f;
-    b = b * mired + -2.38867759e-04f;
+    b = b * mired - 2.38867759e-04f;
     b = b * mired + 2.17272679e-02f;
     b = b * mired + 5.26555890e-01f;
   }
   else {
     b = 0.00000000e+00f;
   }
-
-  rgb[RGB_RED] = r;
-  rgb[RGB_GREEN] = g;
   rgb[RGB_BLUE] = b;
 }
 

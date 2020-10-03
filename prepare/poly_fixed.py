@@ -26,8 +26,11 @@ def intermediate_exp(p, a, b, slop = SLOP, epsilon = EPSILON):
 # then find shift amounts to align each intermediate result with next stage
 # (the shift also removes the effect of the independent variable exponent)
 # return the aligned cofficients, the shifts, and exponent of final result
-def align(p, a, b, x_exp, bits, slop = SLOP, epsilon = EPSILON):
+def align(p, a, b, x_exp, bits, y_exp = None, slop = SLOP, epsilon = EPSILON):
   exp = intermediate_exp(p, a, b, slop, epsilon) - bits
+  if y_exp is not None:
+    assert exp[0] <= y_exp
+    exp[0] = y_exp
   #print('exp', exp)
   shr = exp[:-1] - exp[1:] - x_exp
   #print('shr', shr)
@@ -66,10 +69,11 @@ def poly_fixed(
   b,
   x_exp,
   bits,
+  y_exp = None,
   dtype = numpy.int64,
   slop = SLOP,
   epsilon = EPSILON
 ):
-   c, shr, exp = align(p, a, b, x_exp, bits, slop, epsilon)
+   c, shr, exp = align(p, a, b, x_exp, bits, y_exp, slop, epsilon)
    c = quantize(c, shr, dtype)
    return c, shr, exp

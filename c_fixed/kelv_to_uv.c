@@ -10,7 +10,7 @@
 // kelv in 16:16 fixed point, results in 2:30 fixed point
 void kelv_to_uv(int32_t kelv, int32_t *uv) {
   // validate inputs, allowing a little slack
-  assert(kelv >= 0x3e7ffff && kelv < 0x3a98000a);
+  assert(kelv >= 0x3e7ffbe && kelv < 0x3a9803d7);
 
   // find the approximate (u, v) chromaticity of the given Kelvin value
   // see http://en.wikipedia.org/wiki/Planckian_locus#Approximation (Krystek)

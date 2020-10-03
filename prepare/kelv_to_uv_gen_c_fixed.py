@@ -4,8 +4,7 @@ import math
 import numpy
 from poly_fixed import poly_fixed
 
-ORDER = 3
-EPSILON = 1e-8
+EPSILON = 1e-6
 
 # independent variable in 16:16 fixed point
 KELV_EXP = -16
@@ -13,8 +12,7 @@ KELV_MIN = 1000.
 KELV_MAX = 15000.
 
 # results in 2:30 fixed point
-U_EXP = -30
-V_EXP = -30
+UV_EXP = -30
 
 p_u_num, p_shr_u_num, p_exp_u_num = poly_fixed(
   numpy.array([.860117757, 1.54118254e-4, 1.28641212e-7], numpy.double),
@@ -47,9 +45,9 @@ p_v_denom, p_shr_v_denom, p_exp_v_denom = poly_fixed(
 
 # make sure we can divide u_num by u_denom and v_num by v_denom
 # maximum we can shift by is 32, but allow one less for rounding
-div_shl_u = p_exp_u_num - p_exp_u_denom - U_EXP
+div_shl_u = p_exp_u_num - p_exp_u_denom - UV_EXP
 assert div_shl_u >= 0 and div_shl_u < 32
-div_shl_v = p_exp_v_num - p_exp_v_denom - V_EXP
+div_shl_v = p_exp_v_num - p_exp_v_denom - UV_EXP
 assert div_shl_v >= 0 and div_shl_v < 32
 
 print(

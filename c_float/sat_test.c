@@ -27,7 +27,7 @@
 #define UVW_W 2
 #define N_UVW 3
 
-#define EPSILON 1e-6
+#define EPSILON 1e-6f
 
 // inverse of the matrix calculated by ../prepare/UVW_to_rgb.py
 float rgb_to_UVW[N_UVW][N_RGB] = {

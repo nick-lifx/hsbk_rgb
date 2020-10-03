@@ -6,7 +6,7 @@ CFLAGS=-g -Wall
 %_standalone.o: %.c
 	${CC} ${CFLAGS} ${CPPFLAGS} -DSTANDALONE -o $@ -c $<
 
-all: gamma_decode gamma_encode kelv_to_rgb kelv_to_uv
+all: gamma_decode gamma_encode kelv_to_rgb kelv_to_uv mired_to_rgb
 # hsbk_to_rgb hsv_to_rgb rgb_to_hsbk rgb_to_hsv gamma_decode gamma_encode kelv_to_rgb kelv_to_uv mired_to_rgb hue_kelv_test inv_test sat_test
 
 hsbk_to_rgb: hsbk_to_rgb_standalone.o mired_to_rgb.o
@@ -34,7 +34,7 @@ kelv_to_uv: kelv_to_uv_standalone.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 mired_to_rgb: mired_to_rgb_standalone.o
-	${CC} ${CFLAGS} -o $@ $^
+	${CC} ${CFLAGS} -o $@ $^ -lm
 
 hue_kelv_test: hue_kelv_test.o hsbk_to_rgb.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng

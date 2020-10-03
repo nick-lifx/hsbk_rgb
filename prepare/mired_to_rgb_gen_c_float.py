@@ -48,8 +48,7 @@ print(
 
 void {0:s}(float mired, float *rgb) {{
   // validate inputs, allowing a little slack
-  assert(mired >= {1:.8e}f - EPSILON);
-  assert(mired < {2:.8e}f + EPSILON);
+  assert(mired >= {1:.8e}f * (1.f - EPSILON) && mired < {2:.8e}f * (1.f + EPSILON));
 
   // calculate red channel
   float r;
@@ -59,6 +58,7 @@ void {0:s}(float mired, float *rgb) {{
   else {{
     r = {6:.8e}f;
 {7:s}  }}
+  rgb[RGB_RED] = r;
 
   // calculate green channel
   float g;
@@ -68,6 +68,7 @@ void {0:s}(float mired, float *rgb) {{
   else {{
     g = {11:.8e}f;
 {12:s}  }}
+  rgb[RGB_GREEN] = g;
 
   // calculate blue channel
   float b;
@@ -80,9 +81,6 @@ void {0:s}(float mired, float *rgb) {{
   else {{
     b = {19:.8e}f;
 {20:s}  }}
-
-  rgb[RGB_RED] = r;
-  rgb[RGB_GREEN] = g;
   rgb[RGB_BLUE] = b;
 }}
 
@@ -121,14 +119,20 @@ int main(int argc, char **argv) {{
     p_red_ab[-1],
     ''.join(
       [
-        '    r = r * mired + {0:.8e}f;\n'.format(p_red_ab[i])
+        '    r = r * mired {0:s} {1:.8e}f;\n'.format(
+          '+' if p_red_ab[i] >= 0 else '-',
+          abs(p_red_ab[i])
+        )
         for i in range(p_red_ab.shape[0] - 2, -1, -1)
       ]
     ),
     p_red_bd[-1],
     ''.join(
       [
-        '    r = r * mired + {0:.8e}f;\n'.format(p_red_bd[i])
+        '    r = r * mired {0:s} {1:.8e}f;\n'.format(
+          '+' if p_red_bd[i] >= 0 else '-',
+          abs(p_red_bd[i])
+        )
         for i in range(p_red_bd.shape[0] - 2, -1, -1)
       ]
     ),
@@ -136,14 +140,20 @@ int main(int argc, char **argv) {{
     p_green_ab[-1],
     ''.join(
       [
-        '    g = g * mired + {0:.8e}f;\n'.format(p_green_ab[i])
+        '    g = g * mired {0:s} {1:.8e}f;\n'.format(
+          '+' if p_green_ab[i] >= 0 else '-',
+          abs(p_green_ab[i])
+        )
         for i in range(p_green_ab.shape[0] - 2, -1, -1)
       ]
     ),
     p_green_bd[-1],
     ''.join(
       [
-        '    g = g * mired + {0:.8e}f;\n'.format(p_green_bd[i])
+        '    g = g * mired {0:s} {1:.8e}f;\n'.format(
+          '+' if p_green_bd[i] >= 0 else '-',
+          abs(p_green_bd[i])
+        )
         for i in range(p_green_bd.shape[0] - 2, -1, -1)
       ]
     ),
@@ -151,7 +161,10 @@ int main(int argc, char **argv) {{
     p_blue_ab[-1],
     ''.join(
       [
-        '    b = b * mired + {0:.8e}f;\n'.format(p_blue_ab[i])
+        '    b = b * mired {0:s} {1:.8e}f;\n'.format(
+          '+' if p_blue_ab[i] >= 0 else '-',
+          abs(p_blue_ab[i])
+        )
         for i in range(p_blue_ab.shape[0] - 2, -1, -1)
       ]
     ),
@@ -159,14 +172,20 @@ int main(int argc, char **argv) {{
     p_blue_bc[-1],
     ''.join(
       [
-        '    b = b * mired + {0:.8e}f;\n'.format(p_blue_bc[i])
+        '    b = b * mired {0:s} {1:.8e}f;\n'.format(
+          '+' if p_blue_bc[i] >= 0 else '-',
+          abs(p_blue_bc[i])
+        )
         for i in range(p_blue_bc.shape[0] - 2, -1, -1)
       ]
     ),
     p_blue_cd[-1],
     ''.join(
       [
-        '    b = b * mired + {0:.8e}f;\n'.format(p_blue_cd[i])
+        '    b = b * mired {0:s} {1:.8e}f;\n'.format(
+          '+' if p_blue_cd[i] >= 0 else '-',
+          abs(p_blue_cd[i])
+        )
         for i in range(p_blue_cd.shape[0] - 2, -1, -1)
       ]
     ),

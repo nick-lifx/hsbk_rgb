@@ -20,7 +20,7 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
-#define EPSILON 1e-6
+#define EPSILON 1e-6f
 
 // table for looking up hues when rgb[i] == 0 and rgb[j] == 1
 struct hue_table {

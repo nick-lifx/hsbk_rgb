@@ -29,7 +29,7 @@ float hue_sequence[N_RGB][N_HUE_SEQUENCE + 1] = {
   {0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f}
 };
 
-#define EPSILON 1e-6
+#define EPSILON 1e-6f
 
 void hsbk_to_rgb(const float *hsbk, float *rgb) {
   // validate inputs, allowing a little slack

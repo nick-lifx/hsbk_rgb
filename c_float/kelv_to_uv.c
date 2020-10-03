@@ -7,11 +7,11 @@
 #define UV_v 1
 #define N_UV 2
 
-#define EPSILON 1e-6
+#define EPSILON 1e-6f
 
 void kelv_to_uv(float kelv, float *uv) {
   // validate inputs, allowing a little slack
-  assert(kelv >= 1000. - EPSILON && kelv < 15000. + EPSILON);
+  assert(kelv >= 1000.f * (1.f - EPSILON) && kelv < 15000. * (1.f + EPSILON));
 
   // find the approximate (u, v) chromaticity of the given Kelvin value
   // see http://en.wikipedia.org/wiki/Planckian_locus#Approximation (Krystek)
