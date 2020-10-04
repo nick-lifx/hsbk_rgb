@@ -13,9 +13,8 @@ static int32_t post_factor[] = {
 // argument and result in 2:30 fixed point
 // returns approximation to:
 //   x < 12.92f * .0031308f ? x / 12.92f : powf((x + .055f) / 1.055f, 2.4f)
-// allowed domain (-inf, 1.945), recommended domain [-epsilon, 1 + epsilon]
-// do not call with argument >= 1.945 due to table lookup overflow (unchecked)
-// minimax error is up to 8.360670e-09 on domain [.445, .945]
+// allowed domain [-2, 1.945), recommended domain [-epsilon, 1 + epsilon)
+// minimax error is up to 8.360670e-09 on domain [.445, .945)
 int32_t gamma_decode(int32_t x) {
   if (x < 0x296bb54)
     return (int32_t)((x * 0x4f41c885LL + 0x200000000LL) >> 34);

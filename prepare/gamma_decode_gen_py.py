@@ -22,6 +22,7 @@ with open(gamma_decode_fit_in) as fin:
 p = gamma_decode_fit['p']
 err = gamma_decode_fit['err']
 exp0 = gamma_decode_fit['exp0']
+exp1 = gamma_decode_fit['exp1']
 post_factor = gamma_decode_fit['post_factor']
 
 print(
@@ -46,8 +47,9 @@ def {2:s}(x):
   if x < {3:.16e}:
     return x * {4:.16e}
   x, exp = math.frexp(x + .055)
-  y = {5:.16e}
-{6:s}  return y * post_factor[exp + {7:d}]
+  assert exp < {5:d}
+  y = {6:.16e}
+{7:s}  return y * post_factor[exp + {8:d}]
 
 if __name__ == '__main__':
   import sys
@@ -61,7 +63,7 @@ if __name__ == '__main__':
     sys.exit(EXIT_FAILURE)
   x = float(sys.argv[1])
 
-  y = {8:s}(x)
+  y = {9:s}(x)
   print(f'gamma encoded {{x:.6f}} -> linear {{y:.6f}}')'''.format(
     ','.join(
       [
@@ -73,6 +75,7 @@ if __name__ == '__main__':
     name,
     12.92 * .0031308,
     1. / 12.92,
+    exp1 + 1,
     p[-1],
     ''.join(
       [

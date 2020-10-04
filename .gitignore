@@ -18,6 +18,7 @@ __pycache__
 /c_float/sat_test
 /c_fixed/gamma_decode
 /c_fixed/gamma_encode
+/c_fixed/hsbk_to_rgb
 /c_fixed/kelv_to_rgb
 /c_fixed/kelv_to_uv
 /c_fixed/mired_to_rgb

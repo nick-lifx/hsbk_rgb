@@ -10,8 +10,6 @@ from python_to_numpy import python_to_numpy
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-EPSILON = 1e-6
-
 # independent variable in 16:16 fixed point
 MIRED_EXP = -16
 
@@ -115,10 +113,11 @@ print(
 #define RGB_BLUE 2
 #define N_RGB 3
 
+#define EPSILON 0x40
+
 void {0:s}(int32_t mired, int32_t *rgb) {{
   // validate inputs, allowing a little slack
-  assert(mired >= {1:s});
-  assert(mired < {2:s});
+  assert(mired >= {1:s} - EPSILON && mired < {2:s} + EPSILON);
 
   // calculate red channel
   int32_t r;
@@ -184,8 +183,8 @@ int main(int argc, char **argv) {{
 }}
 #endif'''.format(
     name,
-    to_hex(int(round(math.ldexp(a * (1. - EPSILON), -MIRED_EXP)))),
-    to_hex(int(round(math.ldexp(d * (1. + EPSILON), -MIRED_EXP)))),
+    to_hex(int(round(math.ldexp(a, -MIRED_EXP)))),
+    to_hex(int(round(math.ldexp(d, -MIRED_EXP)))),
     to_hex(int(round(math.ldexp(b_red, -MIRED_EXP)))),
     to_hex(p_red_ab[-1]),
     ''.join(

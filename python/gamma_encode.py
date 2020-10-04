@@ -29,6 +29,7 @@ def gamma_encode(x):
   if x < .0031308:
     return x * 12.92
   x, exp = math.frexp(x)
+  assert exp < 2
   y = 1.5510671045708141e-01
   y = y * x - 9.5313721143243602e-01
   y = y * x + 2.5724148231272337e+00

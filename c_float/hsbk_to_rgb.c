@@ -40,7 +40,7 @@ void hsbk_to_rgb(const float *hsbk, float *rgb) {
   float br = hsbk[HSBK_BR];
   assert(br >= -EPSILON && br < 1. + EPSILON);
   float kelv = hsbk[HSBK_KELV];
-  assert(kelv >= 1500. - EPSILON && kelv < 9000. + EPSILON);
+  assert(kelv >= 1500. * (1.f - EPSILON) && kelv < 9000. * (1.f + EPSILON));
 
   // this section computes hue_rgb from hue
 
