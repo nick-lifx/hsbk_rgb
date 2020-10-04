@@ -85,12 +85,11 @@ There are also some test programs:
 
 Preparation scripts have been included in `prepare/`, you should not need to
 run these, but if you do then `cd` into `prepare/`, run `make` and then `make
-install`. This will auto-generate some of the Python files in the main solver
-directory. Basically it pre-computes various constants which are derived from
-the chromaticities of the SRGB primaries and D65 white point. It uses a Remez
-exchange algorithm to find optimized polynomials for `mired_to_rgb.py`. A case
-where you might want to re-run the preparation scripts is if you are using a
-non-standard monitor such as an Apple (Display P3) or recent HDTV (rec.2020).
+install_srgb`. This will auto-generate some of the Python files in the main
+solver directory. Basically it pre-computes various constants which are derived
+from the chromaticities of the SRGB primaries and D65 white point. It uses a
+Remez exchange algorithm to find optimized polynomials for `mired_to_rgb.py`. A
+case where you might want to re-run the preparation scripts is if you are using a non-standard monitor such as an Apple (Display P3) or recent HDTV (rec.2020).
 
 ### Running from the command line
 

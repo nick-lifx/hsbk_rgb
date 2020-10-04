@@ -67,11 +67,13 @@ diag = False
 if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
   diag = True
   del sys.argv[1]
-if len(sys.argv) < 3:
-  print(f'usage: {sys.argv[0]:s} rgbw_to_xy_in.yml mired_to_rgb_fit_out.yml')
+if len(sys.argv) < 5:
+  print(f'usage: {sys.argv[0]:s} rgbw_to_xy_in.yml b_estimate c_estimate mired_to_rgb_fit_out.yml')
   sys.exit(EXIT_FAILURE)
 rgbw_to_xy_in = sys.argv[1]
-mired_to_rgb_fit_out = sys.argv[2]
+b_estimate = float(sys.argv[2])
+c_estimate = float(sys.argv[3])
+mired_to_rgb_fit_out = sys.argv[4]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -137,8 +139,8 @@ print('d', d)
 def f(x):
   return (XYZ_to_rgb[RGB_RED, :] - XYZ_to_rgb[RGB_BLUE, :]) @ mired_to_XYZ(x)
 b = poly.newton(
-  any_f_to_poly(f, 1e6 / 7500., 1e6 / 5500., ORDER0),
-  1e6 / 6500.
+  any_f_to_poly(f, b_estimate - 100., b_estimate + 100., ORDER0),
+  b_estimate
 )
 print('b', b)
 
@@ -146,8 +148,8 @@ print('b', b)
 def f(x):
   return XYZ_to_rgb[RGB_BLUE, :] @ mired_to_XYZ(x)
 c = poly.newton(
-  any_f_to_poly(f, 1e6 / 3000., 1e6 / 1000., ORDER0),
-  1e6 / 2000.
+  any_f_to_poly(f, c_estimate - 100., c_estimate + 100., ORDER0),
+  c_estimate
 )
 print('c', c)
 
