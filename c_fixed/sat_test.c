@@ -27,35 +27,35 @@
 #define UVW_W 2
 #define N_UVW 3
 
-#define EPSILON 1e-6f
+#define EPSILON 1e-6
 
 // inverse of the matrix calculated by ../prepare/UVW_to_rgb.py
-float rgb_to_UVW[N_UVW][N_RGB] = {
-  {9.04510486e-02f, 7.84301651e-02f, 3.95854529e-02f},
-  {6.99582329e-02f, 2.35290495e-01f, 2.37512718e-02f},
-  {4.02789826e-02f, 3.13720660e-01f, 1.62300357e-01f}
+int32_t rgb_to_UVW[N_UVW][N_RGB] = {
+  {0xb93e664, 0xa09ffe9, 0x51122d9},
+  {0x8f46431, 0x1e1dffbb, 0x30a481c},
+  {0x527dc98, 0x2827ffa4, 0x14c64213}
 };
 
-void hsbk_to_uv(const float *hsbk, float *uv) {
-  float rgb[N_RGB];
+void hsbk_to_uv(const int32_t *hsbk, int32_t *uv) {
+  int32_t rgb[N_RGB];
   hsbk_to_rgb(hsbk, rgb);
 
   for (int i = 0; i < N_RGB; ++i)
     rgb[i] = gamma_decode(rgb[i]);
 
-  float UVW[N_UVW];
+  int32_t UVW[N_UVW];
   for (int i = 0; i < N_UVW; ++i) {
-    float v = 0.f;
+    int64_t v = 1 << 29;
     for (int j = 0; j < N_RGB; ++j)
-      v += rgb_to_UVW[i][j] * rgb[j];
-    UVW[i] = v;
+      v += (int64_t)rgb_to_UVW[i][j] * rgb[j];
+    UVW[i] = (int32_t)(v >> 30);
   }
 
-  float L = 0.f;
+  int64_t L = 0;
   for (int i = 0; i < N_UVW; ++i)
     L += UVW[i];
-  uv[UV_u] = UVW[UVW_U] / L;
-  uv[UV_v] = UVW[UVW_V] / L;
+  uv[UV_u] = (int32_t)((((int64_t)UVW[UVW_U] << 31) / L + 1) >> 1);
+  uv[UV_v] = (int32_t)((((int64_t)UVW[UVW_V] << 31) / L + 1) >> 1);
 }
 
 int main(int argc, char **argv) {
@@ -71,49 +71,67 @@ int main(int argc, char **argv) {
   char *image_out = argv[1];
 
   // find chromaticities of the hue space by 1 degree increments
-  float hue_uv[361][N_UV];
+  int32_t hue_uv[361][N_UV];
   for (int i = 0; i < 361; ++i) {
-    float hsbk[N_HSBK] = {1.f * i, 1.f, 1.f, 6504.f};
+    int32_t hsbk[N_HSBK] = {
+      (int32_t)((((int64_t)i << 33) / 360 + 1) >> 1),
+      1 << 30,
+      1 << 30,
+      6504 << 16
+    };
     hsbk_to_uv(hsbk, hue_uv[i]);
   }
 
   // find chromaticities of the Kelvin space by 20 degree increments
-  float kelv_uv[376][N_UV];
+  int32_t kelv_uv[376][N_UV];
   for (int i = 0; i < 376; ++i) {
-    float hsbk[N_HSBK] = {0.f, 0.f, 1.f, 1500.f + 20.f * i};
+    int32_t hsbk[N_HSBK] = {
+      0,
+      0,
+      1 << 30,
+      (1500 << 16) + (20 << 16) * i
+    };
     hsbk_to_uv(hsbk, kelv_uv[i]);
   }
 
   // find chromaticities of the hue x Kelvin space @ saturation .5, then
   // convert each chromaticity to a weighting between hue_uv and kelv_uv
-  float image[376][361];
+  int32_t image[376][361];
   for (int i = 0; i < 376; ++i) {
     //printf("%d / 376\n", i);
-    float kelv = 1500.f + 20.f * i;
-    float v0[N_UV] = {
+    int32_t kelv = (1500 << 16) + (20 << 16) * i;
+    int32_t v0[N_UV] = {
       kelv_uv[i][UV_u],
       kelv_uv[i][UV_v]
     };
     for (int j = 0; j < 361; ++j) {
-      float hue = 1.f * j;
-      float v1[N_UV] = {
+      int32_t hue = (int32_t)((((int64_t)j << 33) / 360 + 1) >> 1);
+      int32_t v1[N_UV] = {
         hue_uv[j][UV_u] - v0[UV_u],
         hue_uv[j][UV_v] - v0[UV_v]
       };
-      float hsbk[N_HSBK] = {hue, .5f, 1.f, kelv};
-      float uv[N_UV];
+      int32_t hsbk[N_HSBK] = {hue, 1 << 29, 1 << 30, kelv};
+      int32_t uv[N_UV];
       hsbk_to_uv(hsbk, uv);
-      float w = (
-        (uv[UV_u] - v0[UV_u]) * v1[UV_u] +
-          (uv[UV_v] - v0[UV_v]) * v1[UV_v]
-      ) / (
-        v1[UV_u] * v1[UV_u] +
-          v1[UV_v] * v1[UV_v]
+      int32_t w_num = (int32_t)(
+        (
+          (int64_t)(uv[UV_u] - v0[UV_u]) * v1[UV_u] +
+            (int64_t)(uv[UV_v] - v0[UV_v]) * v1[UV_v] +
+            (1 << 29)
+        ) >> 30
       );
-      if (w < 0.f)
-        w = 0.f;
-      else if (w > 1.f)
-        w = 1.f;
+      int32_t w_denom = (int32_t)(
+        (
+          (int64_t)v1[UV_u] * v1[UV_u] +
+            (int64_t)v1[UV_v] * v1[UV_v] +
+            (1 << 29)
+        ) >> 30
+      );
+      int32_t w = (int32_t)((((int64_t)w_num << 31) / w_denom + 1) >> 1);
+      if (w < 0)
+        w = 0;
+      else if (w > (1 << 30))
+        w = 1 << 30;
       image[i][j] = w;
     }
   }
@@ -164,7 +182,7 @@ int main(int argc, char **argv) {
   png_byte pixels[376][361];
   for (int i = 0; i < 376; ++i)
     for (int j = 0; j < 361; ++j)
-      pixels[i][j] = (png_byte)roundf(image[i][j] * 255.f);
+      pixels[i][j] = (png_byte)((image[i][j] * 255LL + (1 << 29)) >> 30);
 
   png_byte *rows[376];
   for (int i = 0; i < 376; ++i)

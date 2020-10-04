@@ -20,12 +20,14 @@ __pycache__
 /c_fixed/gamma_encode
 /c_fixed/hsbk_to_rgb
 /c_fixed/hsv_to_rgb
+/c_fixed/hue_kelv_test
 /c_fixed/inv_test
 /c_fixed/kelv_to_rgb
 /c_fixed/kelv_to_uv
 /c_fixed/mired_to_rgb
 /c_fixed/rgb_to_hsbk
 /c_fixed/rgb_to_hsv
+/c_fixed/sat_test
 /prepare/gamma_decode_fit_srgb.yml
 /prepare/gamma_encode_fit_srgb.yml
 /prepare/mired_to_rgb_fit_srgb.yml
