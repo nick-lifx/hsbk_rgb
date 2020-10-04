@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
   float rgb[N_RGB];
   kelv_to_rgb(kelv, rgb);
   printf(
-    "kelv %.3f -> RGB (%.8e, %.8e, %.8e)\n",
+    "kelv %.3f -> RGB (%.6f, %.6f, %.6f)\n",
     kelv,
     rgb[RGB_RED],
     rgb[RGB_GREEN],

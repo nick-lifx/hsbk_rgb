@@ -85,11 +85,11 @@ int main(int argc, char **argv) {
   int32_t rgb[N_RGB];
   mired_to_rgb(mired, rgb);
   printf(
-    "mired %.3f -> RGB (0x%x, 0x%x, 0x%x)\n",
+    "mired %.3f -> RGB (%.6f, %.6f, %.6f)\n",
     ldexpf(mired, -16),
-    rgb[RGB_RED],
-    rgb[RGB_GREEN],
-    rgb[RGB_BLUE]
+    ldexpf(rgb[RGB_RED], -30),
+    ldexpf(rgb[RGB_GREEN], -30),
+    ldexpf(rgb[RGB_BLUE], -30)
   );
 
   return EXIT_SUCCESS;

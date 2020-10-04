@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
   float rgb[N_RGB];
   mired_to_rgb(mired, rgb);
   printf(
-    "mired %.3f -> RGB (%.8e, %.8e, %.8e)\n",
+    "mired %.3f -> RGB (%.6f, %.6f, %.6f)\n",
     mired,
     rgb[RGB_RED],
     rgb[RGB_GREEN],
