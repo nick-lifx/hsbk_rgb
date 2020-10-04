@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
   for (int i = 0; i < size_y; ++i) {
     //printf("%d / %d\n", i, size_y);
     for (int j = 0; j < size_x; ++j) {
-      float hsbk[N_HSBK] = {0.f, 0.f, 0.f, 0.f};
+      float hsbk[N_HSBK];
       rgb_to_hsbk(image + (i * size_x + j) * N_RGB, kelv, hsbk);
       memcpy(
         image + (i * size_x + j) * N_RGB,
@@ -170,18 +170,15 @@ int main(int argc, char **argv) {
 
   for (int i = 0; i < size_y; ++i)
     for (int j = 0; j < size_x; ++j) {
-      pixels[(i * size_x + j) * N_HSV + HSV_HUE] =
-        (png_byte)roundf(
-          image[(i * size_x + j) * N_HSV + HSV_HUE] * (256.f / 360.f)
-        );
-      pixels[(i * size_x + j) * N_HSV + HSV_SAT] =
-        (png_byte)roundf(
-          image[(i * size_x + j) * N_HSV + HSV_SAT] * 255.f
-        );
-      pixels[(i * size_x + j) * N_HSV + HSV_VAL] =
-        (png_byte)roundf(
-          image[(i * size_x + j) * N_HSV + HSV_VAL] * 255.f
-        );
+      pixels[(i * size_x + j) * N_HSV + HSV_HUE] = (png_byte)roundf(
+        image[(i * size_x + j) * N_HSV + HSV_HUE] * (256.f / 360.f)
+      );
+      pixels[(i * size_x + j) * N_HSV + HSV_SAT] = (png_byte)roundf(
+        image[(i * size_x + j) * N_HSV + HSV_SAT] * 255.f
+      );
+      pixels[(i * size_x + j) * N_HSV + HSV_VAL] = (png_byte)roundf(
+        image[(i * size_x + j) * N_HSV + HSV_VAL] * 255.f
+      );
     }
   free(image);
 

@@ -23,7 +23,7 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
-#define EPSILON 1e-6f
+#define EPSILON 1e-6
 
 int main(int argc, char **argv) {
   if (argc < 3) {
@@ -38,7 +38,10 @@ int main(int argc, char **argv) {
   }
   char *image_in = argv[1];
   char *image_out = argv[2];
-  float kelv = argc >= 4 ? atof(argv[3]) : 6504.f;
+  int32_t kelv =
+    argc >= 4 ?
+      (int32_t)roundf(ldexpf(atof(argv[3]), 16)) :
+      (int32_t)6504 << 16;
 
   FILE *fp = fopen(image_in, "r");
   if (fp == NULL) {
@@ -98,7 +101,7 @@ int main(int argc, char **argv) {
 
   png_read_image(png_ptr, rows);
 
-  float *image = malloc(size_y * size_x * N_HSV * sizeof(float));
+  int32_t *image = malloc(size_y * size_x * N_HSV * sizeof(int32_t));
   if (image == NULL) {
     perror("malloc()");
     exit(EXIT_FAILURE);
@@ -106,11 +109,21 @@ int main(int argc, char **argv) {
   for (int i = 0; i < size_y; ++i)
     for (int j = 0; j < size_x; ++j) {
       image[(i * size_x + j) * N_HSV + HSV_HUE] =
-        pixels[(i * size_x + j) * N_HSV + HSV_HUE] * (360.f / 256.f);
-      image[(i * size_x + j) * N_HSV + HSV_SAT] =
-        pixels[(i * size_x + j) * N_HSV + HSV_SAT] / 255.f;
-      image[(i * size_x + j) * N_HSV + HSV_VAL] =
-        pixels[(i * size_x + j) * N_HSV + HSV_VAL] / 255.f;
+        pixels[(i * size_x + j) * N_HSV + HSV_HUE] << 24;
+      image[(i * size_x + j) * N_HSV + HSV_SAT] = (uint32_t)(
+        (
+          (
+            (int64_t)pixels[(i * size_x + j) * N_HSV + HSV_SAT] << 31
+          ) / 255 + 1
+        ) >> 1
+      );
+      image[(i * size_x + j) * N_HSV + HSV_VAL] = (uint32_t)(
+        (
+          (
+            (int64_t)pixels[(i * size_x + j) * N_HSV + HSV_VAL] << 31
+          ) / 255 + 1
+        ) >> 1
+      );
     }
 
   png_read_end(png_ptr, NULL);
@@ -119,11 +132,11 @@ int main(int argc, char **argv) {
   for (int i = 0; i < size_y; ++i) {
     //printf("%d / %d\n", i, size_y);
     for (int j = 0; j < size_x; ++j) {
-      float hsbk[N_HSBK] = {0.f, 0.f, 0.f, kelv};
+      int32_t hsbk[N_HSBK] = {0, 0, 0, kelv};
       memcpy(
         hsbk,
         image + (i * size_x + j) * N_RGB,
-        N_HSV * sizeof(float)
+        N_HSV * sizeof(int32_t)
       );
       hsbk_to_rgb(hsbk, image + (i * size_x + j) * N_RGB);
     }
@@ -175,8 +188,8 @@ int main(int argc, char **argv) {
   for (int i = 0; i < size_y; ++i)
     for (int j = 0; j < size_x; ++j)
       for (int k = 0; k < N_RGB; ++k)
-        pixels[(i * size_x + j) * N_RGB + k] = (png_byte)roundf(
-          image[(i * size_x + j) * N_RGB + k] * 255.f
+        pixels[(i * size_x + j) * N_RGB + k] = (png_byte)(
+          (image[(i * size_x + j) * N_RGB + k] * 255LL + (1 << 29)) >> 30
         );
   free(image);
 

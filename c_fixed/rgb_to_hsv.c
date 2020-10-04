@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "hsbk_to_rgb.h"
+#include "rgb_to_hsbk.h"
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -23,14 +23,14 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
-#define EPSILON 1e-6f
+#define EPSILON 1e-6
 
 int main(int argc, char **argv) {
   if (argc < 3) {
     printf(
       "usage: %s image_in image_out [kelv]\n"
-        "image_in = name of PNG file (HSV pixels) to read\n"
-        "image_out = name of PNG file to create (will be overwritten)\n"
+        "image_in = name of PNG file to read\n"
+        "image_out = name of PNG file (HSV pixels) to create (will be overwritten)\n"
         "kelv = implicit colour temperature to apply to HSV pixels (default 6504K)\n",
       argv[0]
     );
@@ -38,7 +38,8 @@ int main(int argc, char **argv) {
   }
   char *image_in = argv[1];
   char *image_out = argv[2];
-  float kelv = argc >= 4 ? atof(argv[3]) : 6504.f;
+  int32_t kelv =
+    argc >= 4 ? (int32_t)roundf(ldexpf(atof(argv[3]), 16)) : (int32_t)0;
 
   FILE *fp = fopen(image_in, "r");
   if (fp == NULL) {
@@ -82,7 +83,7 @@ int main(int argc, char **argv) {
   int size_x = png_get_image_width(png_ptr, info_ptr);
   int size_y = png_get_image_height(png_ptr, info_ptr);
 
-  png_byte *pixels = malloc(size_y * size_x * N_HSV * sizeof(png_byte));
+  png_byte *pixels = malloc(size_y * size_x * N_RGB * sizeof(png_byte));
   if (pixels == NULL) {
     perror("malloc()");
     exit(EXIT_FAILURE);
@@ -94,38 +95,38 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
   for (int i = 0; i < size_y; ++i)
-    rows[i] = pixels + i * size_x * N_HSV;
+    rows[i] = pixels + i * size_x * N_RGB;
 
   png_read_image(png_ptr, rows);
 
-  float *image = malloc(size_y * size_x * N_HSV * sizeof(float));
+  int32_t *image = malloc(size_y * size_x * N_RGB * sizeof(int32_t));
   if (image == NULL) {
     perror("malloc()");
     exit(EXIT_FAILURE);
   }
   for (int i = 0; i < size_y; ++i)
-    for (int j = 0; j < size_x; ++j) {
-      image[(i * size_x + j) * N_HSV + HSV_HUE] =
-        pixels[(i * size_x + j) * N_HSV + HSV_HUE] * (360.f / 256.f);
-      image[(i * size_x + j) * N_HSV + HSV_SAT] =
-        pixels[(i * size_x + j) * N_HSV + HSV_SAT] / 255.f;
-      image[(i * size_x + j) * N_HSV + HSV_VAL] =
-        pixels[(i * size_x + j) * N_HSV + HSV_VAL] / 255.f;
-    }
-
+    for (int j = 0; j < size_x; ++j)
+      for (int k = 0; k < N_RGB; ++k)
+        image[(i * size_x + j) * N_RGB + k] = (uint32_t)(
+          (
+            (
+              (int64_t)pixels[(i * size_x + j) * N_RGB + k] << 31
+            ) / 255 + 1
+          ) >> 1
+        );
   png_read_end(png_ptr, NULL);
   fclose(fp);
 
   for (int i = 0; i < size_y; ++i) {
     //printf("%d / %d\n", i, size_y);
     for (int j = 0; j < size_x; ++j) {
-      float hsbk[N_HSBK] = {0.f, 0.f, 0.f, kelv};
+      int32_t hsbk[N_HSBK];
+      rgb_to_hsbk(image + (i * size_x + j) * N_RGB, kelv, hsbk);
       memcpy(
-        hsbk,
         image + (i * size_x + j) * N_RGB,
-        N_HSV * sizeof(float)
+        hsbk,
+        N_HSV * sizeof(int32_t)
       );
-      hsbk_to_rgb(hsbk, image + (i * size_x + j) * N_RGB);
     }
   }
 
@@ -173,11 +174,17 @@ int main(int argc, char **argv) {
   png_write_info(png_ptr, info_ptr);
 
   for (int i = 0; i < size_y; ++i)
-    for (int j = 0; j < size_x; ++j)
-      for (int k = 0; k < N_RGB; ++k)
-        pixels[(i * size_x + j) * N_RGB + k] = (png_byte)roundf(
-          image[(i * size_x + j) * N_RGB + k] * 255.f
-        );
+    for (int j = 0; j < size_x; ++j) {
+      pixels[(i * size_x + j) * N_HSV + HSV_HUE] = (png_byte)(
+        (image[(i * size_x + j) * N_HSV + HSV_HUE] + (1 << 23)) >> 24
+      );
+      pixels[(i * size_x + j) * N_HSV + HSV_SAT] = (png_byte)(
+        (image[(i * size_x + j) * N_HSV + HSV_SAT] * 255LL + (1 << 29)) >> 30
+      );
+      pixels[(i * size_x + j) * N_HSV + HSV_VAL] = (png_byte)(
+        (image[(i * size_x + j) * N_HSV + HSV_VAL] * 255LL + (1 << 29)) >> 30
+      );
+    }
   free(image);
 
   png_write_image(png_ptr, rows);
