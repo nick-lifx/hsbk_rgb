@@ -16,7 +16,7 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
-#define EPSILON 1e-6f
+#define EPSILON 0x400
 
 int main(int argc, char **argv) {
   if (argc < 3) {
@@ -29,19 +29,23 @@ int main(int argc, char **argv) {
   }
   int seed = atoi(argv[1]);
   int count = atoi(argv[2]);
-  float kelv = argc >= 4 ? atof(argv[3]) : 0.f;
+  int32_t kelv =
+    argc >= 4 ? (int32_t)roundf(ldexpf(atof(argv[3]), 16)) : (int32_t)0;
 
   srand(seed);
   for (int i = 0; i < count; ++i) {
-    float rgb[N_RGB];
+    int32_t rgb[N_RGB];
     for (int j = 0; j < N_RGB; ++j)
-      rgb[j] = (float)rand() / RAND_MAX;
-    float hsbk[N_HSBK];
+      rgb[j] = ((int64_t)rand() << 30) / RAND_MAX;
+ printf("%f %f %f\n", ldexpf(rgb[0], -30), ldexpf(rgb[1], -30), ldexpf(rgb[2], -30));
+    int32_t hsbk[N_HSBK];
     rgb_to_hsbk(rgb, kelv, hsbk);
-    float rgb1[N_RGB];
+    int32_t rgb1[N_RGB];
     hsbk_to_rgb(hsbk, rgb1);
-    for (int j = 0; j < N_RGB; ++j)
-      assert(fabsf(rgb1[j] - rgb[j]) < EPSILON);
+    for (int j = 0; j < N_RGB; ++j) {
+      printf("%x %x %x -> %x %x %x\n", rgb1[0], rgb1[1], rgb1[2], rgb[0], rgb[1], rgb[2]);
+      assert(abs(rgb1[j] - rgb[j]) < EPSILON);
+    }
   }
 
   return EXIT_SUCCESS;

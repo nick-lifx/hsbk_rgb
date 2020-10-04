@@ -69,5 +69,5 @@ if __name__ == '__main__':
 
   rgb = mired_to_rgb(mired)
   print(
-    f'mired {mired:.3f} -> RGB ({rgb[RGB_RED]:.6f}, {rgb[RGB_GREEN]:.6f}, {rgb[RGB_BLUE]:.6f})'
+    f'mired {mired:.3f} -> RGB ({rgb[RGB_RED]:.16e}, {rgb[RGB_GREEN]:.16e}, {rgb[RGB_BLUE]:.16e})'
   )

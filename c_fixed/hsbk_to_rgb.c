@@ -19,9 +19,17 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
-#define EPSILON0 0x1000
+#define EPSILON0 0x400
 #define EPSILON1 0x40
 
+// arguments as follows:
+//   hue in 0:32 fixed point
+//   saturation in 2:30 fixed point
+//   brightness in 2:30 fixed point
+//   Kelvin in 16:16 fixed point
+// results in 2:30 fixed point
+// all are signed, so the hue is taken to be in [180, 180), but
+// if cast to unsigned then it would equivalently be in [0, 360)
 void hsbk_to_rgb(const int32_t *hsbk, int32_t *rgb) {
   // validate inputs, allowing a little slack
   // the hue does not matter as it will be normalized modulo 360
@@ -150,7 +158,7 @@ int main(int argc, char **argv) {
   hsbk_to_rgb(hsbk, rgb);
   printf(
     "HSBK (%.3f, %.6f, %.6f, %.3f) -> RGB (%.6f, %.6f, %.6f)\n",
-    hsbk[HSBK_HUE] * (float)(360. / (1LL << 32)),
+    (uint32_t)hsbk[HSBK_HUE] * (float)(360. / (1LL << 32)),
     ldexpf(hsbk[HSBK_SAT], -30),
     ldexpf(hsbk[HSBK_BR], -30),
     ldexpf(hsbk[HSBK_KELV], -16),

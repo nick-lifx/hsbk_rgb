@@ -53,12 +53,12 @@ float kelv_rgb_6504K[N_RGB] = {
   // old way (slower):
   // a more accurate version of what would be printed by
   //   ./kelv_to_rgb 6504
-  //1.000000000000000, 0.974069550996864, 0.996829660936723
+  //1.00000012e+00, 9.74069655e-01, 9.96830285e-01
 
   // new way (faster):
   // a more accurate version of what would be printed by
-  //   ./mired_to_rgb 153.751537515375
-  1.000000000000000, 0.976013921677787, 0.995894521802491
+  //   ./mired_to_rgb 153.75154
+  1.00000000e+00, 9.76017892e-01, 9.95694757e-01
 };
 
 void rgb_to_hsbk(const float *rgb, float kelv, float *hsbk) {
@@ -66,14 +66,13 @@ void rgb_to_hsbk(const float *rgb, float kelv, float *hsbk) {
   for (int i = 0; i < N_RGB; ++i)
     assert(rgb[i] >= -EPSILON && rgb[i] < 1.f + EPSILON);
 
-  // the Kelvin is always constant with this simplified algorithm
-  // we will set the other values if we are able to calculate them
   memset(hsbk, 0, N_HSBK * sizeof(float));
-  hsbk[HSBK_KELV] = 6504.f;
   float kelv_rgb[3];
-  memcpy(kelv_rgb, kelv_rgb_6504K, N_RGB * sizeof(float));
-
-  if (kelv) {
+  if (kelv == 0) {
+    hsbk[HSBK_KELV] = 6504.f;
+    memcpy(kelv_rgb, kelv_rgb_6504K, N_RGB * sizeof(float));
+  }
+  else {
     hsbk[HSBK_KELV] = kelv;
 
     // old way (slower):
@@ -91,22 +90,22 @@ void rgb_to_hsbk(const float *rgb, float kelv, float *hsbk) {
   if (br >= EPSILON) {
     // it is not fully black, so we can calculate saturation
     // note: do not corrupt the caller's value by doing rgb /= br
+    hsbk[HSBK_BR] = br;
     float rgb1[N_RGB];
     for (int i = 0; i < N_RGB; ++i)
       rgb1[i] = rgb[i] / br;
 
     // subtract as much of kelv_rgb as we are able to without going negative
     // this will result in at least one of R, G, B = 0 (i.e. a limiting one)
+    // we rely on the fact that kelv_factor[RGB_RED] cannot go below about .7
     float kelv_factor = rgb1[RGB_RED] / kelv_rgb[RGB_RED];
     int i = RGB_RED;
-    float kelv_factor1 = rgb1[RGB_GREEN] / kelv_rgb[RGB_GREEN];
-    if (kelv_factor1 < kelv_factor) {
-      kelv_factor = kelv_factor1;
+    if (rgb1[RGB_GREEN] < kelv_factor * kelv_rgb[RGB_GREEN]) {
+      kelv_factor = rgb1[RGB_GREEN] / kelv_rgb[RGB_GREEN];
       i = RGB_GREEN;
     }
-    float kelv_factor2 = rgb1[RGB_BLUE] / kelv_rgb[RGB_BLUE];
-    if (kelv_factor2 < kelv_factor) {
-      kelv_factor = kelv_factor2;
+    if (rgb1[RGB_BLUE] < kelv_factor * kelv_rgb[RGB_BLUE]) {
+      kelv_factor = rgb1[RGB_BLUE] / kelv_rgb[RGB_BLUE];
       i = RGB_BLUE;
     }
     float hue_rgb[N_RGB];
@@ -139,19 +138,14 @@ void rgb_to_hsbk(const float *rgb, float kelv, float *hsbk) {
       // if we now re-scale it so that hue_factor + kelv_factor == 1, then
       // hue_factor will be the saturation (sum will be approximately 1, it may
       // be larger, if hue_rgb and kelv_rgb are either side of the white point)
-      float sat = hue_factor / (hue_factor + kelv_factor);
+      hsbk[HSBK_SAT] = hue_factor / (hue_factor + kelv_factor);
 
       // at this point hue_rgb[i] == 0 and hue_rgb[j] == 1 and i != j
       // using the (i, j) we can resolve the hue down to a 60 degree segment,
       // then rgb[k] such that k != i and k != j tells us where in the segment
       struct hue_table ht = hue_table[i][j];
-      float hue = ht.hue_base + ht.hue_delta * hue_rgb[ht.channel];
-
-      hsbk[HSBK_HUE] = hue;
-      hsbk[HSBK_SAT] = sat;
+      hsbk[HSBK_HUE] = ht.hue_base + ht.hue_delta * hue_rgb[ht.channel];
     }
-
-    hsbk[HSBK_BR] = br;
   }
 }
 

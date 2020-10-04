@@ -10,6 +10,11 @@ import sys
 # new way (faster):
 from mired_to_rgb import mired_to_rgb
 
+RGB_RED = 0
+RGB_GREEN = 1
+RGB_BLUE = 2
+N_RGB = 3
+
 HSBK_HUE = 0
 HSBK_SAT = 1
 HSBK_BR = 2
@@ -42,12 +47,12 @@ kelv_rgb_6504K = numpy.array(
   # old way (slower):
   # a more accurate version of what would be printed by
   #   ./kelv_to_rgb.py 6504
-  #[1.000000000000000, 0.974069550996864, 0.996829660936723],
+  #[1.0000000278851402e+00, 9.7406956415619106e-01, 9.9682965489711572e-01],
 
   # new way (faster):
   # a more accurate version of what would be printed by
   #   ./mired_to_rgb.py 153.751537515375
-  [1.000000000000000, 0.976013921677787, 0.995894521802491],
+  [1.0000000000000000e+00, 9.7601796770359650e-01, 9.9569436539271527e-01],
 
   numpy.double
 )
@@ -56,12 +61,11 @@ def rgb_to_hsbk(rgb, kelv = None):
   # validate inputs, allowing a little slack
   assert numpy.all(rgb >= -EPSILON) and numpy.all(rgb < 1. + EPSILON)
 
-  # the Kelvin is always constant with this simplified algorithm
-  # we will set the other values if we are able to calculate them
-  hsbk = numpy.array([0., 0., 0., 6504.], numpy.double)
-  kelv_rgb = kelv_rgb_6504K
-
-  if kelv is not None:
+  hsbk = numpy.array([0., 0., 0., 0.], numpy.double)
+  if kelv is None:
+    hsbk[HSBK_KELV] = 6504.
+    kelv_rgb = kelv_rgb_6504K
+  else:
     hsbk[HSBK_KELV] = kelv
 
     # old way (slower):
@@ -74,13 +78,20 @@ def rgb_to_hsbk(rgb, kelv = None):
   if br >= EPSILON:
     # it is not fully black, so we can calculate saturation
     # note: do not corrupt the caller's value by doing rgb /= br
+    hsbk[HSBK_BR] = br
     rgb = rgb / br
 
     # subtract as much of kelv_rgb as we are able to without going negative
     # this will result in at least one of R, G, B = 0 (i.e. a limiting one)
-    kelv_factor = rgb / kelv_rgb
-    i = numpy.argmin(kelv_factor)
-    kelv_factor = kelv_factor[i]
+    # we rely on the fact that kelv_rgb[RGB_RED] cannot go below about .7
+    kelv_factor = rgb[RGB_RED] / kelv_rgb[RGB_RED]
+    i = RGB_RED
+    if rgb[RGB_GREEN] < kelv_factor * kelv_rgb[RGB_GREEN]:
+      kelv_factor = rgb[RGB_GREEN] / kelv_rgb[RGB_GREEN]
+      i = RGB_GREEN
+    if rgb[RGB_BLUE] < kelv_factor * kelv_rgb[RGB_BLUE]:
+      kelv_factor = rgb[RGB_BLUE] / kelv_rgb[RGB_BLUE]
+      i = RGB_BLUE
     hue_rgb = rgb - kelv_factor * kelv_rgb
     assert hue_rgb[i] < EPSILON
 
@@ -100,18 +111,13 @@ def rgb_to_hsbk(rgb, kelv = None):
       # if we now re-scale it so that hue_factor + kelv_factor == 1, then
       # hue_factor will be the saturation (sum will be approximately 1, it may
       # be larger, if hue_rgb and kelv_rgb are either side of the white point)
-      sat = hue_factor / (hue_factor + kelv_factor)
+      hsbk[HSBK_SAT] = hue_factor / (hue_factor + kelv_factor)
 
       # at this point hue_rgb[i] == 0 and hue_rgb[j] == 1 and i != j
       # using the (i, j) we can resolve the hue down to a 60 degree segment,
       # then rgb[k] such that k != i and k != j tells us where in the segment
       hue_base, hue_delta, channel = hue_table[i][j]
-      hue = hue_base + hue_delta * hue_rgb[channel]
-
-      hsbk[HSBK_HUE] = hue
-      hsbk[HSBK_SAT] = sat
-
-    hsbk[HSBK_BR] = br
+      hsbk[HSBK_HUE] = hue_base + hue_delta * hue_rgb[channel]
 
   return hsbk
 
