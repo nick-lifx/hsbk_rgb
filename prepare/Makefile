@@ -1,74 +1,74 @@
-all: gamma_decode_srgb.gen_py gamma_decode_srgb.gen_c_float gamma_decode_srgb.gen_c_fixed gamma_encode_srgb.gen_py gamma_encode_srgb.gen_c_float gamma_encode_srgb.gen_c_fixed kelv_to_rgb_srgb.gen_py kelv_to_rgb_srgb.gen_c_fixed kelv_to_rgb_srgb.gen_c_float mired_to_rgb_srgb.gen_py mired_to_rgb_srgb.gen_c_float mired_to_rgb_srgb.gen_c_fixed kelv_to_uv.gen_c_fixed
+all: srgb_gamma_decode.gen_py srgb_gamma_decode.gen_c_float srgb_gamma_decode.gen_c_fixed srgb_gamma_encode.gen_py srgb_gamma_encode.gen_c_float srgb_gamma_encode.gen_c_fixed srgb_kelv_to_rgb.gen_py srgb_kelv_to_rgb.gen_c_fixed srgb_kelv_to_rgb.gen_c_float srgb_mired_to_rgb.gen_py srgb_mired_to_rgb.gen_c_float srgb_mired_to_rgb.gen_c_fixed kelv_to_uv.gen_c_fixed
 
-gamma_decode_srgb.gen_py: gamma_decode_fit_srgb.yml
+srgb_gamma_decode.gen_py: srgb_gamma_decode_fit.yml
 	./gamma_decode_gen_py.py $^ >$@
 
-gamma_decode_srgb.gen_c_fixed: gamma_decode_fit_srgb.yml
+srgb_gamma_decode.gen_c_fixed: srgb_gamma_decode_fit.yml
 	./gamma_decode_gen_c_fixed.py $^ >$@
 
-gamma_decode_srgb.gen_c_float: gamma_decode_fit_srgb.yml
+srgb_gamma_decode.gen_c_float: srgb_gamma_decode_fit.yml
 	./gamma_decode_gen_c_float.py $^ >$@
 
-gamma_decode_fit_srgb.yml:
+srgb_gamma_decode_fit.yml:
 	./gamma_decode_fit.py $^ $@
 
-gamma_encode_srgb.gen_py: gamma_encode_fit_srgb.yml
+srgb_gamma_encode.gen_py: srgb_gamma_encode_fit.yml
 	./gamma_encode_gen_py.py $^ >$@
 
-gamma_encode_srgb.gen_c_fixed: gamma_encode_fit_srgb.yml
+srgb_gamma_encode.gen_c_fixed: srgb_gamma_encode_fit.yml
 	./gamma_encode_gen_c_fixed.py $^ >$@
 
-gamma_encode_srgb.gen_c_float: gamma_encode_fit_srgb.yml
+srgb_gamma_encode.gen_c_float: srgb_gamma_encode_fit.yml
 	./gamma_encode_gen_c_float.py $^ >$@
 
-gamma_encode_fit_srgb.yml:
+srgb_gamma_encode_fit.yml:
 	./gamma_encode_fit.py $^ $@
 
-kelv_to_rgb_srgb.gen_py: UVW_to_rgb_srgb.yml
+srgb_kelv_to_rgb.gen_py: srgb_UVW_to_rgb.yml
 	./kelv_to_rgb_gen_py.py $^ >$@
 
-kelv_to_rgb_srgb.gen_c_fixed: UVW_to_rgb_srgb.yml
+srgb_kelv_to_rgb.gen_c_fixed: srgb_UVW_to_rgb.yml
 	./kelv_to_rgb_gen_c_fixed.py $^ >$@
 
-kelv_to_rgb_srgb.gen_c_float: UVW_to_rgb_srgb.yml
+srgb_kelv_to_rgb.gen_c_float: srgb_UVW_to_rgb.yml
 	./kelv_to_rgb_gen_c_float.py $^ >$@
 
-UVW_to_rgb_srgb.yml: rgbw_to_xy_srgb.yml
+srgb_UVW_to_rgb.yml: srgb_rgbw_to_xy.yml
 	./UVW_to_rgb.py $^ $@
 
-mired_to_rgb_srgb.gen_py: mired_to_rgb_fit_srgb.yml
+srgb_mired_to_rgb.gen_py: srgb_mired_to_rgb_fit.yml
 	./mired_to_rgb_gen_py.py $^ >$@
 
-mired_to_rgb_srgb.gen_c_float: mired_to_rgb_fit_srgb.yml
+srgb_mired_to_rgb.gen_c_float: srgb_mired_to_rgb_fit.yml
 	./mired_to_rgb_gen_c_float.py $^ >$@
 
-mired_to_rgb_srgb.gen_c_fixed: mired_to_rgb_fit_srgb.yml
+srgb_mired_to_rgb.gen_c_fixed: srgb_mired_to_rgb_fit.yml
 	./mired_to_rgb_gen_c_fixed.py $^ >$@
 
-mired_to_rgb_fit_srgb.yml: rgbw_to_xy_srgb.yml
+srgb_mired_to_rgb_fit.yml: srgb_rgbw_to_xy.yml
 	./mired_to_rgb_fit.py $^ $@
 
 kelv_to_uv.gen_c_fixed:
 	./kelv_to_uv_gen_c_fixed.py >$@
 
 clean:
-	rm -f gamma_decode_srgb.gen_py gamma_decode_srgb.gen_c_fixed gamma_decode_srgb.gen_c_float gamma_decode_fit_srgb.yml gamma_encode_srgb.gen_py gamma_encode_srgb.gen_c_fixed gamma_encode_srgb.gen_c_float gamma_encode_fit_srgb.yml kelv_to_rgb_srgb.gen_py kelv_to_rgb_srgb.gen_c_fixed kelv_to_rgb_srgb.gen_c_float UVW_to_rgb_srgb.yml mired_to_rgb_srgb.gen_py mired_to_rgb_srgb.gen_c_float mired_to_rgb_srgb.gen_c_fixed kelv_to_uv.gen_c_fixed mired_to_rgb_fit_srgb.yml
+	rm -f srgb_gamma_decode.gen_py srgb_gamma_decode.gen_c_fixed srgb_gamma_decode.gen_c_float srgb_gamma_decode_fit.yml srgb_gamma_encode.gen_py srgb_gamma_encode.gen_c_fixed srgb_gamma_encode.gen_c_float srgb_gamma_encode_fit.yml srgb_kelv_to_rgb.gen_py srgb_kelv_to_rgb.gen_c_fixed srgb_kelv_to_rgb.gen_c_float srgb_UVW_to_rgb.yml srgb_mired_to_rgb.gen_py srgb_mired_to_rgb.gen_c_float srgb_mired_to_rgb.gen_c_fixed kelv_to_uv.gen_c_fixed srgb_mired_to_rgb_fit.yml
 
 install: all
-	cp gamma_decode_srgb.gen_py ../python/gamma_decode.py
+	cp srgb_gamma_decode.gen_py ../python/gamma_decode.py
 	chmod a+x ../python/gamma_decode.py
-	cp gamma_decode_srgb.gen_c_fixed ../c_fixed/gamma_decode.c
-	cp gamma_decode_srgb.gen_c_float ../c_float/gamma_decode.c
-	cp gamma_encode_srgb.gen_py ../python/gamma_encode.py
+	cp srgb_gamma_decode.gen_c_fixed ../c_fixed/gamma_decode.c
+	cp srgb_gamma_decode.gen_c_float ../c_float/gamma_decode.c
+	cp srgb_gamma_encode.gen_py ../python/gamma_encode.py
 	chmod a+x ../python/gamma_encode.py
-	cp gamma_encode_srgb.gen_c_fixed ../c_fixed/gamma_encode.c
-	cp gamma_encode_srgb.gen_c_float ../c_float/gamma_encode.c
-	cp kelv_to_rgb_srgb.gen_py ../python/kelv_to_rgb.py
+	cp srgb_gamma_encode.gen_c_fixed ../c_fixed/gamma_encode.c
+	cp srgb_gamma_encode.gen_c_float ../c_float/gamma_encode.c
+	cp srgb_kelv_to_rgb.gen_py ../python/kelv_to_rgb.py
 	chmod a+x ../python/kelv_to_rgb.py
-	cp kelv_to_rgb_srgb.gen_c_fixed ../c_fixed/kelv_to_rgb.c
-	cp kelv_to_rgb_srgb.gen_c_float ../c_float/kelv_to_rgb.c
-	cp mired_to_rgb_srgb.gen_py ../python/mired_to_rgb.py
+	cp srgb_kelv_to_rgb.gen_c_fixed ../c_fixed/kelv_to_rgb.c
+	cp srgb_kelv_to_rgb.gen_c_float ../c_float/kelv_to_rgb.c
+	cp srgb_mired_to_rgb.gen_py ../python/mired_to_rgb.py
 	chmod a+x ../python/mired_to_rgb.py
-	cp mired_to_rgb_srgb.gen_c_float ../c_float/mired_to_rgb.c
-	cp mired_to_rgb_srgb.gen_c_fixed ../c_fixed/mired_to_rgb.c
+	cp srgb_mired_to_rgb.gen_c_float ../c_float/mired_to_rgb.c
+	cp srgb_mired_to_rgb.gen_c_fixed ../c_fixed/mired_to_rgb.c
 	cp kelv_to_uv.gen_c_fixed ../c_fixed/kelv_to_uv.c

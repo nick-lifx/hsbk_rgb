@@ -1,7 +1,7 @@
 import math
 import numpy
+import numpy.linalg
 import poly
-from solve_scaled import solve_scaled
 
 # convert any function to polynomial
 # done by fitting to the Chebyshev points with no attempt at optimization,
@@ -18,7 +18,7 @@ def any_f_to_poly(f, a, b, order):
   print('x', x)
   y = f(x)
   print('y', y)
-  p = solve_scaled(
+  p = numpy.linalg.solve(
     x[:, numpy.newaxis] ** numpy.arange(order, dtype = numpy.int32),
     y
   )

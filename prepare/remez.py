@@ -1,7 +1,7 @@
 import math
 import numpy
+import numpy.linalg
 import poly
-from solve_scaled import solve_scaled
 
 EPSILON = 1e-12
 
@@ -20,7 +20,7 @@ def remez(p, a, b, order, iters = 10, epsilon = EPSILON):
     # let q be approximating polynomial, fitted to nodes with oscillation
     y = poly.eval(p, x)
     #print('y', y)
-    q = solve_scaled(
+    q = numpy.linalg.solve(
       numpy.concatenate(
         [
           x[:, numpy.newaxis] ** numpy.arange(order, dtype = numpy.int32),
