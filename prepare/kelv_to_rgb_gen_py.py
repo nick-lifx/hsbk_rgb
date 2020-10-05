@@ -9,16 +9,17 @@ EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
 if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} UVW_to_rgb_in.yml [name]')
+  print(f'usage: {sys.argv[0]:s} primaries_in.yml [name]')
   sys.exit(EXIT_FAILURE)
-UVW_to_rgb_in = sys.argv[1]
+primaries_in = sys.argv[1]
 name = sys.argv[2] if len(sys.argv) >= 3 else 'kelv_to_rgb'
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
 
-with open(UVW_to_rgb_in) as fin:
-  UVW_to_rgb = python_to_numpy(yaml.load(fin))
+with open(primaries_in) as fin:
+  primaries = python_to_numpy(yaml.load(fin))
+UVL_to_rgb = primaries['UVL_to_rgb']
 
 print(
   '''#!/usr/bin/env python3
@@ -30,8 +31,13 @@ from kelv_to_uv import kelv_to_uv
 # new way: (faster, at least up to interpreter overhead)
 from gamma_encode import gamma_encode
 
+UVL_U = 0
+UVL_V = 1
+UVL_L = 2
+N_UVL = 3
+
 # this is precomputed for the particular primaries in use
-UVW_to_rgb = numpy.array(
+UVL_to_rgb = numpy.array(
   [
     [{0:.16e}, {1:.16e}, {2:.16e}],
     [{3:.16e}, {4:.16e}, {5:.16e}],
@@ -44,14 +50,12 @@ def {9:s}(kelv):
   # find the approximate (u, v) chromaticity of the given Kelvin value
   uv = kelv_to_uv(kelv)
 
-  # add the missing w, to convert the chromaticity from (u, v) to (U, V, W)
-  # see https://en.wikipedia.org/wiki/CIE_1960_color_space
-  u = uv[0]
-  v = uv[1]
-  UVW = numpy.array([u, v, 1. - u - v], numpy.double)
-
-  # convert to rgb in the given system (the brightness will be arbitrary)
-  rgb = UVW_to_rgb @ UVW
+  # convert (u, v) to (R, G, B) in an optimized way
+  # usually we would calculate w such that u + v + w = 1 and then take
+  # (u, v, w) as (U, V, W) noting that brightness is arbitrary, and then
+  # multiply through by a UVW -> rgb conversion matrix, but the matrix
+  # used here expects L = U + V + W instead of W and L is always 1 here
+  rgb = UVL_to_rgb[:, UVL_L] + UVL_to_rgb[:, :UVL_L] @ uv
 
   # low Kelvins are outside the gamut of SRGB and thus must be interpreted,
   # in this simplistic approach we simply clip off the negative blue value
@@ -95,15 +99,15 @@ if __name__ == '__main__':
   print(
     f'kelv {{kelv:.3f}} -> RGB ({{rgb[RGB_RED]:.6f}}, {{rgb[RGB_GREEN]:.6f}}, {{rgb[RGB_BLUE]:.6f}})'
   )'''.format(
-    UVW_to_rgb[0, 0],
-    UVW_to_rgb[0, 1],
-    UVW_to_rgb[0, 2],
-    UVW_to_rgb[1, 0],
-    UVW_to_rgb[1, 1],
-    UVW_to_rgb[1, 2],
-    UVW_to_rgb[2, 0],
-    UVW_to_rgb[2, 1],
-    UVW_to_rgb[2, 2],
+    UVL_to_rgb[0, 0],
+    UVL_to_rgb[0, 1],
+    UVL_to_rgb[0, 2],
+    UVL_to_rgb[1, 0],
+    UVL_to_rgb[1, 1],
+    UVL_to_rgb[1, 2],
+    UVL_to_rgb[2, 0],
+    UVL_to_rgb[2, 1],
+    UVL_to_rgb[2, 2],
     name,
     name
   )

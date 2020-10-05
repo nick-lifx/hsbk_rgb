@@ -115,7 +115,7 @@ def real_root(p, p_deriv, a, b, increasing):
         a = x
     else:
       break
-    print('reset: a', a, 'b', b)
+    #print('reset: a', a, 'b', b)
     x = .5 * (a + b)
   return x
 

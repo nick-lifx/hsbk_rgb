@@ -20,6 +20,11 @@ XY_x = 0
 XY_y = 1
 N_XY = 2
 
+UVW_U = 0
+UVW_V = 1
+UVW_W = 2
+N_UVW = 3
+
 # see https://en.wikipedia.org/wiki/CIE_1960_color_space
 XYZ_to_UVW = numpy.array(
   [
@@ -29,12 +34,20 @@ XYZ_to_UVW = numpy.array(
   ],
   numpy.double
 )
+UVW_to_XYZ = numpy.array(
+  [
+    [3. / 2., 0., 0.],
+    [0., 1., 0.],
+    [3. / 2., -3., 2.]
+  ],
+  numpy.double
+)
 
 if len(sys.argv) < 3:
-  print(f'usage: {sys.argv[0]:s} rgbw_to_xy_in.yml UVW_to_rgb_out.yml')
+  print(f'usage: {sys.argv[0]:s} rgbw_to_xy_in.yml primaries_out.yml')
   sys.exit(EXIT_FAILURE)
 rgbw_to_xy_in = sys.argv[1]
-UVW_to_rgb_out = sys.argv[2]
+primaries_out = sys.argv[2]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -53,6 +66,13 @@ x = rgbw_to_xy[XY_x, :]
 y = rgbw_to_xy[XY_y, :]
 rgbw_to_XYZ = numpy.stack([x, y, 1. - x - y], 0)
 
+# convert (x, y) primaries to the more perceptually uniform (u, v) system
+# it isn't used by the code, but simply for reference in the generated output
+rgbw_to_UVW = XYZ_to_UVW @ rgbw_to_XYZ
+rgbw_to_uv = (
+  rgbw_to_UVW[:UVW_W, :] / numpy.sum(rgbw_to_UVW, 0)[numpy.newaxis, :]
+)
+
 # find the linear combination of R, G, B primaries to make the white point
 x = numpy.linalg.solve(
   rgbw_to_XYZ[:, :RGBW_WHITE],
@@ -62,13 +82,46 @@ x = numpy.linalg.solve(
 # then scale R, G, B by those factors so the primaries sum to the white point
 # at this point the white point is not needed any more, so trim it off
 rgb_to_XYZ = rgbw_to_XYZ[:, :RGBW_WHITE] * x[numpy.newaxis, :]
+XYZ_to_rgb = numpy.linalg.inv(rgb_to_XYZ)
 
-# and finally convert from the (X, Y, Z) system to the (U, V, W) system
+# convert from (X, Y, Z) system to more perceptually uniform (U, V, W) system
 rgb_to_UVW = XYZ_to_UVW @ rgb_to_XYZ
+UVW_to_rgb = XYZ_to_rgb @ UVW_to_XYZ
 
-# we want to convert Kelvin -> (u, v) -> (U, V, W) -> (R, G, B)
-# to make this as easy as possible we invert the above-calculated matrix
-UVW_to_rgb = numpy.linalg.inv(rgb_to_UVW)
+# create special versions in which L = X + Y + Z or L = U + V + W
+# this makes it easier to convert xy <-> RGB or uv <-> RGB directly
+XYZ_to_XYL = UVW_to_UVL = numpy.array(
+  [
+    [1., 0., 0.],
+    [0., 1., 0.],
+    [1., 1., 1.]
+  ],
+  numpy.double
+)
+XYL_to_XYZ = UVL_to_UVW = numpy.array(
+  [
+    [1., 0., 0.],
+    [0., 1., 0.],
+    [-1., -1., 1.]
+  ],
+  numpy.double
+)
+rgb_to_XYL = XYZ_to_XYL @ rgb_to_XYZ
+XYL_to_rgb = XYZ_to_rgb @ XYL_to_XYZ
+rgb_to_UVL = UVW_to_UVL @ rgb_to_UVW
+UVL_to_rgb = UVW_to_rgb @ UVL_to_UVW
 
-with open(UVW_to_rgb_out, 'w') as fout:
-  yaml.dump(numpy_to_python(UVW_to_rgb), fout)
+primaries = {
+  'rgbw_to_xy': rgbw_to_xy,
+  'rgbw_to_uv': rgbw_to_uv,
+  'rgb_to_XYZ': rgb_to_XYZ,
+  'XYZ_to_rgb': XYZ_to_rgb,
+  'rgb_to_UVW': rgb_to_UVW,
+  'UVW_to_rgb': UVW_to_rgb,
+  'rgb_to_XYL': rgb_to_XYL,
+  'XYL_to_rgb': XYL_to_rgb,
+  'rgb_to_UVL': rgb_to_UVL,
+  'UVL_to_rgb': UVL_to_rgb,
+}
+with open(primaries_out, 'w') as fout:
+  yaml.dump(numpy_to_python(primaries), fout)

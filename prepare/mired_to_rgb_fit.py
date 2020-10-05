@@ -68,9 +68,9 @@ if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
   diag = True
   del sys.argv[1]
 if len(sys.argv) < 5:
-  print(f'usage: {sys.argv[0]:s} rgbw_to_xy_in.yml b_estimate c_estimate mired_to_rgb_fit_out.yml')
+  print(f'usage: {sys.argv[0]:s} primaries_in.yml b_estimate c_estimate mired_to_rgb_fit_out.yml')
   sys.exit(EXIT_FAILURE)
-rgbw_to_xy_in = sys.argv[1]
+primaries_in = sys.argv[1]
 b_estimate = float(sys.argv[2])
 c_estimate = float(sys.argv[3])
 mired_to_rgb_fit_out = sys.argv[4]
@@ -81,32 +81,9 @@ yaml = ruamel.yaml.YAML(typ = 'safe')
 with open('standard_observer_2deg.yml') as fin:
   standard_observer_2deg = python_to_numpy(yaml.load(fin))
 
-# these contain the published (x, y) primaries of the SRGB system
-# see https://en.wikipedia.org/wiki/SRGB
-# across is R, G, B, W and down is x, y
-# the last one is not actually a primary but the so-called white point
-# this means that R + G + B all at full intensity should make the given (x, y)
-with open(rgbw_to_xy_in) as fin:
-  rgbw_to_xy = python_to_numpy(yaml.load(fin))
-
-# add the missing z row, to convert the primaries from (x, y) to (X, Y, Z)
-# see https://en.wikipedia.org/wiki/CIE_1931_color_space#CIE_xy_chromaticity_diagram_and_the_CIE_xyY_color_space
-x = rgbw_to_xy[XY_x, :]
-y = rgbw_to_xy[XY_y, :]
-rgbw_to_XYZ = numpy.stack([x, y, 1. - x - y], 0)
-
-# find the linear combination of R, G, B primaries to make the white point
-x = numpy.linalg.solve(
-  rgbw_to_XYZ[:, :RGBW_WHITE],
-  rgbw_to_XYZ[:, RGBW_WHITE]
-)
-
-# then scale R, G, B by those factors so the primaries sum to the white point
-# at this point the white point is not needed any more, so trim it off
-rgb_to_XYZ = rgbw_to_XYZ[:, :RGBW_WHITE] * x[numpy.newaxis, :]
-
-# prepare to convert XYZ from blackbody spectrum/standard observer into RGB
-XYZ_to_rgb = numpy.linalg.inv(rgb_to_XYZ)
+with open(primaries_in) as fin:
+  primaries = python_to_numpy(yaml.load(fin))
+XYZ_to_rgb = primaries['XYZ_to_rgb']
 
 # functions to be approximated
 def mired_to_XYZ(x):

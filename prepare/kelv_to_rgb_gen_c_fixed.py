@@ -12,22 +12,27 @@ EXIT_FAILURE = 1
 EPSILON = 1e-8
 
 if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} UVW_to_rgb_in.yml [name]')
+  print(f'usage: {sys.argv[0]:s} primaries_in.yml [name]')
   sys.exit(EXIT_FAILURE)
-UVW_to_rgb_in = sys.argv[1]
+primaries_in = sys.argv[1]
 name = sys.argv[2] if len(sys.argv) >= 3 else 'kelv_to_rgb'
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
 
-with open(UVW_to_rgb_in) as fin:
-  UVW_to_rgb = python_to_numpy(yaml.load(fin))
+with open(primaries_in) as fin:
+  primaries = python_to_numpy(yaml.load(fin))
+UVL_to_rgb = primaries['UVL_to_rgb']
+UVW_to_rgb = primaries['UVW_to_rgb']
 
-# RGB extrema can only occur at UVW = (0, 0, 1), (0, 1, 0) or (1, 0, 0)
-_, exp = numpy.frexp(UVW_to_rgb * (1. + EPSILON))
-UVW_to_rgb_exp = numpy.max(exp) - 31
-UVW_to_rgb = numpy.round(
-  numpy.ldexp(UVW_to_rgb, -UVW_to_rgb_exp)
+# choose precision so we can store the entries of the matrix (exp0) and the
+# conversion results (exp1), the extreme values of the conversion results are
+# available in UVW_to_rgb due to the fact that the conversion is barycentric
+_, exp0 = numpy.frexp(UVL_to_rgb * (1. + EPSILON))
+_, exp1 = numpy.frexp(UVW_to_rgb * (1. + EPSILON))
+UVL_to_rgb_exp = numpy.maximum(numpy.max(exp0), numpy.max(exp1)) - 31
+UVL_to_rgb = numpy.round(
+  numpy.ldexp(UVL_to_rgb, -UVL_to_rgb_exp)
 ).astype(numpy.int32)
 
 def to_hex(x):
@@ -39,10 +44,14 @@ print(
 #include "kelv_to_rgb.h"
 #include "kelv_to_uv.h"
 
-#define UVW_U 0
-#define UVW_V 1
-#define UVW_W 2
-#define N_UVW 3
+#define UV_u 0
+#define UV_v 1
+#define N_UV 2
+
+#define UVL_U 0
+#define UVL_V 1
+#define UVL_L 2
+#define N_UVL 3
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -50,7 +59,7 @@ print(
 #define N_RGB 3
 
 // this is precomputed for the particular primaries in use
-int32_t UVW_to_rgb[N_RGB][N_UVW] = {{
+int32_t UVL_to_rgb[N_RGB][N_UVL] = {{
   {{{0:s}, {1:s}, {2:s}}},
   {{{3:s}, {4:s}, {5:s}}},
   {{{6:s}, {7:s}, {8:s}}}
@@ -59,21 +68,22 @@ int32_t UVW_to_rgb[N_RGB][N_UVW] = {{
 // kelv in 16:16 fixed point, results in 2:30 fixed point
 void {9:s}(int32_t kelv, int32_t *rgb) {{
   // find the approximate (u, v) chromaticity of the given Kelvin value
-  int32_t UVW[N_UVW];
-  kelv_to_uv(kelv, UVW);
+  int32_t uv[N_UV];
+  kelv_to_uv(kelv, uv);
 
-  // add the missing w, to convert the chromaticity from (u, v) to (U, V, W)
-  // see https://en.wikipedia.org/wiki/CIE_1960_color_space
-  UVW[UVW_W] = (1 << 30) - UVW[UVW_U] - UVW[UVW_V];
-
-  // convert to rgb in the given system (the brightness will be arbitrary)
-  // rgb has the scaling of columns of UVW_to_rgb until normalization below
-  for (int i = 0; i < N_RGB; ++i) {{
-    int64_t v = 1 << 29;
-    for (int j = 0; j < N_UVW; ++j)
-      v += (int64_t)UVW_to_rgb[i][j] * UVW[j];
-    rgb[i] = (int32_t)(v >> 30);
-  }}
+  // convert (u, v) to (R, G, B) in an optimized way
+  // usually we would calculate w such that u + v + w = 1 and then take
+  // (u, v, w) as (U, V, W) noting that brightness is arbitrary, and then
+  // multiply through by a UVW -> rgb conversion matrix, but the matrix
+  // used here expects L = U + V + W instead of W and L is always 1 here
+  for (int i = 0; i < N_RGB; ++i)
+    rgb[i] = (int32_t)(
+      (
+        (int64_t)uv[UV_u] * UVL_to_rgb[i][UVL_U] +
+          (int64_t)uv[UV_v] * UVL_to_rgb[i][UVL_V] +
+          (1 << 29)
+      ) >> 30
+    ) + UVL_to_rgb[i][UVL_L];
 
   // low Kelvins are outside the gamut of SRGB and thus must be interpreted,
   // in this simplistic approach we simply clip off the negative blue value
@@ -125,15 +135,15 @@ int main(int argc, char **argv) {{
   return EXIT_SUCCESS;
 }}
 #endif'''.format(
-    to_hex(UVW_to_rgb[0, 0]),
-    to_hex(UVW_to_rgb[0, 1]),
-    to_hex(UVW_to_rgb[0, 2]),
-    to_hex(UVW_to_rgb[1, 0]),
-    to_hex(UVW_to_rgb[1, 1]),
-    to_hex(UVW_to_rgb[1, 2]),
-    to_hex(UVW_to_rgb[2, 0]),
-    to_hex(UVW_to_rgb[2, 1]),
-    to_hex(UVW_to_rgb[2, 2]),
+    to_hex(UVL_to_rgb[0, 0]),
+    to_hex(UVL_to_rgb[0, 1]),
+    to_hex(UVL_to_rgb[0, 2]),
+    to_hex(UVL_to_rgb[1, 0]),
+    to_hex(UVL_to_rgb[1, 1]),
+    to_hex(UVL_to_rgb[1, 2]),
+    to_hex(UVL_to_rgb[2, 0]),
+    to_hex(UVL_to_rgb[2, 1]),
+    to_hex(UVL_to_rgb[2, 2]),
     name,
     name
   )

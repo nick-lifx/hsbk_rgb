@@ -7,10 +7,14 @@
 // new way: (faster)
 #include "gamma_encode.h"
 
-#define UVW_U 0
-#define UVW_V 1
-#define UVW_W 2
-#define N_UVW 3
+#define UV_u 0
+#define UV_v 1
+#define N_UV 2
+
+#define UVL_U 0
+#define UVL_V 1
+#define UVL_L 2
+#define N_UVL 3
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -18,28 +22,27 @@
 #define N_RGB 3
 
 // this is precomputed for the particular primaries in use
-float UVW_to_rgb[N_RGB][N_UVW] = {
-  {1.25031574e+01f, -1.26294519e-01f, -3.03106845e+00f},
-  {-4.22958319e+00f, 5.32310738e+00f, 2.52614331e-01f},
-  {5.07265164e+00f, -1.02580289e+01f, 6.42535875e+00f}
+float UVL_to_rgb[N_RGB][N_UVL] = {
+  {1.55342258e+01f, 2.90477393e+00f, -3.03106845e+00f},
+  {-4.48219752e+00f, 5.07049305e+00f, 2.52614331e-01f},
+  {-1.35270711e+00f, -1.66833876e+01f, 6.42535875e+00f}
 };
 
 void kelv_to_rgb(float kelv, float *rgb) {
   // find the approximate (u, v) chromaticity of the given Kelvin value
-  float UVW[N_UVW];
-  kelv_to_uv(kelv, UVW);
+  float uv[N_UV];
+  kelv_to_uv(kelv, uv);
 
-  // add the missing w, to convert the chromaticity from (u, v) to (U, V, W)
-  // see https://en.wikipedia.org/wiki/CIE_1960_color_space
-  UVW[UVW_W] = 1.f - UVW[UVW_U] - UVW[UVW_V];
-
-  // convert to rgb in the given system (the brightness will be arbitrary)
-  for (int i = 0; i < N_RGB; ++i) {
-    float v = 0.f;
-    for (int j = 0; j < N_UVW; ++j)
-      v += UVW_to_rgb[i][j] * UVW[j];
-    rgb[i] = v;
-  }
+  // convert (u, v) to (R, G, B) in an optimized way
+  // usually we would calculate w such that u + v + w = 1 and then take
+  // (u, v, w) as (U, V, W) noting that brightness is arbitrary, and then
+  // multiply through by a UVW -> rgb conversion matrix, but the matrix
+  // used here expects L = U + V + W instead of W and L is always 1 here
+  for (int i = 0; i < N_RGB; ++i)
+    rgb[i] =
+      uv[UV_u] * UVL_to_rgb[i][UVL_U] +
+      uv[UV_v] * UVL_to_rgb[i][UVL_V] +
+      UVL_to_rgb[i][UVL_L];
 
   // low Kelvins are outside the gamut of SRGB and thus must be interpreted,
   // in this simplistic approach we simply clip off the negative blue value

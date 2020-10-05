@@ -7,12 +7,17 @@ from kelv_to_uv import kelv_to_uv
 # new way: (faster, at least up to interpreter overhead)
 from gamma_encode import gamma_encode
 
+UVL_U = 0
+UVL_V = 1
+UVL_L = 2
+N_UVL = 3
+
 # this is precomputed for the particular primaries in use
-UVW_to_rgb = numpy.array(
+UVL_to_rgb = numpy.array(
   [
-    [1.2503157362970454e+01, -1.2629451881788464e-01, -3.0310684516291997e+00],
-    [-4.2295831863542732e+00, 5.3231073838486127e+00, 2.5261433074270845e-01],
-    [5.0726516441027609e+00, -1.0258028880296694e+01, 6.4253587491968300e+00]
+    [1.5534225814599655e+01, 2.9047739328113171e+00, -3.0310684516292001e+00],
+    [-4.4821975170969814e+00, 5.0704930531059027e+00, 2.5261433074270867e-01],
+    [-1.3527071050940691e+00, -1.6683387629493524e+01, 6.4253587491968300e+00]
   ],
   numpy.double
 )
@@ -21,14 +26,12 @@ def kelv_to_rgb(kelv):
   # find the approximate (u, v) chromaticity of the given Kelvin value
   uv = kelv_to_uv(kelv)
 
-  # add the missing w, to convert the chromaticity from (u, v) to (U, V, W)
-  # see https://en.wikipedia.org/wiki/CIE_1960_color_space
-  u = uv[0]
-  v = uv[1]
-  UVW = numpy.array([u, v, 1. - u - v], numpy.double)
-
-  # convert to rgb in the given system (the brightness will be arbitrary)
-  rgb = UVW_to_rgb @ UVW
+  # convert (u, v) to (R, G, B) in an optimized way
+  # usually we would calculate w such that u + v + w = 1 and then take
+  # (u, v, w) as (U, V, W) noting that brightness is arbitrary, and then
+  # multiply through by a UVW -> rgb conversion matrix, but the matrix
+  # used here expects L = U + V + W instead of W and L is always 1 here
+  rgb = UVL_to_rgb[:, UVL_L] + UVL_to_rgb[:, :UVL_L] @ uv
 
   # low Kelvins are outside the gamut of SRGB and thus must be interpreted,
   # in this simplistic approach we simply clip off the negative blue value

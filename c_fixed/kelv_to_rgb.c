@@ -4,10 +4,14 @@
 #include "kelv_to_rgb.h"
 #include "kelv_to_uv.h"
 
-#define UVW_U 0
-#define UVW_V 1
-#define UVW_W 2
-#define N_UVW 3
+#define UV_u 0
+#define UV_v 1
+#define N_UV 2
+
+#define UVL_U 0
+#define UVL_V 1
+#define UVL_L 2
+#define N_UVL 3
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -15,30 +19,31 @@
 #define N_RGB 3
 
 // this is precomputed for the particular primaries in use
-int32_t UVW_to_rgb[N_RGB][N_UVW] = {
-  {0x6406775e, -0x102a6b3, -0x183fa0d1},
-  {-0x21d62fb6, 0x2a95b953, 0x2055aaa},
-  {0x2894ca63, -0x52107172, 0x3367227d}
+int32_t UVL_to_rgb[N_RGB][N_UVL] = {
+  {0x3e230c18, 0xb9e7d0f, -0xc1fd068},
+  {-0x11edc530, 0x14482f55, 0x102ad55},
+  {-0x5692c0d, -0x42bbc9f7, 0x19b3913e}
 };
 
 // kelv in 16:16 fixed point, results in 2:30 fixed point
 void kelv_to_rgb(int32_t kelv, int32_t *rgb) {
   // find the approximate (u, v) chromaticity of the given Kelvin value
-  int32_t UVW[N_UVW];
-  kelv_to_uv(kelv, UVW);
+  int32_t uv[N_UV];
+  kelv_to_uv(kelv, uv);
 
-  // add the missing w, to convert the chromaticity from (u, v) to (U, V, W)
-  // see https://en.wikipedia.org/wiki/CIE_1960_color_space
-  UVW[UVW_W] = (1 << 30) - UVW[UVW_U] - UVW[UVW_V];
-
-  // convert to rgb in the given system (the brightness will be arbitrary)
-  // rgb has the scaling of columns of UVW_to_rgb until normalization below
-  for (int i = 0; i < N_RGB; ++i) {
-    int64_t v = 1 << 29;
-    for (int j = 0; j < N_UVW; ++j)
-      v += (int64_t)UVW_to_rgb[i][j] * UVW[j];
-    rgb[i] = (int32_t)(v >> 30);
-  }
+  // convert (u, v) to (R, G, B) in an optimized way
+  // usually we would calculate w such that u + v + w = 1 and then take
+  // (u, v, w) as (U, V, W) noting that brightness is arbitrary, and then
+  // multiply through by a UVW -> rgb conversion matrix, but the matrix
+  // used here expects L = U + V + W instead of W and L is always 1 here
+  for (int i = 0; i < N_RGB; ++i)
+    rgb[i] = (int32_t)(
+      (
+        (int64_t)uv[UV_u] * UVL_to_rgb[i][UVL_U] +
+          (int64_t)uv[UV_v] * UVL_to_rgb[i][UVL_V] +
+          (1 << 29)
+      ) >> 30
+    ) + UVL_to_rgb[i][UVL_L];
 
   // low Kelvins are outside the gamut of SRGB and thus must be interpreted,
   // in this simplistic approach we simply clip off the negative blue value
