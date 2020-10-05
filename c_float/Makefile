@@ -1,3 +1,23 @@
+# Copyright (c) 2020 Nick Downing
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 CFLAGS=-g -Wall
 
 %.o: %.c
@@ -6,7 +26,19 @@ CFLAGS=-g -Wall
 %_standalone.o: %.c
 	${CC} ${CFLAGS} ${CPPFLAGS} -DSTANDALONE -o $@ -c $<
 
-all: hsbk_to_rgb hsv_to_rgb rgb_to_hsbk rgb_to_hsv gamma_decode gamma_encode kelv_to_rgb kelv_to_uv mired_to_rgb hue_kelv_test inv_test sat_test
+all: \
+hsbk_to_rgb \
+hsv_to_rgb \
+rgb_to_hsbk \
+rgb_to_hsv \
+gamma_decode \
+gamma_encode \
+kelv_to_rgb \
+kelv_to_uv \
+mired_to_rgb \
+hue_kelv_test \
+inv_test \
+sat_test
 
 hsbk_to_rgb: hsbk_to_rgb_standalone.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
@@ -45,4 +77,17 @@ sat_test: sat_test.o hsbk_to_rgb.o mired_to_rgb.o gamma_decode.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
 clean:
-	rm -f hsbk_to_rgb hsv_to_rgb rgb_to_hsbk rgb_to_hsv gamma_decode gamma_encode kelv_to_rgb kelv_to_uv mired_to_rgb hue_kelv_test inv_test sat_test *.o
+	rm -f \
+hsbk_to_rgb \
+hsv_to_rgb \
+rgb_to_hsbk \
+rgb_to_hsv \
+gamma_decode \
+gamma_encode \
+kelv_to_rgb \
+kelv_to_uv \
+mired_to_rgb \
+hue_kelv_test \
+inv_test \
+sat_test \
+*.o

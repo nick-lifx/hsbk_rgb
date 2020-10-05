@@ -1,4 +1,43 @@
-all: srgb_gamma_decode.gen_py srgb_gamma_decode.gen_c_float srgb_gamma_decode.gen_c_fixed srgb_gamma_encode.gen_py srgb_gamma_encode.gen_c_float srgb_gamma_encode.gen_c_fixed srgb_kelv_to_rgb.gen_py srgb_kelv_to_rgb.gen_c_fixed srgb_kelv_to_rgb.gen_c_float srgb_mired_to_rgb.gen_py srgb_mired_to_rgb.gen_c_float srgb_mired_to_rgb.gen_c_fixed display_p3_kelv_to_rgb.gen_py display_p3_kelv_to_rgb.gen_c_fixed display_p3_kelv_to_rgb.gen_c_float display_p3_mired_to_rgb.gen_py display_p3_mired_to_rgb.gen_c_float display_p3_mired_to_rgb.gen_c_fixed kelv_to_uv.gen_c_fixed
+# Copyright (c) 2020 Nick Downing
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+all: \
+srgb_gamma_decode.gen_py \
+srgb_gamma_decode.gen_c_float \
+srgb_gamma_decode.gen_c_fixed \
+srgb_gamma_encode.gen_py \
+srgb_gamma_encode.gen_c_float \
+srgb_gamma_encode.gen_c_fixed \
+srgb_kelv_to_rgb.gen_py \
+srgb_kelv_to_rgb.gen_c_fixed \
+srgb_kelv_to_rgb.gen_c_float \
+srgb_mired_to_rgb.gen_py \
+srgb_mired_to_rgb.gen_c_float \
+srgb_mired_to_rgb.gen_c_fixed \
+display_p3_kelv_to_rgb.gen_py \
+display_p3_kelv_to_rgb.gen_c_fixed \
+display_p3_kelv_to_rgb.gen_c_float \
+display_p3_mired_to_rgb.gen_py \
+display_p3_mired_to_rgb.gen_c_float \
+display_p3_mired_to_rgb.gen_c_fixed \
+kelv_to_uv.gen_c_fixed
 
 srgb_gamma_decode.gen_py: srgb_gamma_decode_fit.yml
 	./gamma_decode_gen_py.py $^ >$@
@@ -76,7 +115,30 @@ kelv_to_uv.gen_c_fixed:
 	./kelv_to_uv_gen_c_fixed.py >$@
 
 clean:
-	rm -f srgb_gamma_decode.gen_py srgb_gamma_decode.gen_c_fixed srgb_gamma_decode.gen_c_float srgb_gamma_decode_fit.yml srgb_gamma_encode.gen_py srgb_gamma_encode.gen_c_fixed srgb_gamma_encode.gen_c_float srgb_gamma_encode_fit.yml srgb_kelv_to_rgb.gen_py srgb_kelv_to_rgb.gen_c_fixed srgb_kelv_to_rgb.gen_c_float srgb_primaries.yml srgb_mired_to_rgb.gen_py srgb_mired_to_rgb.gen_c_float srgb_mired_to_rgb.gen_c_fixed srgb_mired_to_rgb_fit.yml display_p3_kelv_to_rgb.gen_c_float display_p3_primaries.yml display_p3_mired_to_rgb.gen_py display_p3_mired_to_rgb.gen_c_float display_p3_mired_to_rgb.gen_c_fixed display_p3_mired_to_rgb_fit.yml kelv_to_uv.gen_c_fixed
+	rm -f \
+srgb_gamma_decode.gen_py \
+srgb_gamma_decode.gen_c_fixed \
+srgb_gamma_decode.gen_c_float \
+srgb_gamma_decode_fit.yml \
+srgb_gamma_encode.gen_py \
+srgb_gamma_encode.gen_c_fixed \
+srgb_gamma_encode.gen_c_float \
+srgb_gamma_encode_fit.yml \
+srgb_kelv_to_rgb.gen_py \
+srgb_kelv_to_rgb.gen_c_fixed \
+srgb_kelv_to_rgb.gen_c_float \
+srgb_primaries.yml \
+srgb_mired_to_rgb.gen_py \
+srgb_mired_to_rgb.gen_c_float \
+srgb_mired_to_rgb.gen_c_fixed \
+srgb_mired_to_rgb_fit.yml \
+display_p3_kelv_to_rgb.gen_c_float \
+display_p3_primaries.yml \
+display_p3_mired_to_rgb.gen_py \
+display_p3_mired_to_rgb.gen_c_float \
+display_p3_mired_to_rgb.gen_c_fixed \
+display_p3_mired_to_rgb_fit.yml \
+kelv_to_uv.gen_c_fixed
 
 install_srgb: all
 	cp srgb_gamma_decode.gen_py ../python/gamma_decode.py
