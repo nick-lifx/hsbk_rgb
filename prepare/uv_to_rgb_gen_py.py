@@ -68,6 +68,11 @@ print(
 import numpy
 from gamma_encode import gamma_encode
 
+RGB_RED = 0
+RGB_GREEN = 1
+RGB_BLUE = 2
+N_RGB = 3
+
 UVL_U = 0
 UVL_V = 1
 UVL_L = 2
@@ -119,11 +124,6 @@ if __name__ == '__main__':
   UV_u = 0
   UV_v = 1
   N_UV = 2
-
-  RGB_RED = 0
-  RGB_GREEN = 1
-  RGB_BLUE = 2
-  N_RGB = 3
 
   if len(sys.argv) < 3:
     print(f'usage: {{sys.argv[0]:s}} u v')

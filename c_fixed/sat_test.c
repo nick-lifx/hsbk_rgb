@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include "gamma_decode.h"
 #include "hsbk_to_rgb.h"
+#include "rgb_to_uv.h"
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -41,42 +42,6 @@
 #define UV_u 0
 #define UV_v 1
 #define N_UV 2
-
-#define UVW_U 0
-#define UVW_V 1
-#define UVW_W 2
-#define N_UVW 3
-
-#define EPSILON 1e-6
-
-// inverse of the matrix calculated by ../prepare/UVW_to_rgb.py
-int32_t rgb_to_UVW[N_UVW][N_RGB] = {
-  {0xb93e664, 0xa09ffe9, 0x51122d9},
-  {0x8f46431, 0x1e1dffbb, 0x30a481c},
-  {0x527dc98, 0x2827ffa4, 0x14c64213}
-};
-
-void hsbk_to_uv(const int32_t *hsbk, int32_t *uv) {
-  int32_t rgb[N_RGB];
-  hsbk_to_rgb(hsbk, rgb);
-
-  for (int i = 0; i < N_RGB; ++i)
-    rgb[i] = gamma_decode(rgb[i]);
-
-  int32_t UVW[N_UVW];
-  for (int i = 0; i < N_UVW; ++i) {
-    int64_t v = 1 << 29;
-    for (int j = 0; j < N_RGB; ++j)
-      v += (int64_t)rgb_to_UVW[i][j] * rgb[j];
-    UVW[i] = (int32_t)(v >> 30);
-  }
-
-  int64_t L = 0;
-  for (int i = 0; i < N_UVW; ++i)
-    L += UVW[i];
-  uv[UV_u] = (int32_t)((((int64_t)UVW[UVW_U] << 31) / L + 1) >> 1);
-  uv[UV_v] = (int32_t)((((int64_t)UVW[UVW_V] << 31) / L + 1) >> 1);
-}
 
 int main(int argc, char **argv) {
   if (argc < 2) {
@@ -99,7 +64,9 @@ int main(int argc, char **argv) {
       1 << 30,
       6504 << 16
     };
-    hsbk_to_uv(hsbk, hue_uv[i]);
+    int32_t rgb[N_RGB];
+    hsbk_to_rgb(hsbk, rgb);
+    rgb_to_uv(rgb, hue_uv[i]);
   }
 
   // find chromaticities of the Kelvin space by 20 degree increments
@@ -111,7 +78,9 @@ int main(int argc, char **argv) {
       1 << 30,
       (1500 << 16) + (20 << 16) * i
     };
-    hsbk_to_uv(hsbk, kelv_uv[i]);
+    int32_t rgb[N_RGB];
+    hsbk_to_rgb(hsbk, rgb);
+    rgb_to_uv(rgb, kelv_uv[i]);
   }
 
   // find chromaticities of the hue x Kelvin space @ saturation .5, then
@@ -131,8 +100,10 @@ int main(int argc, char **argv) {
         hue_uv[j][UV_v] - v0[UV_v]
       };
       int32_t hsbk[N_HSBK] = {hue, 1 << 29, 1 << 30, kelv};
+      int32_t rgb[N_RGB];
+      hsbk_to_rgb(hsbk, rgb);
       int32_t uv[N_UV];
-      hsbk_to_uv(hsbk, uv);
+      rgb_to_uv(rgb, uv);
       int32_t w_num = (int32_t)(
         (
           (int64_t)(uv[UV_u] - v0[UV_u]) * v1[UV_u] +

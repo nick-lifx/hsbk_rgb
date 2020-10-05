@@ -25,31 +25,10 @@ import numpy
 import sys
 from gamma_decode import gamma_decode
 from hsbk_to_rgb import hsbk_to_rgb
+from rgb_to_uv import rgb_to_uv
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
-
-RGB_RED = 0
-RGB_GREEN = 1
-RGB_BLUE = 2
-N_RGB = 3
-
-UVW_U = 0
-UVW_V = 1
-UVW_W = 2
-N_UVW = 3
-
-EPSILON = 1e-6
-
-# inverse of the matrix calculated by ../prepare/UVW_to_rgb.py
-rgb_to_UVW = numpy.array(
-  [
-    [9.0451048639000400e-02, 7.8430165104863919e-02, 3.9585452922802314e-02],
-    [6.9958232931726871e-02, 2.3529049531459176e-01, 2.3751271753681389e-02],
-    [4.0278982597054855e-02, 3.1372066041945568e-01, 1.6230035698348952e-01]
-  ],
-  numpy.double
-)
 
 if len(sys.argv) < 2:
   print(f'usage: {sys.argv[0]:s} image_out')
@@ -58,17 +37,12 @@ if len(sys.argv) < 2:
   sys.exit(EXIT_FAILURE)
 image_out = sys.argv[1]
 
-def hsbk_to_uv(hsbk):
-  rgb = hsbk_to_rgb(hsbk)
-  for i in range(N_RGB):
-    rgb[i] = gamma_decode(rgb[i])
-  UVW = rgb_to_UVW @ rgb
-  return UVW[:UVW_W] / numpy.sum(UVW)
-
 # find chromaticities of the hue space by 1 degree increments
 hue_uv = numpy.stack(
   [
-    hsbk_to_uv(numpy.array([1. * i, 1., 1., 6504.], numpy.double))
+    rgb_to_uv(
+      hsbk_to_rgb(numpy.array([1. * i, 1., 1., 6504.], numpy.double))
+    )
     for i in range(361)
   ],
   0
@@ -77,7 +51,9 @@ hue_uv = numpy.stack(
 # find chromaticities of the Kelvin space by 20 degree increments
 kelv_uv = numpy.stack(
   [
-    hsbk_to_uv(numpy.array([0., 0., 1., 1500. + 20. * i], numpy.double))
+    rgb_to_uv(
+      hsbk_to_rgb(numpy.array([0., 0., 1., 1500. + 20. * i], numpy.double))
+    )
     for i in range(376)
   ],
   0
@@ -93,7 +69,9 @@ for i in range(376):
   for j in range(361):
     hue = 1. * j
     v1 = hue_uv[j, :] - v0
-    uv = hsbk_to_uv(numpy.array([hue, .5, 1., kelv], numpy.double))
+    uv = rgb_to_uv(
+      hsbk_to_rgb(numpy.array([hue, .5, 1., kelv], numpy.double))
+    )
     w = ((uv - v0) @ v1) / (v1 @ v1)
     if w < 0.:
       w = 0.

@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include "gamma_decode.h"
 #include "hsbk_to_rgb.h"
+#include "rgb_to_uv.h"
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -41,42 +42,6 @@
 #define UV_u 0
 #define UV_v 1
 #define N_UV 2
-
-#define UVW_U 0
-#define UVW_V 1
-#define UVW_W 2
-#define N_UVW 3
-
-#define EPSILON 1e-6f
-
-// inverse of the matrix calculated by ../prepare/UVW_to_rgb.py
-float rgb_to_UVW[N_UVW][N_RGB] = {
-  {9.04510486e-02f, 7.84301651e-02f, 3.95854529e-02f},
-  {6.99582329e-02f, 2.35290495e-01f, 2.37512718e-02f},
-  {4.02789826e-02f, 3.13720660e-01f, 1.62300357e-01f}
-};
-
-void hsbk_to_uv(const float *hsbk, float *uv) {
-  float rgb[N_RGB];
-  hsbk_to_rgb(hsbk, rgb);
-
-  for (int i = 0; i < N_RGB; ++i)
-    rgb[i] = gamma_decode(rgb[i]);
-
-  float UVW[N_UVW];
-  for (int i = 0; i < N_UVW; ++i) {
-    float v = 0.f;
-    for (int j = 0; j < N_RGB; ++j)
-      v += rgb_to_UVW[i][j] * rgb[j];
-    UVW[i] = v;
-  }
-
-  float L = 0.f;
-  for (int i = 0; i < N_UVW; ++i)
-    L += UVW[i];
-  uv[UV_u] = UVW[UVW_U] / L;
-  uv[UV_v] = UVW[UVW_V] / L;
-}
 
 int main(int argc, char **argv) {
   if (argc < 2) {
@@ -94,14 +59,18 @@ int main(int argc, char **argv) {
   float hue_uv[361][N_UV];
   for (int i = 0; i < 361; ++i) {
     float hsbk[N_HSBK] = {1.f * i, 1.f, 1.f, 6504.f};
-    hsbk_to_uv(hsbk, hue_uv[i]);
+    float rgb[N_RGB];
+    hsbk_to_rgb(hsbk, rgb);
+    rgb_to_uv(rgb, hue_uv[i]);
   }
 
   // find chromaticities of the Kelvin space by 20 degree increments
   float kelv_uv[376][N_UV];
   for (int i = 0; i < 376; ++i) {
     float hsbk[N_HSBK] = {0.f, 0.f, 1.f, 1500.f + 20.f * i};
-    hsbk_to_uv(hsbk, kelv_uv[i]);
+    float rgb[N_RGB];
+    hsbk_to_rgb(hsbk, rgb);
+    rgb_to_uv(rgb, kelv_uv[i]);
   }
 
   // find chromaticities of the hue x Kelvin space @ saturation .5, then
@@ -121,8 +90,10 @@ int main(int argc, char **argv) {
         hue_uv[j][UV_v] - v0[UV_v]
       };
       float hsbk[N_HSBK] = {hue, .5f, 1.f, kelv};
+      float rgb[N_RGB];
+      hsbk_to_rgb(hsbk, rgb);
       float uv[N_UV];
-      hsbk_to_uv(hsbk, uv);
+      rgb_to_uv(rgb, uv);
       float w = (
         (uv[UV_u] - v0[UV_u]) * v1[UV_u] +
           (uv[UV_v] - v0[UV_v]) * v1[UV_v]

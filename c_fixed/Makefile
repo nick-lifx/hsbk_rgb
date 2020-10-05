@@ -77,7 +77,7 @@ hue_kelv_test: hue_kelv_test.o hsbk_to_rgb.o mired_to_rgb.o
 inv_test: inv_test.o hsbk_to_rgb.o rgb_to_hsbk.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
-sat_test: sat_test.o hsbk_to_rgb.o mired_to_rgb.o gamma_decode.o
+sat_test: sat_test.o hsbk_to_rgb.o mired_to_rgb.o rgb_to_uv.o gamma_decode.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
 clean:
