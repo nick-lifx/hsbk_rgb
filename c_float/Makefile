@@ -36,6 +36,8 @@ gamma_encode \
 uv_to_rgb \
 rgb_to_uv \
 kelv_to_uv \
+kelv_to_uv_deriv \
+uv_to_kelv \
 mired_to_rgb \
 hue_kelv_test \
 inv_test \
@@ -67,6 +69,12 @@ rgb_to_uv: rgb_to_uv_standalone.o gamma_decode.o
 
 kelv_to_uv: kelv_to_uv_standalone.o
 	${CC} ${CFLAGS} -o $@ $^
+
+kelv_to_uv_deriv: kelv_to_uv_deriv_standalone.o
+	${CC} ${CFLAGS} -o $@ $^
+
+uv_to_kelv: uv_to_kelv_standalone.o kelv_to_uv_deriv.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
 
 mired_to_rgb: mired_to_rgb_standalone.o
 	${CC} ${CFLAGS} -o $@ $^

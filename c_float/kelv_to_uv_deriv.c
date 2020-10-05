@@ -27,7 +27,8 @@
 
 #define EPSILON 1e-6f
 
-void kelv_to_uv(float kelv, float *uv) {
+// uv may be NULL if not required
+void kelv_to_uv_deriv(float kelv, float *uv_deriv, float *uv) {
   // validate inputs, allowing a little slack
   assert(kelv >= 1000.f * (1.f - EPSILON) && kelv < 15000. * (1.f + EPSILON));
 
@@ -38,20 +39,39 @@ void kelv_to_uv(float kelv, float *uv) {
   u_num = u_num * kelv + 1.54118254e-4f;
   u_num = u_num * kelv + .860117757f;
 
+  float u_num_deriv = 1.28641212e-7f * 2.f;
+  u_num_deriv = u_num_deriv * kelv + 1.54118254e-4f;
+
   float u_denom = 7.08145163e-7f;
   u_denom = u_denom * kelv + 8.42420235e-4f;
   u_denom = u_denom * kelv + 1.f;
+
+  float u_denom_deriv = 7.08145163e-7f * 2.f;
+  u_denom_deriv = u_denom_deriv * kelv + 8.42420235e-4f;
 
   float v_num = 4.20481691e-8f;
   v_num = v_num * kelv + 4.22806245e-5f;
   v_num = v_num * kelv + .317398726f;
 
+  float v_num_deriv = 4.20481691e-8f * 2.f;
+  v_num_deriv = v_num_deriv * kelv + 4.22806245e-5f;
+
   float v_denom = 1.61456053e-7f;
   v_denom = v_denom * kelv - 2.89741816e-5f;
   v_denom = v_denom * kelv + 1.f;
 
-  uv[UV_u] = u_num / u_denom;
-  uv[UV_v] = v_num / v_denom;
+  float v_denom_deriv = 1.61456053e-7f * 2.f;
+  v_denom_deriv = v_denom_deriv * kelv - 2.89741816e-5f;
+
+  uv_deriv[UV_u] =
+    (u_num_deriv * u_denom - u_num * u_denom_deriv) / (u_denom * u_denom);
+  uv_deriv[UV_v] =
+    (v_num_deriv * v_denom - v_num * v_denom_deriv) / (v_denom * v_denom);
+
+  if (uv) {
+    uv[UV_u] = u_num / u_denom;
+    uv[UV_v] = v_num / v_denom;
+  }
 }
 
 #ifdef STANDALONE
@@ -69,13 +89,13 @@ int main(int argc, char **argv) {
   }
   float kelv = atof(argv[1]);
 
-  float uv[N_UV];
-  kelv_to_uv(kelv, uv);
+  float uv_deriv[N_UV];
+  kelv_to_uv_deriv(kelv, uv_deriv, NULL);
   printf(
-    "kelv %.3f -> uv (%.6f, %.6f)\n",
+    "kelv %.3f -> u'v' (%.12f, %.12f)\n",
     kelv,
-    uv[UV_u],
-    uv[UV_v]
+    uv_deriv[UV_u],
+    uv_deriv[UV_v]
   );
 
   return EXIT_SUCCESS;
