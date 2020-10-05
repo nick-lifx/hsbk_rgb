@@ -20,10 +20,8 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#include <math.h>
+#include <assert.h>
 #include "uv_to_rgb.h"
-
-// new way: (faster)
 #include "gamma_encode.h"
 
 #define UV_u 0
@@ -47,7 +45,12 @@ float UVL_to_rgb[N_RGB][N_UVL] = {
   {-1.35270711e+00f, -1.66833876e+01f, 6.42535875e+00f}
 };
 
+#define EPSILON 1e-6f
+
 void uv_to_rgb(const float *uv, float *rgb) {
+  // validate inputs, allowing a little slack
+  assert(uv[UV_u] >= -EPSILON && uv[UV_v] >= -EPSILON && uv[UV_u] + uv[UV_v] < 1.f + EPSILON); 
+
   // convert (u, v) to (R, G, B) in an optimized way
   // usually we would calculate w such that u + v + w = 1 and then take
   // (u, v, w) as (U, V, W) noting that brightness is arbitrary, and then
@@ -74,22 +77,14 @@ void uv_to_rgb(const float *uv, float *rgb) {
   for (int i = 0; i < N_RGB; ++i)
     rgb[i] /= max_rgb;
 
-  // gamma-encode the R, G, B tuple according to the SRGB gamma curve
+  // return gamma-encoded (R, G, B) tuple according to the SRGB gamma curve
   // because displaying it on a monitor will gamma-decode it in the process
-
-  // old way: (slower)
-  //for (int i = 0; i < N_RGB; ++i)
-  //  rgb[i] =
-  //    rgb[i] < .0031308 ?
-  //      rgb[i] * 12.92f :
-  //      powf(rgb[i], 1.f / 2.4f) * 1.055f - .055f;
-
-  // new way: (faster)
   for (int i = 0; i < N_RGB; ++i)
     rgb[i] = gamma_encode(rgb[i]);
 }
 
 #ifdef STANDALONE
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -97,8 +92,9 @@ int main(int argc, char **argv) {
   if (argc < 3) {
     printf(
       "usage: %s u v\n"
-        "u = CIE 1960 u coordinate\n"
-        "v = CIE 1960 v coordinate\n",
+        "u = CIE 1960 u coordinate (0 to 1)\n"
+        "v = CIE 1960 v coordinate (0 to 1)\n"
+        "sum of u and v cannot exceed 1\n",
       argv[0]
     );
     exit(EXIT_FAILURE);

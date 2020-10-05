@@ -40,7 +40,7 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
-#define EPSILON 0x400
+#define EPSILON (1 << 10)
 
 // ideally below would be [1, 1, 1] but unfortunately D65 whitepoint != 6504K
 int32_t kelv_rgb_6504K[N_RGB] = {
@@ -65,8 +65,9 @@ int32_t kelv_rgb_6504K[N_RGB] = {
 // if cast to unsigned then it would equivalently be in [0, 360)
 void rgb_to_hsbk(const int32_t *rgb, int32_t kelv, int32_t *hsbk) {
   // validate inputs, allowing a little slack
-  for (int i = 0; i < N_RGB; ++i)
-    assert(rgb[i] >= -EPSILON && rgb[i] < (1 << 30) + EPSILON);
+  assert(rgb[RGB_RED] >= -EPSILON && rgb[RGB_RED] < (1 << 30) + EPSILON);
+  assert(rgb[RGB_GREEN] >= -EPSILON && rgb[RGB_GREEN] < (1 << 30) + EPSILON);
+  assert(rgb[RGB_BLUE] >= -EPSILON && rgb[RGB_BLUE] < (1 << 30) + EPSILON);
 
   // the Kelvin is always constant with this simplified algorithm
   // we will set the other values if we are able to calculate them

@@ -45,12 +45,19 @@ with open(primaries_in) as fin:
 UVL_to_rgb = primaries['UVL_to_rgb']
 UVW_to_rgb = primaries['UVW_to_rgb']
 
-# choose precision so we can store the entries of the matrix (exp0) and the
-# conversion results (exp1), the extreme values of the conversion results are
-# available in UVW_to_rgb due to the fact that the conversion is barycentric
-_, exp0 = numpy.frexp(UVL_to_rgb * (1. + EPSILON))
-_, exp1 = numpy.frexp(UVW_to_rgb * (1. + EPSILON))
-UVL_to_rgb_exp = numpy.maximum(numpy.max(exp0), numpy.max(exp1)) - 31
+# choose precision so that we can store the matrix and also the extreme values
+# of the conversion result, which are at (u, v) = (0, 0), (1, 0) and (1, 1)
+_, exp = numpy.frexp(
+  UVL_to_rgb @ numpy.array(
+    [
+      [1., 0., 0., 1., 0.],
+      [0., 1., 0., 0., 1.],
+      [0., 0., 1., 1., 1.]
+    ],
+    numpy.double
+  ) * (1. + EPSILON)
+)
+UVL_to_rgb_exp = numpy.max(exp) - 31
 UVL_to_rgb = numpy.round(
   numpy.ldexp(UVL_to_rgb, -UVL_to_rgb_exp)
 ).astype(numpy.int32)
@@ -80,9 +87,9 @@ print(
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
+#include <assert.h>
 #include "gamma_encode.h"
 #include "uv_to_rgb.h"
-#include "kelv_to_uv.h"
 
 #define UV_u 0
 #define UV_v 1
@@ -98,6 +105,8 @@ print(
 #define RGB_BLUE 2
 #define N_RGB 3
 
+#define EPSILON (1 << 10)
+
 // this is precomputed for the particular primaries in use
 int32_t UVL_to_rgb[N_RGB][N_UVL] = {{
   {{{0:s}, {1:s}, {2:s}}},
@@ -107,6 +116,9 @@ int32_t UVL_to_rgb[N_RGB][N_UVL] = {{
 
 // kelv in 16:16 fixed point, results in 2:30 fixed point
 void {9:s}(const int32_t *uv, int32_t *rgb) {{
+  // validate inputs, allowing a little slack
+  assert(uv[UV_u] >= -EPSILON && uv[UV_v] >= -EPSILON && uv[UV_u] + uv[UV_v] < (1 << 30) + EPSILON); 
+ 
   // convert (u, v) to (R, G, B) in an optimized way
   // usually we would calculate w such that u + v + w = 1 and then take
   // (u, v, w) as (U, V, W) noting that brightness is arbitrary, and then
@@ -151,8 +163,9 @@ int main(int argc, char **argv) {{
   if (argc < 3) {{
     printf(
       "usage: %s u v\\n"
-        "u = CIE 1960 u coordinate\\n"
-        "v = CIE 1960 v coordinate\\n",
+        "u = CIE 1960 u coordinate (0 to 1)\\n"
+        "v = CIE 1960 v coordinate (0 to 1)\\n"
+        "sum of u and v cannot exceed 1\\n",
       argv[0]
     );
     exit(EXIT_FAILURE);

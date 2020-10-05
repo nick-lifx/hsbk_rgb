@@ -14,6 +14,7 @@ __pycache__
 /c_float/mired_to_rgb
 /c_float/rgb_to_hsbk
 /c_float/rgb_to_hsv
+/c_float/rgb_to_uv
 /c_float/sat_test
 /c_float/uv_to_rgb
 /c_fixed/gamma_decode
@@ -26,6 +27,7 @@ __pycache__
 /c_fixed/mired_to_rgb
 /c_fixed/rgb_to_hsbk
 /c_fixed/rgb_to_hsv
+/c_fixed/rgb_to_uv
 /c_fixed/sat_test
 /c_fixed/uv_to_rgb
 /prepare/display_p3_mired_to_rgb_fit.yml

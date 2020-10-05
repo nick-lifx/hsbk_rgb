@@ -153,7 +153,7 @@ print(
 #define RGB_BLUE 2
 #define N_RGB 3
 
-#define EPSILON 0x40
+#define EPSILON (1 << 6)
 
 void {0:s}(int32_t mired, int32_t *rgb) {{
   // validate inputs, allowing a little slack

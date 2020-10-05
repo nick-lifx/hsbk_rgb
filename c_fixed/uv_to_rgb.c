@@ -20,9 +20,9 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
+#include <assert.h>
 #include "gamma_encode.h"
 #include "uv_to_rgb.h"
-#include "kelv_to_uv.h"
 
 #define UV_u 0
 #define UV_v 1
@@ -38,6 +38,8 @@
 #define RGB_BLUE 2
 #define N_RGB 3
 
+#define EPSILON (1 << 10)
+
 // this is precomputed for the particular primaries in use
 int32_t UVL_to_rgb[N_RGB][N_UVL] = {
   {0x3e230c18, 0xb9e7d0f, -0xc1fd068},
@@ -47,6 +49,9 @@ int32_t UVL_to_rgb[N_RGB][N_UVL] = {
 
 // kelv in 16:16 fixed point, results in 2:30 fixed point
 void uv_to_rgb(const int32_t *uv, int32_t *rgb) {
+  // validate inputs, allowing a little slack
+  assert(uv[UV_u] >= -EPSILON && uv[UV_v] >= -EPSILON && uv[UV_u] + uv[UV_v] < (1 << 30) + EPSILON); 
+ 
   // convert (u, v) to (R, G, B) in an optimized way
   // usually we would calculate w such that u + v + w = 1 and then take
   // (u, v, w) as (U, V, W) noting that brightness is arbitrary, and then
@@ -91,8 +96,9 @@ int main(int argc, char **argv) {
   if (argc < 3) {
     printf(
       "usage: %s u v\n"
-        "u = CIE 1960 u coordinate\n"
-        "v = CIE 1960 v coordinate\n",
+        "u = CIE 1960 u coordinate (0 to 1)\n"
+        "v = CIE 1960 v coordinate (0 to 1)\n"
+        "sum of u and v cannot exceed 1\n",
       argv[0]
     );
     exit(EXIT_FAILURE);

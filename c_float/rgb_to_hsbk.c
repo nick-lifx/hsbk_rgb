@@ -83,8 +83,9 @@ float kelv_rgb_6504K[N_RGB] = {
 
 void rgb_to_hsbk(const float *rgb, float kelv, float *hsbk) {
   // validate inputs, allowing a little slack
-  for (int i = 0; i < N_RGB; ++i)
-    assert(rgb[i] >= -EPSILON && rgb[i] < 1.f + EPSILON);
+  assert(rgb[RGB_RED] >= -EPSILON && rgb[RGB_RED] < 1.f + EPSILON);
+  assert(rgb[RGB_GREEN] >= -EPSILON && rgb[RGB_GREEN] < 1.f + EPSILON);
+  assert(rgb[RGB_BLUE] >= -EPSILON && rgb[RGB_BLUE] < 1.f + EPSILON);
 
   memset(hsbk, 0, N_HSBK * sizeof(float));
   float kelv_rgb[3];

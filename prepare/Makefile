@@ -28,12 +28,18 @@ srgb_gamma_encode.gen_c_fixed \
 srgb_uv_to_rgb.gen_py \
 srgb_uv_to_rgb.gen_c_fixed \
 srgb_uv_to_rgb.gen_c_float \
+srgb_rgb_to_uv.gen_py \
+srgb_rgb_to_uv.gen_c_fixed \
+srgb_rgb_to_uv.gen_c_float \
 srgb_mired_to_rgb.gen_py \
 srgb_mired_to_rgb.gen_c_float \
 srgb_mired_to_rgb.gen_c_fixed \
 display_p3_uv_to_rgb.gen_py \
 display_p3_uv_to_rgb.gen_c_fixed \
 display_p3_uv_to_rgb.gen_c_float \
+display_p3_rgb_to_uv.gen_py \
+display_p3_rgb_to_uv.gen_c_fixed \
+display_p3_rgb_to_uv.gen_c_float \
 display_p3_mired_to_rgb.gen_py \
 display_p3_mired_to_rgb.gen_c_float \
 display_p3_mired_to_rgb.gen_c_fixed \
@@ -72,6 +78,15 @@ srgb_uv_to_rgb.gen_c_fixed: srgb_primaries.yml
 srgb_uv_to_rgb.gen_c_float: srgb_primaries.yml
 	./uv_to_rgb_gen_c_float.py $^ >$@
 
+srgb_rgb_to_uv.gen_py: srgb_primaries.yml
+	./rgb_to_uv_gen_py.py $^ >$@
+
+srgb_rgb_to_uv.gen_c_fixed: srgb_primaries.yml
+	./rgb_to_uv_gen_c_fixed.py $^ >$@
+
+srgb_rgb_to_uv.gen_c_float: srgb_primaries.yml
+	./rgb_to_uv_gen_c_float.py $^ >$@
+
 srgb_primaries.yml: srgb_rgbw_to_xy.yml
 	./primaries.py $^ $@
 
@@ -95,6 +110,15 @@ display_p3_uv_to_rgb.gen_c_fixed: display_p3_primaries.yml
 
 display_p3_uv_to_rgb.gen_c_float: display_p3_primaries.yml
 	./uv_to_rgb_gen_c_float.py $^ >$@
+
+display_p3_rgb_to_uv.gen_py: display_p3_primaries.yml
+	./rgb_to_uv_gen_py.py $^ >$@
+
+display_p3_rgb_to_uv.gen_c_fixed: display_p3_primaries.yml
+	./rgb_to_uv_gen_c_fixed.py $^ >$@
+
+display_p3_rgb_to_uv.gen_c_float: display_p3_primaries.yml
+	./rgb_to_uv_gen_c_float.py $^ >$@
 
 display_p3_primaries.yml: display_p3_rgbw_to_xy.yml
 	./primaries.py $^ $@
@@ -127,12 +151,20 @@ srgb_gamma_encode_fit.yml \
 srgb_uv_to_rgb.gen_py \
 srgb_uv_to_rgb.gen_c_fixed \
 srgb_uv_to_rgb.gen_c_float \
+srgb_rgb_to_uv.gen_py \
+srgb_rgb_to_uv.gen_c_fixed \
+srgb_rgb_to_uv.gen_c_float \
 srgb_primaries.yml \
 srgb_mired_to_rgb.gen_py \
 srgb_mired_to_rgb.gen_c_float \
 srgb_mired_to_rgb.gen_c_fixed \
 srgb_mired_to_rgb_fit.yml \
+display_p3_uv_to_rgb.gen_py \
+display_p3_uv_to_rgb.gen_c_fixed \
 display_p3_uv_to_rgb.gen_c_float \
+display_p3_rgb_to_uv.gen_py \
+display_p3_rgb_to_uv.gen_c_fixed \
+display_p3_rgb_to_uv.gen_c_float \
 display_p3_primaries.yml \
 display_p3_mired_to_rgb.gen_py \
 display_p3_mired_to_rgb.gen_c_float \
@@ -153,6 +185,10 @@ install_srgb: all
 	chmod a+x ../python/uv_to_rgb.py
 	cp srgb_uv_to_rgb.gen_c_fixed ../c_fixed/uv_to_rgb.c
 	cp srgb_uv_to_rgb.gen_c_float ../c_float/uv_to_rgb.c
+	cp srgb_rgb_to_uv.gen_py ../python/rgb_to_uv.py
+	chmod a+x ../python/rgb_to_uv.py
+	cp srgb_rgb_to_uv.gen_c_fixed ../c_fixed/rgb_to_uv.c
+	cp srgb_rgb_to_uv.gen_c_float ../c_float/rgb_to_uv.c
 	cp srgb_mired_to_rgb.gen_py ../python/mired_to_rgb.py
 	chmod a+x ../python/mired_to_rgb.py
 	cp srgb_mired_to_rgb.gen_c_float ../c_float/mired_to_rgb.c
@@ -172,6 +208,10 @@ install_display_p3: all
 	chmod a+x ../python/uv_to_rgb.py
 	cp display_p3_uv_to_rgb.gen_c_fixed ../c_fixed/uv_to_rgb.c
 	cp display_p3_uv_to_rgb.gen_c_float ../c_float/uv_to_rgb.c
+	cp display_p3_rgb_to_uv.gen_py ../python/rgb_to_uv.py
+	chmod a+x ../python/rgb_to_uv.py
+	cp display_p3_rgb_to_uv.gen_c_fixed ../c_fixed/rgb_to_uv.c
+	cp display_p3_rgb_to_uv.gen_c_float ../c_float/rgb_to_uv.c
 	cp display_p3_mired_to_rgb.gen_py ../python/mired_to_rgb.py
 	chmod a+x ../python/mired_to_rgb.py
 	cp display_p3_mired_to_rgb.gen_c_float ../c_float/mired_to_rgb.c

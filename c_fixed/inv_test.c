@@ -36,7 +36,7 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
-#define EPSILON 0x400
+#define EPSILON (1 << 10)
 
 int main(int argc, char **argv) {
   if (argc < 3) {

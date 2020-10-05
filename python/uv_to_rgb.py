@@ -22,14 +22,14 @@
 # SOFTWARE.
 
 import numpy
-
-# new way: (faster, at least up to interpreter overhead)
 from gamma_encode import gamma_encode
 
 UVL_U = 0
 UVL_V = 1
 UVL_L = 2
 N_UVL = 3
+
+EPSILON = 1e-6
 
 # this is precomputed for the particular primaries in use
 UVL_to_rgb = numpy.array(
@@ -42,6 +42,9 @@ UVL_to_rgb = numpy.array(
 )
 
 def uv_to_rgb(uv):
+  # validate inputs, allowing a little slack
+  assert numpy.all(uv >= -EPSILON) and numpy.sum(uv) < 1. + EPSILON
+
   # convert (u, v) to (R, G, B) in an optimized way
   # usually we would calculate w such that u + v + w = 1 and then take
   # (u, v, w) as (U, V, W) noting that brightness is arbitrary, and then
@@ -56,19 +59,12 @@ def uv_to_rgb(uv):
   # normalize the brightness, so that at least one of R, G, or B = 1
   rgb /= numpy.max(rgb)
 
-  # gamma-encode the R, G, B tuple according to the SRGB gamma curve
+  # return gamma-encoded (R, G, B) tuple according to the SRGB gamma curve
   # because displaying it on a monitor will gamma-decode it in the process
-
-  # old way: (slower)
-  #mask = rgb < .0031308
-  #rgb[mask] *= 12.92
-  #rgb[~mask] = rgb[~mask] ** (1. / 2.4) * 1.055 - 0.055
-
-  # new way: (faster, at least up to interpreter overhead)
-  for i in range(N_RGB):
-    rgb[i] = gamma_encode(rgb[i])
-
-  return rgb
+  return numpy.array(
+    [gamma_encode(rgb[i]) for i in range(N_RGB)],
+    numpy.double
+  )
 
 if __name__ == '__main__':
   import sys
@@ -87,10 +83,11 @@ if __name__ == '__main__':
 
   if len(sys.argv) < 3:
     print(f'usage: {sys.argv[0]:s} u v')
-    print('u = CIE 1960 u coordinate')
-    print('v = CIE 1960 v coordinate')
+    print('u = CIE 1960 u coordinate (0 to 1)')
+    print('v = CIE 1960 v coordinate (0 to 1)')
+    print('sum of u and v cannot exceed 1')
     sys.exit(EXIT_FAILURE)
-  uv = [float(i) for i in sys.argv[1:3]]
+  uv = numpy.array([float(i) for i in sys.argv[1:3]], numpy.double)
 
   rgb = uv_to_rgb(uv)
   print(

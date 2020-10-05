@@ -45,8 +45,8 @@
 //#define UV_v 1
 //#define N_UV 2
 
-#define EPSILON0 0x400
-#define EPSILON1 0x40
+#define EPSILON0 (1 << 10)
+#define EPSILON1 (1 << 6)
 
 // arguments as follows:
 //   hue in 0:32 fixed point
