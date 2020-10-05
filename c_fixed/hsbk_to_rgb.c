@@ -23,7 +23,8 @@
 #include "hsbk_to_rgb.h"
 
 // old way (slower):
-//#include "kelv_to_rgb.h"
+//#include "kelv_to_uv.h"
+//#include "uv_to_rgb.h"
 
 // new way (faster):
 #include "mired_to_rgb.h"
@@ -38,6 +39,11 @@
 #define HSBK_BR 2
 #define HSBK_KELV 3
 #define N_HSBK 4
+
+// old way (slower):
+//#define UV_u 0
+//#define UV_v 1
+//#define N_UV 2
 
 #define EPSILON0 0x400
 #define EPSILON1 0x40
@@ -110,7 +116,9 @@ void hsbk_to_rgb(const int32_t *hsbk, int32_t *rgb) {
   int32_t kelv_rgb[N_RGB];
 
   // old way (slower):
-  //kelv_to_rgb(kelv, kelv_rgb);
+  //int32_t uv[N_UV];
+  //kelv_to_uv(kelv, uv);
+  //uv_to_rgb(uv, kelv_rgb);
 
   // new way (faster):
   mired_to_rgb(

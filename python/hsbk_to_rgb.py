@@ -25,7 +25,8 @@ import numpy
 import sys
 
 # old way (slower):
-#from kelv_to_rgb import kelv_to_rgb
+#from kelv_to_uv import kelv_to_uv
+#from uv_to_rgb import uv_to_rgb
 
 # new way (faster):
 from mired_to_rgb import mired_to_rgb
@@ -80,7 +81,7 @@ def hsbk_to_rgb(hsbk):
   # this section computes kelv_rgb from kelv
 
   # old way (slower):
-  #kelv_rgb = kelv_to_rgb(kelv)
+  #kelv_rgb = uv_to_rgb(kelv_to_uv(kelv))
 
   # new way (faster):
   kelv_rgb = mired_to_rgb(1e6 / kelv)

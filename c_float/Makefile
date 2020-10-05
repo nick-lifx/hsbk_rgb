@@ -33,7 +33,7 @@ rgb_to_hsbk \
 rgb_to_hsv \
 gamma_decode \
 gamma_encode \
-kelv_to_rgb \
+uv_to_rgb \
 kelv_to_uv \
 mired_to_rgb \
 hue_kelv_test \
@@ -58,7 +58,7 @@ gamma_decode: gamma_decode_standalone.o
 gamma_encode: gamma_encode_standalone.o
 	${CC} ${CFLAGS} -o $@ $^
 
-kelv_to_rgb: kelv_to_rgb_standalone.o kelv_to_uv.o gamma_encode.o
+uv_to_rgb: uv_to_rgb_standalone.o kelv_to_uv.o gamma_encode.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 kelv_to_uv: kelv_to_uv_standalone.o
@@ -84,7 +84,7 @@ rgb_to_hsbk \
 rgb_to_hsv \
 gamma_decode \
 gamma_encode \
-kelv_to_rgb \
+uv_to_rgb \
 kelv_to_uv \
 mired_to_rgb \
 hue_kelv_test \

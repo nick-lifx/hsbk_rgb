@@ -18,9 +18,9 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#ifndef _KELV_TO_RGB_H
-#define _KELV_TO_RGB_H
+#ifndef _UV_TO_RGB_H
+#define _UV_TO_RGB_H
 
-void kelv_to_rgb(float kelv, float *rgb);
+void uv_to_rgb(const float *uv, float *rgb);
 
 #endif

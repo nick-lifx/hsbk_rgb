@@ -27,8 +27,7 @@ EPSILON = 1e-6
 
 def mired_to_rgb(mired):
   # validate inputs, allowing a little slack
-  assert mired >= 6.6666666666666671e+01 - EPSILON
-  assert mired < 1.0000000000000000e+03 + EPSILON
+  assert mired >= 6.6666666666666671e+01 - EPSILON and mired < 1.0000000000000000e+03 + EPSILON
 
   # calculate red channel
   if mired < 1.5301383549813977e+02:

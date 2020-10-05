@@ -23,7 +23,8 @@
 #include "hsbk_to_rgb.h"
 
 // old way (slower):
-//#include "kelv_to_rgb.h"
+//#include "kelv_to_uv.h"
+//#include "uv_to_rgb.h"
 
 // new way (faster):
 #include "mired_to_rgb.h"
@@ -38,6 +39,11 @@
 #define HSBK_BR 2
 #define HSBK_KELV 3
 #define N_HSBK 4
+
+// old way (slower):
+//#define UV_u 0
+//#define UV_v 1
+//#define N_UV 2
 
 // define hues as red->yellow->green->cyan->blue->magenta->red again
 // across is hue 0, 60, 120, 180, 240, 300, 360, down is R, G, B
@@ -86,7 +92,9 @@ void hsbk_to_rgb(const float *hsbk, float *rgb) {
   float kelv_rgb[N_RGB];
 
   // old way (slower):
-  //kelv_to_rgb(kelv, kelv_rgb);
+  //float uv[N_UV];
+  //kelv_to_uv(kelv, uv);
+  //uv_to_rgb(uv, kelv_rgb);
 
   // new way (faster):
   mired_to_rgb(1e6f / kelv, kelv_rgb);
