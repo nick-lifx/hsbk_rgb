@@ -36,14 +36,19 @@ RGBW_BLUE = 2
 RGBW_WHITE = 3
 N_RGBW = 4
 
-XY_x = 0
-XY_y = 1
-N_XY = 2
-
 UVW_U = 0
 UVW_V = 1
 UVW_W = 2
 N_UVW = 3
+
+XY_x = 0
+XY_y = 1
+N_XY = 2
+
+XYZ_X = 0
+XYZ_Y = 1
+XYZ_Z = 2
+N_XYZ = 3
 
 # see https://en.wikipedia.org/wiki/CIE_1960_color_space
 XYZ_to_UVW = numpy.array(
@@ -64,9 +69,9 @@ UVW_to_XYZ = numpy.array(
 )
 
 if len(sys.argv) < 3:
-  print(f'usage: {sys.argv[0]:s} rgbw_to_xy_in.yml primaries_out.yml')
+  print(f'usage: {sys.argv[0]:s} rgbw_to_XYZ_in.yml primaries_out.yml')
   sys.exit(EXIT_FAILURE)
-rgbw_to_xy_in = sys.argv[1]
+rgbw_to_XYZ_in = sys.argv[1]
 primaries_out = sys.argv[2]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
@@ -77,29 +82,27 @@ yaml = ruamel.yaml.YAML(typ = 'safe')
 # across is R, G, B, W and down is x, y
 # the last one is not actually a primary but the so-called white point
 # this means that R + G + B all at full intensity should make the given (x, y)
-with open(rgbw_to_xy_in) as fin:
-  rgbw_to_xy = python_to_numpy(yaml.load(fin))
+with open(rgbw_to_XYZ_in) as fin:
+  rgbw_to_XYZ = python_to_numpy(yaml.load(fin))
 
-# add the missing z row, to convert the primaries from (x, y) to (X, Y, Z)
-# see https://en.wikipedia.org/wiki/CIE_1931_color_space#CIE_xy_chromaticity_diagram_and_the_CIE_xyY_color_space
-x = rgbw_to_xy[XY_x, :]
-y = rgbw_to_xy[XY_y, :]
-rgbw_to_XYZ = numpy.stack([x, y, 1. - x - y], 0)
+if rgbw_to_XYZ.shape[0] < N_XYZ:
+  # add the missing z row, to convert the primaries from (x, y) to (X, Y, Z)
+  # see https://en.wikipedia.org/wiki/CIE_1931_color_space#CIE_xy_chromaticity_diagram_and_the_CIE_xyY_color_space
+  x = rgbw_to_XYZ[XY_x, :]
+  y = rgbw_to_XYZ[XY_y, :]
+  rgbw_to_XYZ = numpy.stack([x, y, 1. - x - y], 0)
 
-# find the linear combination of R, G, B primaries to make the white point
-x = numpy.linalg.solve(
-  rgbw_to_XYZ[:, :RGBW_WHITE],
-  rgbw_to_XYZ[:, RGBW_WHITE]
-)
+  # find the linear combination of R, G, B primaries to make the white point
+  x = numpy.linalg.solve(
+    rgbw_to_XYZ[:, :RGBW_WHITE],
+    rgbw_to_XYZ[:, RGBW_WHITE]
+  )
 
-# then scale R, G, B by those factors so the primaries sum to the white point
-rgbw_to_XYZ[:, :RGBW_WHITE] *= x[numpy.newaxis, :]
+  # then scale R, G, B by those factors so the primaries sum to the white point
+  rgbw_to_XYZ[:, :RGBW_WHITE] *= x[numpy.newaxis, :]
 
 # convert from (X, Y, Z) system to more perceptually uniform (U, V, W) system
 rgbw_to_UVW = XYZ_to_UVW @ rgbw_to_XYZ
-rgbw_to_uv = (
-  rgbw_to_UVW[:UVW_W, :] / numpy.sum(rgbw_to_UVW, 0)[numpy.newaxis, :]
-)
 
 # white point isn't needed anymore, trim it off
 rgb_to_XYZ = rgbw_to_XYZ[:, :RGBW_WHITE]
@@ -132,9 +135,15 @@ XYL_to_rgb = XYZ_to_rgb @ XYL_to_XYZ
 rgb_to_UVL = UVW_to_UVL @ rgb_to_UVW
 UVL_to_rgb = UVW_to_rgb @ UVL_to_UVW
 
+# recover chromaticities just for reference (they aren't used by the code)
+rgbw_to_xy = (
+  rgbw_to_XYZ[:UVW_W, :] / numpy.sum(rgbw_to_XYZ, 0)[numpy.newaxis, :]
+)
+rgbw_to_uv = (
+  rgbw_to_UVW[:UVW_W, :] / numpy.sum(rgbw_to_UVW, 0)[numpy.newaxis, :]
+)
+
 primaries = {
-  'rgbw_to_xy': rgbw_to_xy,
-  'rgbw_to_uv': rgbw_to_uv,
   'rgb_to_XYZ': rgb_to_XYZ,
   'XYZ_to_rgb': XYZ_to_rgb,
   'rgb_to_UVW': rgb_to_UVW,
@@ -143,6 +152,8 @@ primaries = {
   'XYL_to_rgb': XYL_to_rgb,
   'rgb_to_UVL': rgb_to_UVL,
   'UVL_to_rgb': UVL_to_rgb,
+  'rgbw_to_xy': rgbw_to_xy,
+  'rgbw_to_uv': rgbw_to_uv
 }
 with open(primaries_out, 'w') as fout:
   yaml.dump(numpy_to_python(primaries), fout)
