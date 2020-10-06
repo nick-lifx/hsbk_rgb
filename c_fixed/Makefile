@@ -50,6 +50,14 @@ hsv_to_rgb: hsv_to_rgb.o hsbk_to_rgb.o mired_to_rgb.o
 rgb_to_hsbk: rgb_to_hsbk_standalone.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
+rgb_to_hsbk_standalone.o: rgb_to_hsbk.c kelv_rgb_6504K.inc
+
+kelv_rgb_6504K.inc: kelv_rgb_6504K_gen
+	./kelv_rgb_6504K_gen >$@
+
+kelv_rgb_6504K_gen: kelv_rgb_6504K_gen.o hsbk_to_rgb.o mired_to_rgb.o
+	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
+
 rgb_to_hsv: rgb_to_hsv.o rgb_to_hsbk.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
@@ -85,6 +93,8 @@ clean:
 hsbk_to_rgb \
 hsv_to_rgb \
 rgb_to_hsbk \
+kelv_rgb_6504K.inc \
+kelv_rgb_6504K_gen \
 rgb_to_hsv \
 gamma_decode \
 gamma_encode \

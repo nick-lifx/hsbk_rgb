@@ -194,6 +194,10 @@ install_srgb: all
 	cp srgb_mired_to_rgb.gen_c_float ../c_float/mired_to_rgb.c
 	cp srgb_mired_to_rgb.gen_c_fixed ../c_fixed/mired_to_rgb.c
 	cp kelv_to_uv.gen_c_fixed ../c_fixed/kelv_to_uv.c
+	rm -f \
+../python/kelv_rgb_6504K.py \
+../c_float/kelv_rgb_6504K.inc \
+../c_fixed/kelv_rgb_6504K.inc
 
 install_display_p3: all
 	cp srgb_gamma_decode.gen_py ../python/gamma_decode.py
@@ -217,3 +221,7 @@ install_display_p3: all
 	cp display_p3_mired_to_rgb.gen_c_float ../c_float/mired_to_rgb.c
 	cp display_p3_mired_to_rgb.gen_c_fixed ../c_fixed/mired_to_rgb.c
 	cp kelv_to_uv.gen_c_fixed ../c_fixed/kelv_to_uv.c
+	rm -f \
+../python/kelv_rgb_6504K.py \
+../c_float/kelv_rgb_6504K.inc \
+../c_fixed/kelv_rgb_6504K.inc

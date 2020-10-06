@@ -23,6 +23,7 @@
 import math
 import numpy
 import sys
+from kelv_rgb_6504K import kelv_rgb_6504K
 
 # old way (slower):
 #from kelv_to_rgb import kelv_to_rgb
@@ -61,21 +62,6 @@ hue_table = [
     1: (120., -60., 0)   # i = 2, j = 1 (more green): hue = 120 - 60 * rgb[0]
   }
 ]
-
-# ideally below would be [1, 1, 1] but unfortunately D65 whitepoint != 6504K
-kelv_rgb_6504K = numpy.array(
-  # old way (slower):
-  # a more accurate version of what would be printed by
-  #   ./kelv_to_rgb.py 6504
-  #[1.0000000278851402e+00, 9.7406956415619106e-01, 9.9682965489711572e-01],
-
-  # new way (faster):
-  # a more accurate version of what would be printed by
-  #   ./mired_to_rgb.py 153.751537515375
-  [1.0000000000000000e+00, 9.7601796770359650e-01, 9.9569436539271527e-01],
-
-  numpy.double
-)
 
 def rgb_to_hsbk(rgb, kelv = None):
   # validate inputs, allowing a little slack

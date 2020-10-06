@@ -42,18 +42,7 @@
 
 #define EPSILON (1 << 10)
 
-// ideally below would be [1, 1, 1] but unfortunately D65 whitepoint != 6504K
-int32_t kelv_rgb_6504K[N_RGB] = {
-  // old way (slower):
-  // a hexadecimal version of what would be printed by
-  //   ./kelv_to_rgb 6504
-  //0x4000001e, 0x3e5729fe, 0x3fcc0d0c
-
-  // new way (faster):
-  // a hexadecimal version of what would be printed by
-  //   ./mired_to_rgb 153.75154
-  0x40000000, 0x3e77142b, 0x3fb975e6
-};
+#include "kelv_rgb_6504K.inc"
 
 // arguments in 2:30 fixed point
 // results as follows:

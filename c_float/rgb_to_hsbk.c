@@ -43,7 +43,7 @@
 #define EPSILON 1e-6f
 
 // table for looking up hues when rgb[i] == 0 and rgb[j] == 1
-struct hue_table {
+static struct hue_table {
   float hue_base;
   float hue_delta;
   int channel;
@@ -68,18 +68,7 @@ struct hue_table {
   }
 };
 
-// ideally below would be [1, 1, 1] but unfortunately D65 whitepoint != 6504K
-float kelv_rgb_6504K[N_RGB] = {
-  // old way (slower):
-  // a more accurate version of what would be printed by
-  //   ./kelv_to_rgb 6504
-  //1.00000012e+00, 9.74069655e-01, 9.96830285e-01
-
-  // new way (faster):
-  // a more accurate version of what would be printed by
-  //   ./mired_to_rgb 153.75154
-  1.00000000e+00, 9.76017892e-01, 9.95694757e-01
-};
+#include "kelv_rgb_6504K.inc"
 
 void rgb_to_hsbk(const float *rgb, float kelv, float *hsbk) {
   // validate inputs, allowing a little slack

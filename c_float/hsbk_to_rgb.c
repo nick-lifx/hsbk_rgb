@@ -49,7 +49,7 @@
 // across is hue 0, 60, 120, 180, 240, 300, 360, down is R, G, B
 // for interpolation, e.g. hue of 10 = column 1 + 10/60 * (column 2 - column 1)
 #define N_HUE_SEQUENCE 6
-float hue_sequence[N_RGB][N_HUE_SEQUENCE + 1] = {
+static float hue_sequence[N_RGB][N_HUE_SEQUENCE + 1] = {
   {1.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f},
   {0.f, 1.f, 1.f, 1.f, 0.f, 0.f, 0.f},
   {0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f}
