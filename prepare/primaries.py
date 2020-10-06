@@ -86,13 +86,6 @@ x = rgbw_to_xy[XY_x, :]
 y = rgbw_to_xy[XY_y, :]
 rgbw_to_XYZ = numpy.stack([x, y, 1. - x - y], 0)
 
-# convert (x, y) primaries to the more perceptually uniform (u, v) system
-# it isn't used by the code, but simply for reference in the generated output
-rgbw_to_UVW = XYZ_to_UVW @ rgbw_to_XYZ
-rgbw_to_uv = (
-  rgbw_to_UVW[:UVW_W, :] / numpy.sum(rgbw_to_UVW, 0)[numpy.newaxis, :]
-)
-
 # find the linear combination of R, G, B primaries to make the white point
 x = numpy.linalg.solve(
   rgbw_to_XYZ[:, :RGBW_WHITE],
@@ -100,12 +93,20 @@ x = numpy.linalg.solve(
 )
 
 # then scale R, G, B by those factors so the primaries sum to the white point
-# at this point the white point is not needed any more, so trim it off
-rgb_to_XYZ = rgbw_to_XYZ[:, :RGBW_WHITE] * x[numpy.newaxis, :]
-XYZ_to_rgb = numpy.linalg.inv(rgb_to_XYZ)
+rgbw_to_XYZ[:, :RGBW_WHITE] *= x[numpy.newaxis, :]
 
 # convert from (X, Y, Z) system to more perceptually uniform (U, V, W) system
-rgb_to_UVW = XYZ_to_UVW @ rgb_to_XYZ
+rgbw_to_UVW = XYZ_to_UVW @ rgbw_to_XYZ
+rgbw_to_uv = (
+  rgbw_to_UVW[:UVW_W, :] / numpy.sum(rgbw_to_UVW, 0)[numpy.newaxis, :]
+)
+
+# white point isn't needed anymore, trim it off
+rgb_to_XYZ = rgbw_to_XYZ[:, :RGBW_WHITE]
+rgb_to_UVW = rgbw_to_UVW[:, :RGBW_WHITE]
+
+# create inverse versions
+XYZ_to_rgb = numpy.linalg.inv(rgb_to_XYZ)
 UVW_to_rgb = XYZ_to_rgb @ UVW_to_XYZ
 
 # create special versions in which L = X + Y + Z or L = U + V + W
