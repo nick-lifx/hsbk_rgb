@@ -25,6 +25,7 @@ import poly
 from any_f_to_poly import any_f_to_poly
 
 EPSILON = 1e-12
+A_EPSILON = 1e-6
 
 # Remez algorithm -- fit function f to polynomial p of given order
 # f is not fitted directly but via a polynomial approximation of order err_order
@@ -32,7 +33,16 @@ EPSILON = 1e-12
 #   -1 inverse relative error (used for fitting odd functions)
 #   0 absolute error
 #   1 relative error
-def remez(f, a, b, order, err_order, err_rel = 0, iters = 10, epsilon = EPSILON):
+def remez(
+  f,
+  a,
+  b,
+  order,
+  err_order,
+  err_rel = 0,
+  iters = 10,
+  epsilon = EPSILON
+):
   # put minimax nodes halfway between Chebyshev nodes on unit circle
   x = a + (b - a) * (
     .5 + .5 * numpy.cos(
@@ -154,3 +164,55 @@ def remez(f, a, b, order, err_order, err_rel = 0, iters = 10, epsilon = EPSILON)
   print('err', err)
 
   return p, err
+
+# fit even polynomial in a domain symmetrical about 0
+# fits order * 2 polynomial, returns order even coefficients
+def remez_even(
+  f,
+  b,
+  order,
+  err_order,
+  err_rel = 0,
+  iters = 10,
+  epsilon = EPSILON
+):
+  def g(x):
+    return f(numpy.sqrt(x))
+  return remez(
+    g,
+    0.,
+    b ** 2,
+    order,
+    err_order,
+    err_rel,
+    iters,
+    epsilon
+  )
+
+# fit odd polynomial in a domain symmetrical about 0
+# fits order * 2 + 1 polynomial, returns order odd coefficients
+# function won't be evaluated at 0, domain will start at A_EPSILON instead
+# (because we don't have a way to take the limiting value of f(x) / x at 0)
+def remez_odd(
+  f,
+  b,
+  order,
+  err_order,
+  err_rel = 0,
+  iters = 10,
+  epsilon = EPSILON,
+  a_epsilon = A_EPSILON
+):
+  def g(x):
+    x = numpy.sqrt(x)
+    return f(x) / x
+  return remez(
+    g,
+    a_epsilon ** 2,
+    b ** 2,
+    order,
+    err_order,
+    err_rel - 1,
+    iters,
+    epsilon
+  )

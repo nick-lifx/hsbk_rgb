@@ -24,11 +24,11 @@ import numpy
 import numpy.linalg
 import math
 import poly
+import remez
 import ruamel.yaml
 import sys
 from numpy_to_python import numpy_to_python
 from python_to_numpy import python_to_numpy
-from remez import remez
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -36,7 +36,7 @@ EXIT_FAILURE = 1
 ERR_ORDER = 24
 ORDER1 = 7
 ORDER2 = 7
-EPSILON = 1e-8
+EPSILON = 1e-4
 
 diag = False
 if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
@@ -50,33 +50,26 @@ xy_to_rtheta_fit_out = sys.argv[1]
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
 
+# function to be approximated
 def f(x):
-  return numpy.sqrt(x + 1.)
-def g(x):
-  x = numpy.sqrt(x)
-  return numpy.arctan(x) / x
-a = 0.
-a_eps = EPSILON
-b = 1. ** 2
+  return numpy.sqrt(x ** 2 + 1.)
+g = numpy.arctan
+a = -1.
+b = 1.
 
 # find approximating polynomial
-p, p_err = remez(f, a, b, ORDER1, ERR_ORDER)
-q, q_err = remez(g, a_eps, b, ORDER2, ERR_ORDER, -1)
+p, p_err = remez.remez_even(f, b, ORDER1, ERR_ORDER)
+q, q_err = remez.remez_odd(g, b, ORDER2, ERR_ORDER, a_epsilon = EPSILON)
 
 # checking
 if diag:
   import matplotlib.pyplot
 
-  def f1(x):
-    return poly.eval(p, x)
-  def g1(x):
-    return poly.eval(q, x)
-
-  x = numpy.linspace(math.sqrt(a_eps), math.sqrt(b), 1000, numpy.double)
-  matplotlib.pyplot.plot(x, f(x ** 2))
-  matplotlib.pyplot.plot(x, f1(x ** 2))
-  matplotlib.pyplot.plot(x, g(x ** 2) * x)
-  matplotlib.pyplot.plot(x, g1(x ** 2) * x)
+  x = numpy.linspace(a, b, 1000, numpy.double)
+  matplotlib.pyplot.plot(x, f(x))
+  matplotlib.pyplot.plot(x, poly.eval(p, x ** 2))
+  matplotlib.pyplot.plot(x, g(x))
+  matplotlib.pyplot.plot(x, poly.eval(q, x ** 2) * x)
   matplotlib.pyplot.show()
 
 xy_to_rtheta_fit = {
