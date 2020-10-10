@@ -24,7 +24,6 @@ import imageio
 import numpy
 import sys
 from hsbk_to_rgb import hsbk_to_rgb
-from rgb_to_hsbk import rgb_to_hsbk
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1

@@ -90,7 +90,7 @@ N_RTHETA = 2
 # returns approximation to:
 #   r * math.cos(theta), r * math.sin(theta)
 # minimax error is up to {0:e} resp. {1:e} on domain [-pi/4, pi/4)
-def {2:s}(xy):
+def {2:s}(rtheta):
   r = rtheta[RTHETA_r]
   theta = rtheta[RTHETA_theta]
 
