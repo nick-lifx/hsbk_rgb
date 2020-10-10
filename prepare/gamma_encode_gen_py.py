@@ -82,7 +82,7 @@ post_factor = numpy.array(
 #   x * 12.92 if x < .0031308 else (x ** (1. / 2.4) * 1.055) - .055
 # allowed domain (-inf, 2), recommended domain [-epsilon, 1 + epsilon]
 # do not call with argument >= 2 due to table lookup overflow (unchecked)
-# minimax error is up to {1:e} on domain [.5, 1]
+# minimax error is up to {1:e} relative
 def {2:s}(x):
   if x < .0031308:
     return x * 12.92

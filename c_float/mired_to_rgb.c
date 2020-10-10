@@ -49,36 +49,36 @@ void mired_to_rgb(float mired, float *rgb) {
 
   // calculate green channel
   float g;
-  if (mired < 1.53387545e+02f) {
+  if (mired < 1.53387510e+02f) {
     g = -3.23218415e-09f;
     g = g * mired + 5.62298423e-06f;
     g = g * mired + 1.07366864e-03f;
     g = g * mired + 6.91329670e-01f;
   }
   else {
-    g = -2.89707673e-15f;
-    g = g * mired + 7.51190147e-12f;
-    g = g * mired - 8.13342656e-09f;
-    g = g * mired + 5.12759679e-06f;
-    g = g * mired - 2.83288533e-03f;
-    g = g * mired + 1.31597739e+00f;
+    g = -2.89755679e-15f;
+    g = g * mired + 7.51294713e-12f;
+    g = g * mired - 8.13420368e-09f;
+    g = g * mired + 5.12782513e-06f;
+    g = g * mired - 2.83290790e-03f;
+    g = g * mired + 1.31597760e+00f;
   }
   rgb[RGB_GREEN] = g;
 
   // calculate blue channel
   float b;
-  if (mired < 1.52700144e+02f) {
+  if (mired < 1.52758877e+02f) {
     b = 1.00000000e+00f;
   }
-  else if (mired < 5.26000750e+02f) {
-    b = -1.16458920e-18f;
-    b = b * mired + 7.19659684e-16f;
-    b = b * mired + 1.19336703e-12f;
-    b = b * mired - 1.60683948e-09f;
-    b = b * mired + 7.80160863e-07f;
-    b = b * mired - 1.80926276e-04f;
-    b = b * mired + 1.60600243e-02f;
-    b = b * mired + 7.56230445e-01f;
+  else if (mired < 5.25960020e+02f) {
+    b = -3.10480520e-18f;
+    b = b * mired + 5.40122106e-15f;
+    b = b * mired - 3.52546986e-12f;
+    b = b * mired + 9.62734675e-10f;
+    b = b * mired - 3.42953156e-08f;
+    b = b * mired - 3.09879421e-05f;
+    b = b * mired + 1.24058069e-03f;
+    b = b * mired + 1.36226283e+00f;
   }
   else {
     b = 0.00000000e+00f;

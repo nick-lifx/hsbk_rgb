@@ -22,11 +22,17 @@ import math
 import numpy
 import numpy.linalg
 import poly
+from any_f_to_poly import any_f_to_poly
 
 EPSILON = 1e-12
 
-# Remez algorithm -- fit polynomial q of given order to polynomial p
-def remez(p, a, b, order, iters = 10, epsilon = EPSILON, times_x = False):
+# Remez algorithm -- fit function f to polynomial p of given order
+# f is not fitted directly but via a polynomial approximation of order err_order
+# err_rel determines error weighting based on x^err_rel, as follows:
+#   -1 inverse relative error (used for fitting odd functions)
+#   0 absolute error
+#   1 relative error
+def remez(f, a, b, order, err_order, err_rel = 0, iters = 10, epsilon = EPSILON):
   # put minimax nodes halfway between Chebyshev nodes on unit circle
   x = a + (b - a) * (
     .5 + .5 * numpy.cos(
@@ -37,50 +43,53 @@ def remez(p, a, b, order, iters = 10, epsilon = EPSILON, times_x = False):
   for i in range(iters):
     print('i', i)
 
-    # let q be approximating polynomial, fitted to nodes with oscillation
-    y = poly.eval(p, x)
+    # let p be approximating polynomial, fitted to nodes with oscillation
+    y = f(x)
     #print('y', y)
-    q = numpy.linalg.solve(
+    p = numpy.linalg.solve(
       numpy.concatenate(
         [
           x[:, numpy.newaxis] ** numpy.arange(order, dtype = numpy.int32),
           (
-            (-1.) ** numpy.arange(order + 1, dtype = numpy.int32) /
-              (x if times_x else 1.)
+            (-1.) ** numpy.arange(order + 1, dtype = numpy.int32) *
+              x ** err_rel
           )[:, numpy.newaxis]
         ],
         1
       ),
       y
     )
-    osc = q[-1]
+    osc = p[-1]
     print('osc', osc)
-    q = q[:-1]
-    print('q', q)
+    p = p[:-1]
+    print('p', p)
 
-    # let r be the error function
-    r = poly.add(q, -p)
-    if times_x:
-      r = poly.mul(r, numpy.array([0., 1.], numpy.double))
-    #print('r', r)
-    #print('r(x)', poly.eval(r, x))
+    # let q be the error function
+    q = any_f_to_poly(
+      lambda x: (poly.eval(p, x) - f(x)) * x ** -err_rel,
+      a,
+      b,
+      err_order
+    )
+    #print('q', q)
+    #print('q(x)', poly.eval(q, x))
 
-    # partition domain into intervals where r is positive or negative
-    intervals = poly.real_roots(r, a, b, epsilon)
+    # partition domain into intervals where q is positive or negative
+    intervals = poly.real_roots(q, a, b, epsilon)
     print('intervals', intervals)
     n_intervals = intervals.shape[0] - 1
     print('n_intervals', n_intervals)
     if n_intervals < order + 1:
       # there absolutely have to be at least order + 1 intervals,
-      # because the oscillating fit made p go positive and negative,
+      # because the oscillating fit made q go positive and negative,
       # if there isn't, it means osc is very tiny or precision error
       print('warning: not enough intervals -- we say good enough')
       break
 
-    # determine if r increasing or decreasing through each boundary
-    # have n_intervals - 1 boundaries, must produce n_intervals signs
+    # determine if q increasing or decreasing through each boundary
+    # have n_intervals - 1 boundaries, must produce n_intervals signs,
     # then check that the intervals are actually alternating in sign
-    interval_pos = poly.eval(poly.deriv(r), intervals[1:-1]) >= 0.
+    interval_pos = poly.eval(poly.deriv(q), intervals[1:-1]) >= 0.
     #print('interval_pos', interval_pos)
     interval_polarity = not interval_pos[0] # sign of first interval
     #print('interval_polarity', interval_polarity)
@@ -97,8 +106,8 @@ def remez(p, a, b, order, iters = 10, epsilon = EPSILON, times_x = False):
       print('warning: intervals not alternating -- we say good enough')
       break
 
-    # within each interval, find the "global" maximum or minimum of r
-    interval_extrema = poly.interval_extrema(r, intervals, epsilon)
+    # within each interval, find the "global" maximum or minimum of q
+    interval_extrema = poly.interval_extrema(q, intervals, epsilon)
     x = []
     y = []
     for i in range(n_intervals):
@@ -130,14 +139,18 @@ def remez(p, a, b, order, iters = 10, epsilon = EPSILON, times_x = False):
     # checking
     err = poly.eval(q, x)
     print('err', err)
-  print('q', q)
 
   # final minimax error analysis
-  r = poly.add(q, -p)
-  if times_x:
-    r = poly.mul(r, numpy.array([0., 1.], numpy.double))
-  _, y = poly.extrema(r, a, b, epsilon)
+  q = any_f_to_poly(
+    lambda x: (poly.eval(p, x) - f(x)) * x ** -err_rel,
+    a,
+    b,
+    err_order
+  )
+  #print('q', q)
+  #print('q(x)', poly.eval(q, x))
+  _, y = poly.extrema(q, a, b, epsilon)
   err = numpy.max(numpy.abs(y))
   print('err', err)
 
-  return q, err
+  return p, err

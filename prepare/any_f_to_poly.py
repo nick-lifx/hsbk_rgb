@@ -35,14 +35,14 @@ def any_f_to_poly(f, a, b, order):
       (numpy.arange(order, dtype = numpy.int32) + .5) * math.pi / order
     )
   )
-  print('x', x)
+  #print('x', x)
   y = f(x)
-  print('y', y)
+  #print('y', y)
   p = numpy.linalg.solve(
     x[:, numpy.newaxis] ** numpy.arange(order, dtype = numpy.int32),
     y
   )
-  print('p', p)
+  #print('p', p)
 
   # checking
   x = a + (b - a) * (
@@ -50,8 +50,8 @@ def any_f_to_poly(f, a, b, order):
       numpy.arange(order + 1, dtype = numpy.int32) * math.pi / order
     )
   )
-  print('x', x)
+  #print('x', x)
   err = poly.eval(p, x) - f(x)
-  print('err', err)
+  #print('err', err)
 
   return p

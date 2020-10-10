@@ -78,7 +78,7 @@ static float post_factor[] = {{{0:s}
 // returns approximation to:
 //   x < 12.92f * .0031308f ? x / 12.92f : powf((x + .055f) / 1.055f, 2.4f)
 // allowed domain (-inf, 1.945), recommended domain [-epsilon, 1 + epsilon)
-// minimax error is up to {1:e} on domain [.445, .945)
+// minimax error is up to {1:e} relative
 float {2:s}(float x) {{
   if (x < {3:.8e}f)
     return x * {4:.8e}f;

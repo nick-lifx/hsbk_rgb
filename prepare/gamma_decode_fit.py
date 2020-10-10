@@ -26,7 +26,6 @@ import math
 import poly
 import ruamel.yaml
 import sys
-from any_f_to_poly import any_f_to_poly
 from numpy_to_python import numpy_to_python
 from python_to_numpy import python_to_numpy
 from remez import remez
@@ -34,8 +33,8 @@ from remez import remez
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-ORDER0 = 21
-ORDER1 = 7
+ORDER = 7
+ERR_ORDER = 21
 EPSILON = 1e-12
 
 diag = False
@@ -60,8 +59,8 @@ b = 1.055
 # def gamma_decode(x):
 #   return x / 12.92 if x < 12.92 * .0031308 else f(x + .055)
 
-# find approximating polynomial
-p, err = remez(any_f_to_poly(f, .5, 1., ORDER0), .5, 1., ORDER1)
+# find approximating polynomial (relative error criterion)
+p, err = remez(f, .5, 1., ORDER, ERR_ORDER, 1)
 
 # compute pre- and post-processing constants
 

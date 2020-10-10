@@ -73,7 +73,7 @@ def gamma_encode(x):
   x[~mask] = x[~mask] ** (1. / 2.4) * 1.055 - .055
   return x
 
-ORDER0 = 18
+ERR_ORDER = 18
 
 # approximation order can be set separately for each channel and interval
 ORDER_RED_AB = 4
@@ -136,7 +136,7 @@ print('d', d)
 def f(x):
   return (XYZ_to_rgb[RGB_RED, :] - XYZ_to_rgb[RGB_BLUE, :]) @ mired_to_XYZ(x)
 b = poly.newton(
-  any_f_to_poly(f, b_estimate - 100., b_estimate + 100., ORDER0),
+  any_f_to_poly(f, b_estimate - 100., b_estimate + 100., ERR_ORDER),
   b_estimate
 )
 print('b', b)
@@ -145,7 +145,7 @@ print('b', b)
 def f(x):
   return XYZ_to_rgb[RGB_BLUE, :] @ mired_to_XYZ(x)
 c = poly.newton(
-  any_f_to_poly(f, c_estimate - 100., c_estimate + 100., ORDER0),
+  any_f_to_poly(f, c_estimate - 100., c_estimate + 100., ERR_ORDER),
   c_estimate
 )
 print('c', c)
@@ -157,10 +157,11 @@ def f(x):
     (XYZ_to_rgb[RGB_RED, :] @ XYZ) / (XYZ_to_rgb[RGB_BLUE, :] @ XYZ)
   )
 p_red_ab, p_red_ab_err = remez(
-  any_f_to_poly(f, a, b, ORDER0),
+  f,
   a,
   b,
   ORDER_RED_AB,
+  ERR_ORDER,
   epsilon = EPSILON
 )
 print('p_red_ab', p_red_ab)
@@ -175,10 +176,11 @@ def f(x):
     (XYZ_to_rgb[RGB_GREEN, :] @ XYZ) / (XYZ_to_rgb[RGB_BLUE, :] @ XYZ)
   )
 p_green_ab, p_green_ab_err = remez(
-  any_f_to_poly(f, a, b, ORDER0),
+  f,
   a,
   b,
   ORDER_GREEN_AB,
+  ERR_ORDER,
   epsilon = EPSILON
 )
 print('p_green_ab', p_green_ab)
@@ -189,10 +191,11 @@ def f(x):
     (XYZ_to_rgb[RGB_GREEN, :] @ XYZ) / (XYZ_to_rgb[RGB_RED, :] @ XYZ)
   )
 p_green_bd, p_green_bd_err = remez(
-  any_f_to_poly(f, b, d, ORDER0),
+  f,
   b,
   d,
   ORDER_GREEN_BD,
+  ERR_ORDER,
   epsilon = EPSILON
 )
 print('p_green_bd', p_green_bd)
@@ -207,10 +210,11 @@ def f(x):
     (XYZ_to_rgb[RGB_BLUE, :] @ XYZ) / (XYZ_to_rgb[RGB_RED, :] @ XYZ)
   )
 p_blue_bc, p_blue_bc_err = remez(
-  any_f_to_poly(f, b, c, ORDER0),
+  f,
   b,
   c,
   ORDER_BLUE_BC,
+  ERR_ORDER,
   epsilon = EPSILON
 )
 print('p_blue_bc', p_blue_bc)

@@ -26,7 +26,6 @@ import math
 import poly
 import ruamel.yaml
 import sys
-from any_f_to_poly import any_f_to_poly
 from numpy_to_python import numpy_to_python
 from python_to_numpy import python_to_numpy
 from remez import remez
@@ -34,7 +33,7 @@ from remez import remez
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-ORDER0 = 24
+ERR_ORDER = 24
 ORDER1 = 7
 ORDER2 = 7
 EPSILON = 1e-8
@@ -61,8 +60,8 @@ a_eps = EPSILON
 b = 1. ** 2
 
 # find approximating polynomial
-p, p_err = remez(any_f_to_poly(f, a, b, ORDER0), a, b, ORDER1)
-q, q_err = remez(any_f_to_poly(g, a_eps, b, ORDER0), a_eps, b, ORDER2, times_x = True)
+p, p_err = remez(f, a, b, ORDER1, ERR_ORDER)
+q, q_err = remez(g, a_eps, b, ORDER2, ERR_ORDER, -1)
 
 # checking
 if diag:
