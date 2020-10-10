@@ -26,7 +26,7 @@ import poly
 EPSILON = 1e-12
 
 # Remez algorithm -- fit polynomial q of given order to polynomial p
-def remez(p, a, b, order, iters = 10, epsilon = EPSILON):
+def remez(p, a, b, order, iters = 10, epsilon = EPSILON, times_x = False):
   # put minimax nodes halfway between Chebyshev nodes on unit circle
   x = a + (b - a) * (
     .5 + .5 * numpy.cos(
@@ -45,7 +45,8 @@ def remez(p, a, b, order, iters = 10, epsilon = EPSILON):
         [
           x[:, numpy.newaxis] ** numpy.arange(order, dtype = numpy.int32),
           (
-            (-1.) ** numpy.arange(order + 1, dtype = numpy.int32)
+            (-1.) ** numpy.arange(order + 1, dtype = numpy.int32) /
+              (x if times_x else 1.)
           )[:, numpy.newaxis]
         ],
         1
@@ -59,6 +60,8 @@ def remez(p, a, b, order, iters = 10, epsilon = EPSILON):
 
     # let r be the error function
     r = poly.add(q, -p)
+    if times_x:
+      r = poly.mul(r, numpy.array([0., 1.], numpy.double))
     #print('r', r)
     #print('r(x)', poly.eval(r, x))
 
@@ -130,7 +133,10 @@ def remez(p, a, b, order, iters = 10, epsilon = EPSILON):
   print('q', q)
 
   # final minimax error analysis
-  _, y = poly.extrema(poly.add(q, -p), a, b, epsilon)
+  r = poly.add(q, -p)
+  if times_x:
+    r = poly.mul(r, numpy.array([0., 1.], numpy.double))
+  _, y = poly.extrema(r, a, b, epsilon)
   err = numpy.max(numpy.abs(y))
   print('err', err)
 

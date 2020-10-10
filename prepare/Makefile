@@ -43,6 +43,8 @@ display_p3_rgb_to_uv.gen_c_float \
 display_p3_mired_to_rgb.gen_py \
 display_p3_mired_to_rgb.gen_c_float \
 display_p3_mired_to_rgb.gen_c_fixed \
+rtheta_to_xy.gen_py \
+xy_to_rtheta.gen_py \
 kelv_to_uv.gen_c_fixed
 
 srgb_gamma_decode.gen_py: srgb_gamma_decode_fit.yml
@@ -135,52 +137,37 @@ display_p3_mired_to_rgb.gen_c_fixed: display_p3_mired_to_rgb_fit.yml
 display_p3_mired_to_rgb_fit.yml: display_p3_primaries.yml
 	./mired_to_rgb_fit.py $^ 150 950 $@
 
+rtheta_to_xy.gen_py: rtheta_to_xy_fit.yml
+	./rtheta_to_xy_gen_py.py $^ >$@
+
+rtheta_to_xy_fit.yml:
+	./rtheta_to_xy_fit.py $^ $@
+
+xy_to_rtheta.gen_py: xy_to_rtheta_fit.yml
+	./xy_to_rtheta_gen_py.py $^ >$@
+
+xy_to_rtheta_fit.yml:
+	./xy_to_rtheta_fit.py $^ $@
+
 kelv_to_uv.gen_c_fixed:
 	./kelv_to_uv_gen_c_fixed.py >$@
 
 clean:
 	rm -f \
-srgb_gamma_decode.gen_py \
-srgb_gamma_decode.gen_c_fixed \
-srgb_gamma_decode.gen_c_float \
+*.gen_py \
+*.gen_c_fixed \
+*.gen_c_float \
 srgb_gamma_decode_fit.yml \
-srgb_gamma_encode.gen_py \
-srgb_gamma_encode.gen_c_fixed \
-srgb_gamma_encode.gen_c_float \
 srgb_gamma_encode_fit.yml \
-srgb_uv_to_rgb.gen_py \
-srgb_uv_to_rgb.gen_c_fixed \
-srgb_uv_to_rgb.gen_c_float \
-srgb_rgb_to_uv.gen_py \
-srgb_rgb_to_uv.gen_c_fixed \
-srgb_rgb_to_uv.gen_c_float \
 srgb_primaries.yml \
-srgb_mired_to_rgb.gen_py \
-srgb_mired_to_rgb.gen_c_float \
-srgb_mired_to_rgb.gen_c_fixed \
 srgb_mired_to_rgb_fit.yml \
-display_p3_uv_to_rgb.gen_py \
-display_p3_uv_to_rgb.gen_c_fixed \
-display_p3_uv_to_rgb.gen_c_float \
-display_p3_rgb_to_uv.gen_py \
-display_p3_rgb_to_uv.gen_c_fixed \
-display_p3_rgb_to_uv.gen_c_float \
 display_p3_primaries.yml \
-display_p3_mired_to_rgb.gen_py \
-display_p3_mired_to_rgb.gen_c_float \
-display_p3_mired_to_rgb.gen_c_fixed \
 display_p3_mired_to_rgb_fit.yml \
+rtheta_to_xy_fit.yml \
+xy_to_rtheta_fit.yml \
 kelv_to_uv.gen_c_fixed
 
-install_srgb: all
-	cp srgb_gamma_decode.gen_py ../python/gamma_decode.py
-	chmod a+x ../python/gamma_decode.py
-	cp srgb_gamma_decode.gen_c_fixed ../c_fixed/gamma_decode.c
-	cp srgb_gamma_decode.gen_c_float ../c_float/gamma_decode.c
-	cp srgb_gamma_encode.gen_py ../python/gamma_encode.py
-	chmod a+x ../python/gamma_encode.py
-	cp srgb_gamma_encode.gen_c_fixed ../c_fixed/gamma_encode.c
-	cp srgb_gamma_encode.gen_c_float ../c_float/gamma_encode.c
+install_srgb: install_common
 	cp srgb_uv_to_rgb.gen_py ../python/uv_to_rgb.py
 	chmod a+x ../python/uv_to_rgb.py
 	cp srgb_uv_to_rgb.gen_c_fixed ../c_fixed/uv_to_rgb.c
@@ -194,20 +181,8 @@ install_srgb: all
 	cp srgb_mired_to_rgb.gen_c_float ../c_float/mired_to_rgb.c
 	cp srgb_mired_to_rgb.gen_c_fixed ../c_fixed/mired_to_rgb.c
 	cp kelv_to_uv.gen_c_fixed ../c_fixed/kelv_to_uv.c
-	rm -f \
-../python/kelv_rgb_6504K.py \
-../c_float/kelv_rgb_6504K.inc \
-../c_fixed/kelv_rgb_6504K.inc
 
-install_display_p3: all
-	cp srgb_gamma_decode.gen_py ../python/gamma_decode.py
-	chmod a+x ../python/gamma_decode.py
-	cp srgb_gamma_decode.gen_c_fixed ../c_fixed/gamma_decode.c
-	cp srgb_gamma_decode.gen_c_float ../c_float/gamma_decode.c
-	cp srgb_gamma_encode.gen_py ../python/gamma_encode.py
-	chmod a+x ../python/gamma_encode.py
-	cp srgb_gamma_encode.gen_c_fixed ../c_fixed/gamma_encode.c
-	cp srgb_gamma_encode.gen_c_float ../c_float/gamma_encode.c
+install_display_p3: install_common
 	cp display_p3_uv_to_rgb.gen_py ../python/uv_to_rgb.py
 	chmod a+x ../python/uv_to_rgb.py
 	cp display_p3_uv_to_rgb.gen_c_fixed ../c_fixed/uv_to_rgb.c
@@ -220,8 +195,25 @@ install_display_p3: all
 	chmod a+x ../python/mired_to_rgb.py
 	cp display_p3_mired_to_rgb.gen_c_float ../c_float/mired_to_rgb.c
 	cp display_p3_mired_to_rgb.gen_c_fixed ../c_fixed/mired_to_rgb.c
-	cp kelv_to_uv.gen_c_fixed ../c_fixed/kelv_to_uv.c
+
+# for displays that use SRGB gamma curve
+install_srgb_common: install_common
+	cp srgb_gamma_decode.gen_py ../python/gamma_decode.py
+	chmod a+x ../python/gamma_decode.py
+	cp srgb_gamma_decode.gen_c_fixed ../c_fixed/gamma_decode.c
+	cp srgb_gamma_decode.gen_c_float ../c_float/gamma_decode.c
+	cp srgb_gamma_encode.gen_py ../python/gamma_encode.py
+	chmod a+x ../python/gamma_encode.py
+	cp srgb_gamma_encode.gen_c_fixed ../c_fixed/gamma_encode.c
+	cp srgb_gamma_encode.gen_c_float ../c_float/gamma_encode.c
+	
+install_common: all
 	rm -f \
 ../python/kelv_rgb_6504K.py \
 ../c_float/kelv_rgb_6504K.inc \
 ../c_fixed/kelv_rgb_6504K.inc
+	cp rtheta_to_xy.gen_py ../python/rtheta_to_xy.py
+	chmod a+x ../python/rtheta_to_xy.py
+	cp xy_to_rtheta.gen_py ../python/xy_to_rtheta.py
+	chmod a+x ../python/xy_to_rtheta.py
+	cp kelv_to_uv.gen_c_fixed ../c_fixed/kelv_to_uv.c
