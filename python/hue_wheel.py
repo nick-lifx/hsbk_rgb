@@ -91,6 +91,19 @@ def blend(rgb0, rgb1, alpha):
     rgb[i] = gamma_encode(v0 + alpha * (v1 - v0))
   return rgb
 
+# this is similar to xy_to_rtheta() but faster if we only need the r
+def xy_to_r(xy):
+  # initial estimate
+  # see https://en.wikipedia.org/wiki/Alpha_max_plus_beta_min_algorithm
+  abs_xy = numpy.abs(xy)
+  r = .397824734759 * numpy.min(abs_xy) + .960433870103 * numpy.max(abs_xy)
+  # several iterations of Newton's method to refine estimate
+  r2 = numpy.sum(numpy.square(xy))
+  r = .5 * (r + r2 / r)
+  r = .5 * (r + r2 / r)
+  #print('xy', xy, 'r', 'err', r - math.sqrt(r2))
+  return r
+
 # these won't change throughout the image
 br = hsbk[HSBK_BR]
 kelv = hsbk[HSBK_KELV]
@@ -146,9 +159,9 @@ for i in range(31):
   for j in range(31):
     y = j - 14.5 - xy_frac[XY_y]
 
-    rtheta = xy_to_rtheta(numpy.array([x, y], numpy.double))
-    r = rtheta[RTHETA_r]
-    theta = rtheta[RTHETA_theta]
+    #rtheta = xy_to_rtheta(numpy.array([x, y], numpy.double))
+    #r = rtheta[RTHETA_r]
+    r = xy_to_r(numpy.array([x, y], numpy.double))
 
     if r < 15.:
       image[xy_int[XY_y] + j, xy_int[XY_x] + i, :] = (

@@ -59,7 +59,6 @@ def xy_to_rtheta(xy):
   r = r * slope2 - 1.2467479204615568e-01
   r = r * slope2 + 4.9998158114449415e-01
   r = r * slope2 + 1.0000001715430289e+00
-  r *= x
 
   s = 5.9510726380696344e-03
   s = s * slope2 - 3.0660224956957999e-02
@@ -70,7 +69,7 @@ def xy_to_rtheta(xy):
   s = s * slope2 + 9.9998971226021360e-01
   s *= slope
 
-  return numpy.array([r, theta + s], numpy.double)
+  return numpy.array([x * r, theta + s], numpy.double)
 
 if __name__ == '__main__':
   import sys

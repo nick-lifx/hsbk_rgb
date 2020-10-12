@@ -101,12 +101,11 @@ def {2:s}(xy):
   slope2 = slope * slope
 
   r = {6:.16e}
-{7:s}  r *= x
-
+{7:s}
   s = {8:.16e}
 {9:s}  s *= slope
 
-  return numpy.array([r, theta + s], numpy.double)
+  return numpy.array([x * r, theta + s], numpy.double)
 
 if __name__ == '__main__':
   import sys
