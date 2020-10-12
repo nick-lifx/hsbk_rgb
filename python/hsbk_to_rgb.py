@@ -37,6 +37,8 @@ HSBK_BR = 2
 HSBK_KELV = 3
 N_HSBK = 4
 
+EPSILON = 1e-6
+
 # define hues as red->yellow->green->cyan->blue->magenta->red again
 # across is hue 0, 60, 120, 180, 240, 300, 360, down is R, G, B
 # for interpolation, e.g. hue of 10 = column 1 + 10/60 * (column 2 - column 1)
@@ -48,8 +50,6 @@ hue_sequence = numpy.array(
   ],
   numpy.double
 )
-
-EPSILON = 1e-6
 
 def hsbk_to_rgb(hsbk):
   # validate inputs, allowing a little slack

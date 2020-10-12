@@ -45,6 +45,8 @@
 //#define UV_v 1
 //#define N_UV 2
 
+#define EPSILON 1e-6f
+
 // define hues as red->yellow->green->cyan->blue->magenta->red again
 // across is hue 0, 60, 120, 180, 240, 300, 360, down is R, G, B
 // for interpolation, e.g. hue of 10 = column 1 + 10/60 * (column 2 - column 1)
@@ -55,16 +57,14 @@ static float hue_sequence[N_RGB][N_HUE_SEQUENCE + 1] = {
   {0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f}
 };
 
-#define EPSILON 1e-6f
-
 void hsbk_to_rgb(const float *hsbk, float *rgb) {
   // validate inputs, allowing a little slack
   // the hue does not matter as it will be normalized modulo 360
   float hue = hsbk[HSBK_HUE];
   float sat = hsbk[HSBK_SAT];
-  assert(sat >= -EPSILON && sat < 1. + EPSILON);
+  assert(sat >= -EPSILON && sat < 1.f + EPSILON);
   float br = hsbk[HSBK_BR];
-  assert(br >= -EPSILON && br < 1. + EPSILON);
+  assert(br >= -EPSILON && br < 1.f + EPSILON);
   float kelv = hsbk[HSBK_KELV];
   assert(kelv >= 1500. * (1.f - EPSILON) && kelv < 9000. * (1.f + EPSILON));
 
@@ -110,19 +110,19 @@ void hsbk_to_rgb(const float *hsbk, float *rgb) {
   // this is needed because SRGB produces the brightest colours near the white
   // point, so if hue_rgb and kelv_rgb are on opposite sides of the white point,
   // then rgb could land near the white point, but not be as bright as possible
-  float max_rgb = rgb[RGB_RED];
-  if (rgb[RGB_GREEN] > max_rgb)
-    max_rgb = rgb[RGB_GREEN];
-  if (rgb[RGB_BLUE] > max_rgb)
-    max_rgb = rgb[RGB_BLUE];
-  br /= max_rgb;
+  float max_channel = rgb[RGB_RED];
+  if (rgb[RGB_GREEN] > max_channel)
+    max_channel = rgb[RGB_GREEN];
+  if (rgb[RGB_BLUE] > max_channel)
+    max_channel = rgb[RGB_BLUE];
+  br /= max_channel;
 
   // this section applies the brightness
 
   // do the scaling in gamma-encoded RGB space
   // this is not very principled and can corrupt the chromaticities
-  for (int i = 0; i < N_RGB; ++i)
-    rgb[i] *= br;
+  for (int k = 0; k < N_RGB; ++k)
+    rgb[k] *= br;
 }
 
 #ifdef STANDALONE

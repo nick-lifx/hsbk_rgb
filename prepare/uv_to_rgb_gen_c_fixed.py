@@ -117,8 +117,8 @@ int32_t UVL_to_rgb[N_RGB][N_UVL] = {{
 // kelv in 16:16 fixed point, results in 2:30 fixed point
 void {9:s}(const int32_t *uv, int32_t *rgb) {{
   // validate inputs, allowing a little slack
-  assert(uv[UV_u] >= -EPSILON && uv[UV_v] >= -EPSILON && uv[UV_u] + uv[UV_v] < (1 << 30) + EPSILON); 
- 
+  assert(uv[UV_u] >= -EPSILON && uv[UV_v] >= -EPSILON && uv[UV_u] + uv[UV_v] < (1 << 30) + EPSILON);
+
   // convert (u, v) to (R, G, B) in an optimized way
   // usually we would calculate w such that u + v + w = 1 and then take
   // (u, v, w) as (U, V, W) noting that brightness is arbitrary, and then

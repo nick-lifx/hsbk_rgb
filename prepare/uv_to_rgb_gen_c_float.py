@@ -93,7 +93,7 @@ float UVL_to_rgb[N_RGB][N_UVL] = {{
 
 void {9:s}(const float *uv, float *rgb) {{
   // validate inputs, allowing a little slack
-  assert(uv[UV_u] >= -EPSILON && uv[UV_v] >= -EPSILON && uv[UV_u] + uv[UV_v] < 1.f + EPSILON); 
+  assert(uv[UV_u] >= -EPSILON && uv[UV_v] >= -EPSILON && uv[UV_u] + uv[UV_v] < 1.f + EPSILON);
 
   // convert (u, v) to (R, G, B) in an optimized way
   // usually we would calculate w such that u + v + w = 1 and then take

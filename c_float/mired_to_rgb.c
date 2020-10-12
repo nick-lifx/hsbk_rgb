@@ -36,11 +36,11 @@ void mired_to_rgb(float mired, float *rgb) {
 
   // calculate red channel
   float r;
-  if (mired < 1.53013835e+02f) {
-    r = 3.95709693e-09f;
-    r = r * mired + 8.80761568e-06f;
-    r = r * mired + 1.28870351e-03f;
-    r = r * mired + 5.82419274e-01f;
+  if (mired < 1.53011240e+02f) {
+    r = 4.07596973e-09f;
+    r = r * mired + 8.77453520e-06f;
+    r = r * mired + 1.29150846e-03f;
+    r = r * mired + 5.82349796e-01f;
   }
   else {
     r = 1.00000000e+00f;
@@ -49,36 +49,36 @@ void mired_to_rgb(float mired, float *rgb) {
 
   // calculate green channel
   float g;
-  if (mired < 1.53387510e+02f) {
-    g = -3.23218415e-09f;
-    g = g * mired + 5.62298423e-06f;
-    g = g * mired + 1.07366864e-03f;
-    g = g * mired + 6.91329670e-01f;
+  if (mired < 1.53290208e+02f) {
+    g = -3.70669803e-09f;
+    g = g * mired + 5.77539615e-06f;
+    g = g * mired + 1.05778557e-03f;
+    g = g * mired + 6.91865553e-01f;
   }
   else {
-    g = -2.89755679e-15f;
-    g = g * mired + 7.51294713e-12f;
-    g = g * mired - 8.13420368e-09f;
-    g = g * mired + 5.12782513e-06f;
-    g = g * mired - 2.83290790e-03f;
-    g = g * mired + 1.31597760e+00f;
+    g = -3.20617210e-15f;
+    g = g * mired + 8.31774662e-12f;
+    g = g * mired - 8.89633022e-09f;
+    g = g * mired + 5.44440998e-06f;
+    g = g * mired - 2.88743112e-03f;
+    g = g * mired + 1.31877787e+00f;
   }
   rgb[RGB_GREEN] = g;
 
   // calculate blue channel
   float b;
-  if (mired < 1.52758877e+02f) {
+  if (mired < 1.52991521e+02f) {
     b = 1.00000000e+00f;
   }
-  else if (mired < 5.25960020e+02f) {
-    b = -3.10480520e-18f;
-    b = b * mired + 5.40122106e-15f;
-    b = b * mired - 3.52546986e-12f;
-    b = b * mired + 9.62734675e-10f;
-    b = b * mired - 3.42953156e-08f;
-    b = b * mired - 3.09879421e-05f;
-    b = b * mired + 1.24058069e-03f;
-    b = b * mired + 1.36226283e+00f;
+  else if (mired < 5.26548709e+02f) {
+    b = 4.35983263e-18f;
+    b = b * mired - 1.20261371e-14f;
+    b = b * mired + 1.34307620e-11f;
+    b = b * mired - 7.92676692e-09f;
+    b = b * mired + 2.67076921e-06f;
+    b = b * mired - 5.07643250e-04f;
+    b = b * mired + 4.61903799e-02f;
+    b = b * mired - 3.85926456e-01f;
   }
   else {
     b = 0.00000000e+00f;

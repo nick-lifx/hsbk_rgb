@@ -139,22 +139,22 @@ void hsbk_to_rgb(const int32_t *hsbk, int32_t *rgb) {
   // this is needed because SRGB produces the brightest colours near the white
   // point, so if hue_rgb and kelv_rgb are on opposite sides of the white point,
   // then rgb could land near the white point, but not be as bright as possible
-  int32_t max_rgb = rgb[RGB_RED];
-  if (rgb[RGB_GREEN] > max_rgb)
-    max_rgb = rgb[RGB_GREEN];
-  if (rgb[RGB_BLUE] > max_rgb)
-    max_rgb = rgb[RGB_BLUE];
+  int32_t max_channel = rgb[RGB_RED];
+  if (rgb[RGB_GREEN] > max_channel)
+    max_channel = rgb[RGB_GREEN];
+  if (rgb[RGB_BLUE] > max_channel)
+    max_channel = rgb[RGB_BLUE];
 
-  // the minimum of max_rgb would be .5 and is reached when saturation is .5,
+  // the minimum max_channel would be .5 and is reached when saturation is .5,
   // this would leave br = 2 + epsilon, hence we declared br as int64_t above
-  br = (((br << 31) / max_rgb) + 1) >> 1;
+  br = (((br << 31) / max_channel) + 1) >> 1;
 
   // this section applies the brightness
 
   // do the scaling in gamma-encoded RGB space
   // this is not very principled and can corrupt the chromaticities
-  for (int i = 0; i < N_RGB; ++i)
-    rgb[i] = (int32_t)((rgb[i] * br + (1 << 29)) >> 30);
+  for (int k = 0; k < N_RGB; ++k)
+    rgb[k] = (int32_t)((rgb[k] * br + (1 << 29)) >> 30);
 }
 
 #ifdef STANDALONE

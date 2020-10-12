@@ -36,11 +36,11 @@ void mired_to_rgb(int32_t mired, int32_t *rgb) {
 
   // calculate red channel
   int32_t r;
-  if (mired < 0x99038b) {
-    r = 0x87f70;
-    r = (int32_t)(((int64_t)r * mired + 0x49e2362d0d8aLL) >> 23);
-    r = (int32_t)(((int64_t)r * mired + 0x5474dc72f140LL) >> 25);
-    r = (int32_t)(((int64_t)r * mired + 0x4a8cb6fcdd01LL) >> 17);
+  if (mired < 0x9902e1) {
+    r = 0x8c0ca;
+    r = (int32_t)(((int64_t)r * mired + 0x499b2bfe1a61LL) >> 23);
+    r = (int32_t)(((int64_t)r * mired + 0x54a3eb997000LL) >> 25);
+    r = (int32_t)(((int64_t)r * mired + 0x4a8a7029c679LL) >> 17);
   }
   else {
     r = 0x40000000;
@@ -49,36 +49,36 @@ void mired_to_rgb(int32_t mired, int32_t *rgb) {
 
   // calculate green channel
   int32_t g;
-  if (mired < 0x996334) {
-    g = -0xde1d3;
-    g = (int32_t)(((int64_t)g * mired + 0x5e56890a0439LL) >> 24);
-    g = (int32_t)(((int64_t)g * mired + 0x465d2cb3a376LL) >> 25);
-    g = (int32_t)(((int64_t)g * mired + 0x587d7d9bad57LL) >> 17);
+  if (mired < 0x994a4b) {
+    g = -0xfeb8f;
+    g = (int32_t)(((int64_t)g * mired + 0x60e523b90070LL) >> 24);
+    g = (int32_t)(((int64_t)g * mired + 0x4552b371a16fLL) >> 25);
+    g = (int32_t)(((int64_t)g * mired + 0x588f0cea720dLL) >> 17);
   }
   else {
-    g = -0x68654;
-    g = (int32_t)(((int64_t)g * mired + 0x4215a9271dabLL) >> 26);
-    g = (int32_t)(((int64_t)g * mired - 0x45df4c95bf4aLL) >> 25);
-    g = (int32_t)(((int64_t)g * mired + 0x5607d859f21eLL) >> 25);
-    g = (int32_t)(((int64_t)g * mired - 0x5cd42666d46dLL) >> 25);
-    g = (int32_t)(((int64_t)g * mired + 0x5438fa17c054LL) >> 16);
+    g = -0x7383b;
+    g = (int32_t)(((int64_t)g * mired + 0x4929e87a0127LL) >> 26);
+    g = (int32_t)(((int64_t)g * mired - 0x4c6b3baf44f3LL) >> 25);
+    g = (int32_t)(((int64_t)g * mired + 0x5b5791135828LL) >> 25);
+    g = (int32_t)(((int64_t)g * mired - 0x5e9d861f5868LL) >> 25);
+    g = (int32_t)(((int64_t)g * mired + 0x5466db4a7041LL) >> 16);
   }
   rgb[RGB_GREEN] = g;
 
   // calculate blue channel
   int32_t b;
-  if (mired < 0x98c246) {
+  if (mired < 0x98fdd4) {
     b = 0x40000000;
   }
-  else if (mired < 0x20df5c4) {
-    b = -0xe5182;
-    b = (int32_t)(((int64_t)b * mired + 0x614cbd531dadLL) >> 25);
-    b = (int32_t)(((int64_t)b * mired - 0x7c0a9b061670LL) >> 25);
-    b = (int32_t)(((int64_t)b * mired + 0x42289b9610ffLL) >> 21);
-    b = (int32_t)(((int64_t)b * mired - 0x49a60a958692LL) >> 26);
-    b = (int32_t)(((int64_t)b * mired - 0x40fc86456de5LL) >> 21);
-    b = (int32_t)(((int64_t)b * mired + 0x514d7f78c2a8LL) >> 26);
-    b = (int32_t)(((int64_t)b * mired + 0x572f506ce8caLL) >> 16);
+  else if (mired < 0x20e8c78) {
+    b = 0xa0d97;
+    b = (int32_t)(((int64_t)b * mired - 0x6c52605d6f48LL) >> 26);
+    b = (int32_t)(((int64_t)b * mired + 0x7623652411f5LL) >> 26);
+    b = (int32_t)(((int64_t)b * mired - 0x44172491ee82LL) >> 24);
+    b = (int32_t)(((int64_t)b * mired + 0x599dbc1a7e47LL) >> 24);
+    b = (int32_t)(((int64_t)b * mired - 0x4289ae30c8daLL) >> 22);
+    b = (int32_t)(((int64_t)b * mired + 0x5e990fdc5f33LL) >> 19);
+    b = (int32_t)(((int64_t)b * mired - 0x62cc13803e86LL) >> 18);
   }
   else {
     b = 0x0;

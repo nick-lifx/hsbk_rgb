@@ -81,6 +81,14 @@ ORDER_GREEN_AB = 4
 ORDER_GREEN_BD = 6
 ORDER_BLUE_BC = 8
 
+# user has to provide an estimate of the red/blue and blue/zero intersection
+# we will search for the actual intersection at user's estimate +/- this value
+INTERSECT_EXTRA_DOMAIN = 100.
+
+# we can fit a small extra region around the needed one
+# tries to place a zero near each end of the region, allowing better joining
+FIT_EXTRA_DOMAIN = 5.
+
 EPSILON = 1e-48
 
 diag = False
@@ -88,7 +96,7 @@ if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
   diag = True
   del sys.argv[1]
 if len(sys.argv) < 5:
-  print(f'usage: {sys.argv[0]:s} primaries_in.yml b_estimate c_estimate mired_to_rgb_fit_out.yml')
+  print(f'usage: {sys.argv[0]:s} [--diag] primaries_in.yml b_estimate c_estimate mired_to_rgb_fit_out.yml')
   sys.exit(EXIT_FAILURE)
 primaries_in = sys.argv[1]
 b_estimate = float(sys.argv[2])
@@ -136,7 +144,12 @@ print('d', d)
 def f(x):
   return (XYZ_to_rgb[RGB_RED, :] - XYZ_to_rgb[RGB_BLUE, :]) @ mired_to_XYZ(x)
 b = poly.newton(
-  any_f_to_poly(f, b_estimate - 100., b_estimate + 100., ERR_ORDER),
+  any_f_to_poly(
+    f,
+    b_estimate - INTERSECT_EXTRA_DOMAIN,
+    b_estimate + INTERSECT_EXTRA_DOMAIN,
+    ERR_ORDER
+  ),
   b_estimate
 )
 print('b', b)
@@ -145,7 +158,12 @@ print('b', b)
 def f(x):
   return XYZ_to_rgb[RGB_BLUE, :] @ mired_to_XYZ(x)
 c = poly.newton(
-  any_f_to_poly(f, c_estimate - 100., c_estimate + 100., ERR_ORDER),
+  any_f_to_poly(
+    f,
+    c_estimate - INTERSECT_EXTRA_DOMAIN,
+    c_estimate + INTERSECT_EXTRA_DOMAIN,
+    ERR_ORDER
+  ),
   c_estimate
 )
 print('c', c)
@@ -158,8 +176,8 @@ def f(x):
   )
 p_red_ab, p_red_ab_err = remez(
   f,
-  a,
-  b,
+  a - FIT_EXTRA_DOMAIN,
+  b + FIT_EXTRA_DOMAIN,
   ORDER_RED_AB,
   ERR_ORDER,
   epsilon = EPSILON
@@ -177,8 +195,8 @@ def f(x):
   )
 p_green_ab, p_green_ab_err = remez(
   f,
-  a,
-  b,
+  a - FIT_EXTRA_DOMAIN,
+  b - FIT_EXTRA_DOMAIN,
   ORDER_GREEN_AB,
   ERR_ORDER,
   epsilon = EPSILON
@@ -192,8 +210,8 @@ def f(x):
   )
 p_green_bd, p_green_bd_err = remez(
   f,
-  b,
-  d,
+  b - FIT_EXTRA_DOMAIN,
+  d + FIT_EXTRA_DOMAIN,
   ORDER_GREEN_BD,
   ERR_ORDER,
   epsilon = EPSILON
@@ -211,8 +229,8 @@ def f(x):
   )
 p_blue_bc, p_blue_bc_err = remez(
   f,
-  b,
-  c,
+  b - FIT_EXTRA_DOMAIN,
+  c + FIT_EXTRA_DOMAIN,
   ORDER_BLUE_BC,
   ERR_ORDER,
   epsilon = EPSILON
