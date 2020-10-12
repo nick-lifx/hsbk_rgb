@@ -49,11 +49,11 @@ void mired_to_rgb(int32_t mired, int32_t *rgb) {
 
   // calculate green channel
   int32_t g;
-  if (mired < 0x994a4b) {
-    g = -0xfeb8f;
-    g = (int32_t)(((int64_t)g * mired + 0x60e523b90070LL) >> 24);
-    g = (int32_t)(((int64_t)g * mired + 0x4552b371a16fLL) >> 25);
-    g = (int32_t)(((int64_t)g * mired + 0x588f0cea720dLL) >> 17);
+  if (mired < 0x9947b7) {
+    g = -0xda73d;
+    g = (int32_t)(((int64_t)g * mired + 0x5e3b95b5d805LL) >> 24);
+    g = (int32_t)(((int64_t)g * mired + 0x4652b68a9c83LL) >> 25);
+    g = (int32_t)(((int64_t)g * mired + 0x587fb60e5d2eLL) >> 17);
   }
   else {
     g = -0x7383b;

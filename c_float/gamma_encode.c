@@ -40,21 +40,21 @@ static float post_factor[] = {
 // returns approximation to:
 //   x < .0031308f ? x * 12.92f : powf(x, 1.f / 2.4f) * 1.055f - .055f
 // allowed domain (-inf, 2), recommended domain [-epsilon, 1 + epsilon)
-// minimax error is up to 2.089029e-08 on domain [.5, 1)
+// minimax error is up to 3.018057e-08 relative
 float gamma_encode(float x) {
   if (x < .0031308f)
     return x * 12.92f;
   int exp;
   x = frexpf(x, &exp);
   assert(exp < 2);
-  float y = 1.55106710e-01f;
-  y = y * x - 9.53137211e-01f;
-  y = y * x + 2.57241482e+00f;
-  y = y * x - 4.01642966e+00f;
-  y = y * x + 4.04617577e+00f;
-  y = y * x - 2.85229493e+00f;
-  y = y * x + 1.84237174e+00f;
-  y = y * x + 2.60792784e-01f;
+  float y = 1.62916011e-01f;
+  y = y * x - 9.93910045e-01f;
+  y = y * x + 2.66279255e+00f;
+  y = y * x - 4.12665575e+00f;
+  y = y * x + 4.12604477e+00f;
+  y = y * x - 2.88667285e+00f;
+  y = y * x + 1.85050989e+00f;
+  y = y * x + 2.59975447e-01f;
   return y * post_factor[exp + 8] - .055f;
 }
 

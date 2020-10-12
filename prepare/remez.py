@@ -20,7 +20,6 @@
 
 import math
 import numpy
-import numpy.linalg
 import poly
 from any_f_to_poly import any_f_to_poly
 from solve_scaled import solve_scaled

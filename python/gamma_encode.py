@@ -44,20 +44,20 @@ post_factor = numpy.array(
 #   x * 12.92 if x < .0031308 else (x ** (1. / 2.4) * 1.055) - .055
 # allowed domain (-inf, 2), recommended domain [-epsilon, 1 + epsilon]
 # do not call with argument >= 2 due to table lookup overflow (unchecked)
-# minimax error is up to 2.089029e-08 on domain [.5, 1]
+# minimax error is up to 3.018057e-08 relative
 def gamma_encode(x):
   if x < .0031308:
     return x * 12.92
   x, exp = math.frexp(x)
   assert exp < 2
-  y = 1.5510671045708141e-01
-  y = y * x - 9.5313721143243602e-01
-  y = y * x + 2.5724148231272337e+00
-  y = y * x - 4.0164296642648258e+00
-  y = y * x + 4.0461757676546011e+00
-  y = y * x - 2.8522949272325429e+00
-  y = y * x + 1.8423717384802476e+00
-  y = y * x + 2.6079278410089901e-01
+  y = 1.6291601149232637e-01
+  y = y * x - 9.9391004501124169e-01
+  y = y * x + 2.6627925495640974e+00
+  y = y * x - 4.1266557526485474e+00
+  y = y * x + 4.1260447728098884e+00
+  y = y * x - 2.8866728453409363e+00
+  y = y * x + 1.8505098918883685e+00
+  y = y * x + 2.5997544739882761e-01
   return y * post_factor[exp + 8] - .055
 
 if __name__ == '__main__':

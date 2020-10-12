@@ -167,7 +167,7 @@ rtheta_to_xy_fit.yml \
 xy_to_rtheta_fit.yml \
 kelv_to_uv.gen_c_fixed
 
-install_srgb: install_common
+install_srgb: install_srgb_common
 	cp srgb_uv_to_rgb.gen_py ../python/uv_to_rgb.py
 	chmod a+x ../python/uv_to_rgb.py
 	cp srgb_uv_to_rgb.gen_c_fixed ../c_fixed/uv_to_rgb.c
@@ -182,7 +182,7 @@ install_srgb: install_common
 	cp srgb_mired_to_rgb.gen_c_fixed ../c_fixed/mired_to_rgb.c
 	cp kelv_to_uv.gen_c_fixed ../c_fixed/kelv_to_uv.c
 
-install_display_p3: install_common
+install_display_p3: install_srgb_common
 	cp display_p3_uv_to_rgb.gen_py ../python/uv_to_rgb.py
 	chmod a+x ../python/uv_to_rgb.py
 	cp display_p3_uv_to_rgb.gen_c_fixed ../c_fixed/uv_to_rgb.c

@@ -40,5 +40,5 @@ __pycache__
 /prepare/srgb_gamma_decode_fit.yml
 /prepare/srgb_gamma_encode_fit.yml
 /prepare/srgb_mired_to_rgb_fit.yml
-/prepare/xy_to_rtheta_fit.yml
 /prepare/srgb_primaries.yml
+/prepare/xy_to_rtheta_fit.yml

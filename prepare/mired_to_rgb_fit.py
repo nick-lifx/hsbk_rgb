@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 import numpy
-import numpy.linalg
 import math
 import poly
 import ruamel.yaml
@@ -196,7 +195,7 @@ def f(x):
 p_green_ab, p_green_ab_err = remez(
   f,
   a - FIT_EXTRA_DOMAIN,
-  b - FIT_EXTRA_DOMAIN,
+  b + FIT_EXTRA_DOMAIN,
   ORDER_GREEN_AB,
   ERR_ORDER,
   epsilon = EPSILON

@@ -49,11 +49,11 @@ void mired_to_rgb(float mired, float *rgb) {
 
   // calculate green channel
   float g;
-  if (mired < 1.53290208e+02f) {
-    g = -3.70669803e-09f;
-    g = g * mired + 5.77539615e-06f;
-    g = g * mired + 1.05778557e-03f;
-    g = g * mired + 6.91865553e-01f;
+  if (mired < 1.53280141e+02f) {
+    g = -3.17889899e-09f;
+    g = g * mired + 5.61670932e-06f;
+    g = g * mired + 1.07304508e-03f;
+    g = g * mired + 6.91397435e-01f;
   }
   else {
     g = -3.20617210e-15f;

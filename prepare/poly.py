@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 import numpy
-import numpy.linalg
+#import numpy.linalg
 
 EPSILON = 1e-12
 

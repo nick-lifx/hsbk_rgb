@@ -34,7 +34,7 @@ static int32_t post_factor[] = {
 // returns approximation to:
 //   x < 12.92f * .0031308f ? x / 12.92f : powf((x + .055f) / 1.055f, 2.4f)
 // allowed domain [-2, 1.945), recommended domain [-epsilon, 1 + epsilon)
-// minimax error is up to 8.360670e-09 on domain [.445, .945)
+// minimax error is up to 1.187446e-08 relative
 int32_t gamma_decode(int32_t x) {
   if (x < 0x296bb54)
     return (int32_t)((x * 0x4f41c885LL + 0x200000000LL) >> 34);
@@ -52,13 +52,13 @@ int32_t gamma_decode(int32_t x) {
     x <<= 1;
     exp -= 1;
   }
-  int32_t y = -0xcc27ee7;
-  y = (int32_t)(((int64_t)y * x + 0x2767a3e656cb9400LL) >> 32);
-  y = (int32_t)(((int64_t)y * x - 0x3af1b334759ad800LL) >> 33);
-  y = (int32_t)(((int64_t)y * x + 0x263605cba20c5a00LL) >> 31);
-  y = (int32_t)(((int64_t)y * x + 0x1f0a83a292c13100LL) >> 31);
-  y = (int32_t)(((int64_t)y * x - 0x2893cee4891d200LL) >> 31);
-  y = (int32_t)(((int64_t)y * x + 0x2cab80b9de0f00LL) >> 31);
+  int32_t y = -0xd27b6bc;
+  y = (int32_t)(((int64_t)y * x + 0x284a35d49f297200LL) >> 32);
+  y = (int32_t)(((int64_t)y * x - 0x3bc2a4874c784e00LL) >> 33);
+  y = (int32_t)(((int64_t)y * x + 0x2668cf8cc4ea1800LL) >> 31);
+  y = (int32_t)(((int64_t)y * x + 0x1eef110d2b441700LL) >> 31);
+  y = (int32_t)(((int64_t)y * x - 0x2816bfcacfce600LL) >> 31);
+  y = (int32_t)(((int64_t)y * x + 0x2bc0f3d9c2f740LL) >> 31);
   return (int32_t)(((int64_t)y * post_factor[exp] + 0x10000000LL) >> 29);
 }
 

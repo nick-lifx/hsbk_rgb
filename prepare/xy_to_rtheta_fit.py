@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 import numpy
-import numpy.linalg
 import math
 import poly
 import remez
