@@ -59,7 +59,7 @@ b = 1.
 #   return x * 12.92 if x .0031308 else f(x) - .055
 
 # find approximating polynomial (relative error criterion)
-p, err = remez(f, .5, 1., ORDER, ERR_ORDER, 1)
+p, _, err = remez(f, .5, 1., ORDER, ERR_ORDER, 1)
 
 # compute pre- and post-processing constants
 

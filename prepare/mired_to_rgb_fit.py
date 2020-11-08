@@ -173,7 +173,7 @@ def f(x):
   return gamma_encode(
     (XYZ_to_rgb[RGB_RED, :] @ XYZ) / (XYZ_to_rgb[RGB_BLUE, :] @ XYZ)
   )
-p_red_ab, p_red_ab_err = remez(
+p_red_ab, _, p_red_ab_err = remez(
   f,
   a - FIT_EXTRA_DOMAIN,
   b + FIT_EXTRA_DOMAIN,
@@ -192,7 +192,7 @@ def f(x):
   return gamma_encode(
     (XYZ_to_rgb[RGB_GREEN, :] @ XYZ) / (XYZ_to_rgb[RGB_BLUE, :] @ XYZ)
   )
-p_green_ab, p_green_ab_err = remez(
+p_green_ab, _, p_green_ab_err = remez(
   f,
   a - FIT_EXTRA_DOMAIN,
   b + FIT_EXTRA_DOMAIN,
@@ -207,7 +207,7 @@ def f(x):
   return gamma_encode(
     (XYZ_to_rgb[RGB_GREEN, :] @ XYZ) / (XYZ_to_rgb[RGB_RED, :] @ XYZ)
   )
-p_green_bd, p_green_bd_err = remez(
+p_green_bd, _, p_green_bd_err = remez(
   f,
   b - FIT_EXTRA_DOMAIN,
   d + FIT_EXTRA_DOMAIN,
@@ -226,7 +226,7 @@ def f(x):
   return gamma_encode(
     (XYZ_to_rgb[RGB_BLUE, :] @ XYZ) / (XYZ_to_rgb[RGB_RED, :] @ XYZ)
   )
-p_blue_bc, p_blue_bc_err = remez(
+p_blue_bc, _, p_blue_bc_err = remez(
   f,
   b - FIT_EXTRA_DOMAIN,
   c + FIT_EXTRA_DOMAIN,

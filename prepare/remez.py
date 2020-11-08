@@ -163,7 +163,7 @@ def remez(
   err = numpy.max(numpy.abs(y))
   print('err', err)
 
-  return p, err
+  return p, x, err
 
 # fit even polynomial in a domain symmetrical about 0
 # fits order * 2 polynomial, returns order even coefficients
