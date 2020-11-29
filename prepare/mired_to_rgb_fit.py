@@ -88,6 +88,10 @@ INTERSECT_EXTRA_DOMAIN = 100.
 # tries to place a zero near each end of the region, allowing better joining
 FIT_EXTRA_DOMAIN = 5.
 
+# fit will be valid in this range
+MIRED_MIN = 1e6 / 15000.
+MIRED_MAX = 1e6 / 1000.
+
 EPSILON = 1e-48
 
 diag = False
@@ -134,9 +138,9 @@ def mired_to_XYZ(x):
 #   c <= x <= d: red is at 1, blue is at 0, green is decreasing
 # where [a, d] is the domain, e.g. [1e6 / 15000, 1e6 / 1000]
 
-a = 1e6 / 15000.
+a = MIRED_MIN
 print('a', a)
-d = 1e6 / 1000.
+d = MIRED_MAX
 print('d', d)
 
 # find b, i.e. where red meets blue
@@ -239,7 +243,7 @@ print('p_blue_bc_err', p_blue_bc_err)
 p_blue_cd = numpy.array([0.], numpy.double)
 p_blue_cd_err = 0.
 
-# fix discontinuities by setting b, c to exact intersection after fitting
+# fix discontinuities by setting b, c to exact intersections after fitting
 b_red = poly.newton(poly.add(p_red_ab, -p_red_bd), b)
 print('b_red', b_red)
 b_green = poly.newton(poly.add(p_green_ab, -p_green_bd), b)
