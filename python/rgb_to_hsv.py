@@ -23,8 +23,8 @@
 import imageio
 import numpy
 import sys
-from hsbk_to_rgb import hsbk_to_rgb
-from rgb_to_hsbk import rgb_to_hsbk
+from rgb_to_hsbk_display_p3 import rgb_to_hsbk_display_p3
+from rgb_to_hsbk_srgb import rgb_to_hsbk_srgb
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -37,8 +37,12 @@ N_HSBK = 4
 
 EPSILON = 1e-6
 
+device = 'srgb'
+if len(sys.argv) >= 3 and sys.argv[1] == '--device':
+  device = sys.argv[2]
+  del sys.argv[1:3]
 if len(sys.argv) < 3:
-  print(f'usage: {sys.argv[0]:s} image_in image_out [kelv]')
+  print(f'usage: {sys.argv[0]:s} [--device device] image_in image_out [kelv]')
   print('image_in = name of PNG file to read')
   print('image_out = name of PNG file (HSV pixels) to create (will be overwritten)')
   print('kelv = implicit colour temperature to apply to HSV pixels (default 6504K)')
@@ -46,6 +50,11 @@ if len(sys.argv) < 3:
 image_in = sys.argv[1]
 image_out = sys.argv[2]
 kelv = float(sys.argv[3]) if len(sys.argv) >= 4 else None
+
+rgb_to_hsbk = {
+  'srgb': rgb_to_hsbk_srgb,
+  'display_p3': rgb_to_hsbk_display_p3
+}[device]
 
 image = imageio.imread(image_in).astype(numpy.double) / 255.
 assert len(image.shape) == 3 and image.shape[2] == 3

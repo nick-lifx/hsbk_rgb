@@ -23,19 +23,38 @@
 import imageio
 import numpy
 import sys
-from gamma_decode import gamma_decode
-from hsbk_to_rgb import hsbk_to_rgb
-from rgb_to_uv import rgb_to_uv
+from gamma_decode_srgb import gamma_decode_srgb
+from hsbk_to_rgb_display_p3 import hsbk_to_rgb_display_p3
+from hsbk_to_rgb_srgb import hsbk_to_rgb_srgb
+from rgb_to_uv_display_p3 import rgb_to_uv_display_p3
+from rgb_to_uv_srgb import rgb_to_uv_srgb
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
+device = 'srgb'
+if len(sys.argv) >= 3 and sys.argv[1] == '--device':
+  device = sys.argv[2]
+  del sys.argv[1:3]
 if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} image_out')
+  print(f'usage: {sys.argv[0]:s} [--device device] image_out')
   print('image_out = name of PNG file to create (will be overwritten)')
   print('creates 361 x 376 x 3 image with 0..360 degrees by 1, 1500..9000 Kelvin by 20')
   sys.exit(EXIT_FAILURE)
 image_out = sys.argv[1]
+
+gamma_decode, rgb_to_uv, hsbk_to_rgb = {
+  'srgb': (
+    gamma_decode_srgb,
+    rgb_to_uv_srgb,
+    hsbk_to_rgb_srgb
+  ),
+  'display_p3': (
+    gamma_decode_srgb,
+    rgb_to_uv_display_p3,
+    hsbk_to_rgb_display_p3
+  )
+}[device]
 
 # find chromaticities of the hue space by 1 degree increments
 hue_uv = numpy.stack(

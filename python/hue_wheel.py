@@ -24,9 +24,10 @@ import imageio
 import math
 import numpy
 import sys
-from gamma_decode import gamma_decode
-from gamma_encode import gamma_encode
-from hsbk_to_rgb import hsbk_to_rgb
+from gamma_decode_srgb import gamma_decode_srgb
+from gamma_encode_srgb import gamma_encode_srgb
+from hsbk_to_rgb_display_p3 import hsbk_to_rgb_display_p3
+from hsbk_to_rgb_srgb import hsbk_to_rgb_srgb
 from rtheta_to_xy import rtheta_to_xy
 from xy_to_rtheta import xy_to_rtheta
 
@@ -53,8 +54,13 @@ N_XY = 2
 
 EPSILON = 1e-6
 
+device = 'srgb'
+if len(sys.argv) >= 3 and sys.argv[1] == '--device':
+  device = sys.argv[2]
+  del sys.argv[1:3]
 if len(sys.argv) < 6:
-  print(f'usage: {sys.argv[0]:s} hue sat br kelv image_out')
+  print(f'usage: {sys.argv[0]:s} [--device device] hue sat br kelv image_out')
+  print('device in {srgb, display_p3}, default srgb')
   print('hue = hue in degrees (0 to 360)')
   print('sat = saturation as fraction (0 to 1)')
   print('br = brightness as fraction (0 to 1)')
@@ -72,6 +78,19 @@ hsbk = numpy.array(
   numpy.double
 )
 image_out = sys.argv[5]
+
+gamma_decode, gamma_encode, hsbk_to_rgb = {
+  'srgb': (
+    gamma_decode_srgb,
+    gamma_encode_srgb,
+    hsbk_to_rgb_srgb
+  ),
+  'display_p3': (
+    gamma_decode_srgb,
+    gamma_encode_srgb,
+    hsbk_to_rgb_display_p3
+  )
+}[device]
 
 # these functions present a slightly modified saturation scale to user,
 # giving more space to the whites (behaves like gamma but faster to compute)
