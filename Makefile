@@ -33,6 +33,8 @@ c_fixed: prepare
 	${MAKE} -C $@
 
 .PHONY: prepare
+prepare:
+	${MAKE} -C $@
 
 clean:
 	${MAKE} -C python clean
