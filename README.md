@@ -11,11 +11,34 @@ your code. They communicate using `numpy`, so you need to be able to construct
 `numpy` arrays before calling the utilities, and interpret the result which is
 returned as a `numpy` array. There are also command-line versions for testing.
 
+There are also C versions of each utility and subroutine. The C versions come
+in two flavours, the "regular" flavour uses `float` to represent the HSBK and
+RGB tuples whereas the "fixed-point" flavour uses `int32_t`. The fixed-point
+version is much more advanced and is intended for microcontrollers without FPU.
+
+The fixed-point versions of the command-line utilities should work more or less
+the same as the regular versions, since they contain inbuilt conversion between
+floating and fixed point. The fixed-point callable subroutines only deal with
+`int32_t` and each subroutine has a comment in the code explaining the scaling.
+
+The conversions which are sensitive to the colour space in use (essentially
+those which take a Kelvin value and hence must compute the Kelvin locus) are
+available in SRGB and Display P3 versions. Most PC monitors are SRGB. Display
+P3 is an Apple standard with extended colour gamut (a better green primary).
+
+### Building
+
+After checking out the repository you should execute `make` at the top level.
+This will build the `prepare` subdirectory first and then the others (`python`,
+`c_float` and `c_fixed`). Before building you need to have `python3`, `gcc`,
+and `libpng` installed. Your Python installation must be 3.6+ and have `numpy`
+and `imageio`. (Note: These dependencies may not be exhaustive going forward).
+
 ### Utilities
 
 There are a number of command-line utilities to try:
 
-* `hsbk_to_rgb` -- this takes an HSBK tuple where hue is in degrees, saturation
+* `hsbk_to_rgb_srgb` -- this takes an HSBK tuple where hue is in degrees, saturation
   and brightness are fractional and Kelvin is in the range 1500 to 9000, and
   converts to a gamma-encoded (R, G, B) value in the SRGB colour space, using
   the 'mired_to_rgb` algorithm as a backend for the Kelvin computation. If you
@@ -32,13 +55,13 @@ There are a number of command-line utilities to try:
   15000, and converts it to a (u, v) value in the CIE 1960 colour space, using
   an approximation by Krystek (see CIE 1960 colour space in Wikipedia).
 
-* `kelv_to_rgb` -- this takes a Kelvin value, which can be in the range 1000 to
+* `kelv_to_rgb_srgb` -- this takes a Kelvin value, which can be in the range 1000 to
   15000, and converts it to a gamma-encoded (R, G, B) value in the SRGB colour
   space, using the `kelv_to_uv` algorithm as a backend. The result is the same
   as calling `hsbk_to_rgb` with saturation 0 and brightness 1. Kelvin below
   some minimum are outside the SRGB gamut and must be interpreted.
 
-* `mired_to_rgb` -- this is essentially the same as `kelv_to_rgb` except that
+* `mired_to_rgb_srgb` -- this is essentially the same as `kelv_to_rgb` except that
   it takes the argument in mireds (micro reciprocal degrees; equal to 1e6 /
   Kelvin) and directly computes (R, G, B) from mireds instead of going via
   chromaticities and applying various clipping and normalization steps as the
@@ -47,7 +70,7 @@ There are a number of command-line utilities to try:
   Krystek (u, v) approximation error, but it does introduce its own errors of
   about the same magnitude, so results differ slightly from `kelv_to_rgb`.
 
-* `rgb_to_hsbk` -- this is the inverse conversion to `hsbk_to_rgb` and should
+* `rgb_to_hsbk_srgb` -- this is the inverse conversion to `hsbk_to_rgb_srgb` and should
   be lossless, except to say that you must provide a Kelvin value to use in the
   conversion. When converting HSBK to RGB and back to HSBK, it will produce an
   HSBK with the same eyeball colour as originally, but it may be expressed
@@ -64,6 +87,19 @@ There are a number of command-line utilities to try:
   do not store a Kelvin value per pixel and you provide one on the command line
   which is then applied to all pixels. This gives control over the white point
   of the image in a similar way to Gimp or Photoshop's white point adjustment.
+
+* `gamma_decode_srgb` -- takes a single fractional value (0 to 1) and gamma
+  decodes it according to the SRGB gamma function, using a shorthand convention
+  that "decoding" means taking a gamma-compressed value as would occur in a PNG
+  file and converting it to a linear intensity for an output device.
+
+* `gamma_encode_srgb` -- takes a single fractional value (0 to 1) and gamma
+  encodes it according to the SRGB gamma function, the opposite of the above.
+
+Note that the `*_srgb` utilities in general have a corresponding `*_display_p3`
+utility which uses a different Kelvin locus that is accurate on a Display P3
+monitor. An exception is the gamma decode/encode which use the SRGB version
+for Display P3 (since Display P3 is specified to have the same gamma as SRGB).
 
 There are also some test programs:
 
@@ -83,20 +119,24 @@ There are also some test programs:
   turned on full and thus is the sum of hues 0 and 120), and the corruption
   of chromaticity values that occurs when mixing in a gamma-encoded space.
 
-Preparation scripts have been included in `prepare/`, you should not need to
-run these, but if you do then `cd` into `prepare/`, run `make` and then `make
-install_srgb`. This will auto-generate some of the Python files in the main
-solver directory. Basically it pre-computes various constants which are derived
-from the chromaticities of the SRGB primaries and D65 white point. It uses a
-Remez exchange algorithm to find optimized polynomials for `mired_to_rgb.py`. A
-case where you might want to re-run the preparation scripts is if you are using a non-standard monitor such as an Apple (Display P3) or recent HDTV (rec.2020).
+For the utilities you can use `--device display_p3` to access the Display P3
+version. (Both SRGB and Display P3 subroutines are linked into the executable).
+
+Preparation scripts have been included in `prepare/`. These scripts are meant
+to process colorimetric data and formulae and combine them with data from the
+SRGB or Display P3 specifications. They produce compact descriptions of the
+transformations that will be done by the test programs and callable functions
+in `python/`, `c_float/` and `c_fixed/`. This is done through a pipeline that
+generates various files like `prepare/*.yml` containing raw data, coefficients,
+etc. The `yml` files are language-independent and get compiled into specific
+code in each langage (Python, C float, C fixed) e.g. by `prepare/*_gen_py.py`.
 
 ### Running from the command line
 
 You can run each utility from the command line for testing purposes, e.g.
 ```
 cd python
-./hsbk_to_rgb.py 60 1 1 3500
+./hsbk_to_rgb_srgb.py 60 1 1 3500
 ```
 should produce output similar to the following
 ```
@@ -119,8 +159,8 @@ which should print something like this (the CIE 1960 u, v coordinates at 3500K)
 [0.23570687 0.3408642 ]
 ```
 
-For the more sophisticated subroutines `hsbk_to_rgb()` and `rgb_to_hsbk()` we
-recommend that you look in the code of `inv_test.py` or `image.py` as a usage
+For the more sophisticated subroutines `hsbk_to_rgb_srgb()` and `rgb_to_hsbk_srgb()` we
+recommend that you look in the code of `hue_kelv_test.py` or `inv_test.py` as a usage
 example. We will give some basic tips here, on the use of `numpy` to call them.
 
 HSBK values are passed as a 4-entry `numpy` array which can be constructed by:
@@ -141,8 +181,9 @@ you back the hue value. You can print them using Python 3.6+ formatting, e.g.
 print(f'HSBK ({hsbk[0]:.3f}, {hsbk[1]:.6f}, {hsbk[2]:.6f}, {hsbk[3]:.3f})')
 ```
 
-The `numpy` RGB values are compatible with Python's `imageio` if you multiply
-by 255, round, and then convert to `numpy.uint8`. See the image test programs.
+In general the returned RGB values are in gamma-encoded form, and are
+compatible with Python's `imageio` if you multiply by 255, round, and then
+convert to `numpy.uint8`. See the test programs such as `hue_kelv_test.py`.
 
 ### Caveats and warnings
 
