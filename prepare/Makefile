@@ -35,11 +35,11 @@ gamma_encode_fit_srgb.yml:
 primaries_srgb.yml: rgbw_to_xy_srgb.yml
 	./primaries.py $^ $@
 
-mired_to_rgb_fit_srgb.yml: primaries_srgb.yml
-	./mired_to_rgb_fit.py $^ 150 500 $@
-
 primaries_display_p3.yml: rgbw_to_xy_display_p3.yml
 	./primaries.py $^ $@
+
+mired_to_rgb_fit_srgb.yml: primaries_srgb.yml
+	./mired_to_rgb_fit.py $^ 150 500 $@
 
 mired_to_rgb_fit_display_p3.yml: primaries_display_p3.yml
 	./mired_to_rgb_fit.py $^ 150 950 $@
@@ -51,4 +51,10 @@ xy_to_rtheta_fit.yml:
 	./xy_to_rtheta_fit.py $^ $@
 
 clean:
-	rm -f *_fit.yml *_primaries.yml
+	rm -f \
+gamma_decode_fit_*.yml \
+gamma_encode_fit_*.yml \
+primaries_*.yml \
+mired_to_rgb_fit_*.yml \
+rtheta_to_xy_fit.yml \
+xy_to_rtheta_fit.yml

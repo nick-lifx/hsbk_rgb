@@ -22,7 +22,6 @@
 /c_fixed/rgb_to_hsbk_display_p3
 /c_fixed/rgb_to_hsbk_display_p3.c
 /c_fixed/rgb_to_hsbk_gen
-/c_fixed/rgb_to_hsbk_gen.c
 /c_fixed/rgb_to_hsbk_srgb
 /c_fixed/rgb_to_hsbk_srgb.c
 /c_fixed/rgb_to_hsv
@@ -88,6 +87,8 @@
 /python/rgb_to_hsbk_srgb.py
 /python/rgb_to_uv_display_p3.py
 /python/rgb_to_uv_srgb.py
+/python/rtheta_to_xy.py
 /python/uv_to_rgb_display_p3.py
 /python/uv_to_rgb_srgb.py
+/python/xy_to_rtheta.py
 __pycache__
