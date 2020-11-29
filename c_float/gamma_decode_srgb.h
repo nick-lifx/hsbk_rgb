@@ -18,9 +18,9 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#ifndef _GAMMA_DECODE_H
-#define _GAMMA_DECODE_H
+#ifndef _GAMMA_DECODE_SRGB_H
+#define _GAMMA_DECODE_SRGB_H
 
-float gamma_decode(float x);
+float gamma_decode_srgb(float x);
 
 #endif

@@ -28,11 +28,11 @@ from python_to_numpy import python_to_numpy
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} mired_to_rgb_fit_in.yml [name]')
+if len(sys.argv) < 3:
+  print(f'usage: {sys.argv[0]:s} mired_to_rgb_fit_in.yml device')
   sys.exit(EXIT_FAILURE)
 mired_to_rgb_fit_in = sys.argv[1]
-name = sys.argv[2] if len(sys.argv) >= 3 else 'mired_to_rgb'
+device = sys.argv[2]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -81,7 +81,7 @@ import numpy
 
 EPSILON = 1e-6
 
-def {0:s}(mired):
+def mired_to_rgb_{0:s}(mired):
   # validate inputs, allowing a little slack
   assert mired >= {1:.16e} - EPSILON and mired < {2:.16e} + EPSILON
 
@@ -124,11 +124,11 @@ if __name__ == '__main__':
     sys.exit(EXIT_FAILURE)
   mired = float(sys.argv[1])
 
-  rgb = {21:s}(mired)
+  rgb = mired_to_rgb_{21:s}(mired)
   print(
     f'mired {{mired:.3f}} -> RGB ({{rgb[RGB_RED]:.6f}}, {{rgb[RGB_GREEN]:.6f}}, {{rgb[RGB_BLUE]:.6f}})'
   )'''.format(
-    name,
+    device,
     a,
     d,
     b_red,
@@ -184,6 +184,6 @@ if __name__ == '__main__':
         for i in range(p_blue_cd.shape[0] - 2, -1, -1)
       ]
     ),
-    name
+    device
   )
 )

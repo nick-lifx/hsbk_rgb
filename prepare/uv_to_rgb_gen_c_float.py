@@ -28,11 +28,22 @@ from python_to_numpy import python_to_numpy
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} primaries_in.yml [name]')
+RGB_RED = 0
+RGB_GREEN = 1
+RGB_BLUE = 2
+N_RGB = 3
+
+UVL_U = 0
+UVL_V = 1
+UVL_L = 2
+N_UVL = 3
+
+if len(sys.argv) < 4:
+  print(f'usage: {sys.argv[0]:s} primaries_in.yml gamma_curve device')
   sys.exit(EXIT_FAILURE)
 primaries_in = sys.argv[1]
-name = sys.argv[2] if len(sys.argv) >= 3 else 'uv_to_rgb'
+gamma_curve = sys.argv[2]
+device = sys.argv[3]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -65,8 +76,8 @@ print(
 // IN THE SOFTWARE.
 
 #include <assert.h>
-#include "uv_to_rgb.h"
-#include "gamma_encode.h"
+#include "uv_to_rgb_{0:s}.h"
+#include "gamma_encode_{1:s}.h"
 
 #define UV_u 0
 #define UV_v 1
@@ -83,15 +94,15 @@ print(
 #define N_RGB 3
 
 // this is precomputed for the particular primaries in use
-float UVL_to_rgb[N_RGB][N_UVL] = {{
-  {{{0:.8e}f, {1:.8e}f, {2:.8e}f}},
-  {{{3:.8e}f, {4:.8e}f, {5:.8e}f}},
-  {{{6:.8e}f, {7:.8e}f, {8:.8e}f}}
+static float UVL_to_rgb[N_RGB][N_UVL] = {{
+  {{{2:.8e}f, {3:.8e}f, {4:.8e}f}},
+  {{{5:.8e}f, {6:.8e}f, {7:.8e}f}},
+  {{{8:.8e}f, {9:.8e}f, {10:.8e}f}}
 }};
 
 #define EPSILON 1e-6f
 
-void {9:s}(const float *uv, float *rgb) {{
+void uv_to_rgb_{11:s}(const float *uv, float *rgb) {{
   // validate inputs, allowing a little slack
   assert(uv[UV_u] >= -EPSILON && uv[UV_v] >= -EPSILON && uv[UV_u] + uv[UV_v] < 1.f + EPSILON);
 
@@ -124,7 +135,7 @@ void {9:s}(const float *uv, float *rgb) {{
   // return gamma-encoded (R, G, B) tuple according to the SRGB gamma curve
   // because displaying it on a monitor will gamma-decode it in the process
   for (int i = 0; i < N_RGB; ++i)
-    rgb[i] = gamma_encode(rgb[i]);
+    rgb[i] = gamma_encode_{12:s}(rgb[i]);
 }}
 
 #ifdef STANDALONE
@@ -146,7 +157,7 @@ int main(int argc, char **argv) {{
   float uv[N_UV] = {{atof(argv[1]), atof(argv[2])}};
 
   float rgb[N_RGB];
-  {10:s}(uv, rgb);
+  uv_to_rgb_{13:s}(uv, rgb);
   printf(
     "uv (%.6f, %.6f) -> RGB (%.6f, %.6f, %.6f)\\n",
     uv[UV_u],
@@ -159,16 +170,19 @@ int main(int argc, char **argv) {{
   return EXIT_SUCCESS;
 }}
 #endif'''.format(
-    UVL_to_rgb[0, 0],
-    UVL_to_rgb[0, 1],
-    UVL_to_rgb[0, 2],
-    UVL_to_rgb[1, 0],
-    UVL_to_rgb[1, 1],
-    UVL_to_rgb[1, 2],
-    UVL_to_rgb[2, 0],
-    UVL_to_rgb[2, 1],
-    UVL_to_rgb[2, 2],
-    name,
-    name
+    device,
+    gamma_curve,
+    UVL_to_rgb[RGB_RED, UVL_U],
+    UVL_to_rgb[RGB_RED, UVL_V],
+    UVL_to_rgb[RGB_RED, UVL_L],
+    UVL_to_rgb[RGB_GREEN, UVL_U],
+    UVL_to_rgb[RGB_GREEN, UVL_V],
+    UVL_to_rgb[RGB_GREEN, UVL_L],
+    UVL_to_rgb[RGB_BLUE, UVL_U],
+    UVL_to_rgb[RGB_BLUE, UVL_V],
+    UVL_to_rgb[RGB_BLUE, UVL_L],
+    device,
+    gamma_curve,
+    device 
   )
 )

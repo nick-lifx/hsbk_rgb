@@ -22,13 +22,6 @@
 #include <math.h>
 #include "hsbk_to_rgb.h"
 
-// old way (slower):
-//#include "kelv_to_uv.h"
-//#include "uv_to_rgb.h"
-
-// new way (faster):
-#include "mired_to_rgb.h"
-
 #define RGB_RED 0
 #define RGB_GREEN 1
 #define RGB_BLUE 2
@@ -39,11 +32,6 @@
 #define HSBK_BR 2
 #define HSBK_KELV 3
 #define N_HSBK 4
-
-// old way (slower):
-//#define UV_u 0
-//#define UV_v 1
-//#define N_UV 2
 
 #define EPSILON 1e-6f
 
@@ -57,7 +45,11 @@ static float hue_sequence[N_RGB][N_HUE_SEQUENCE + 1] = {
   {0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f}
 };
 
-void hsbk_to_rgb(const float *hsbk, float *rgb) {
+void hsbk_to_rgb(
+  void (*mired_to_rgb)(float mired, float *rgb),
+  const float *hsbk,
+  float *rgb
+) {
   // validate inputs, allowing a little slack
   // the hue does not matter as it will be normalized modulo 360
   float hue = hsbk[HSBK_HUE];
@@ -90,13 +82,6 @@ void hsbk_to_rgb(const float *hsbk, float *rgb) {
   // this section computes kelv_rgb from kelv
 
   float kelv_rgb[N_RGB];
-
-  // old way (slower):
-  //float uv[N_UV];
-  //kelv_to_uv(kelv, uv);
-  //uv_to_rgb(uv, kelv_rgb);
-
-  // new way (faster):
   mired_to_rgb(1e6f / kelv, kelv_rgb);
 
   // this section applies the saturation
@@ -129,7 +114,11 @@ void hsbk_to_rgb(const float *hsbk, float *rgb) {
 #include <stdlib.h>
 #include <stdio.h>
 
-int main(int argc, char **argv) {
+int hsbk_to_rgb_standalone(
+  void (*_hsbk_to_rgb)(const float *hsbk, float *rgb),
+  int argc,
+  char **argv
+) {
   if (argc < 4) {
     printf(
       "usage: %s hue sat br [kelv]\n"
@@ -149,7 +138,7 @@ int main(int argc, char **argv) {
   };
 
   float rgb[N_RGB];
-  hsbk_to_rgb(hsbk, rgb);
+  _hsbk_to_rgb(hsbk, rgb);
   printf(
     "HSBK (%.3f, %.6f, %.6f, %.3f) -> RGB (%.6f, %.6f, %.6f)\n",
     hsbk[HSBK_HUE],

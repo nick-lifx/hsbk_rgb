@@ -18,13 +18,9 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#ifndef _HSBK_TO_RGB_H
-#define _HSBK_TO_RGB_H
+#ifndef _HSBK_TO_RGB_SRGB_H
+#define _HSBK_TO_RGB_SRGB_H
 
-void hsbk_to_rgb(
-  void (*mired_to_rgb)(float mired, float *rgb),
-  const float *hsbk,
-  float *rgb
-);
+void hsbk_to_rgb_srgb(const float *hsbk, float *rgb);
 
 #endif

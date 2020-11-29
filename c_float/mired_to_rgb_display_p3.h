@@ -18,9 +18,9 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#ifndef _MIRED_TO_RGB_H
-#define _MIRED_TO_RGB_H
+#ifndef _MIRED_TO_RGB_DISPLAY_P3_H
+#define _MIRED_TO_RGB_DISPLAY_P3_H
 
-void mired_to_rgb(float mired, float *rgb);
+void mired_to_rgb_display_p3(float mired, float *rgb);
 
 #endif

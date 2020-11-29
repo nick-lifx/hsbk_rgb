@@ -28,11 +28,11 @@ from python_to_numpy import python_to_numpy
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} mired_to_rgb_fit_in.yml [name]')
+if len(sys.argv) < 3:
+  print(f'usage: {sys.argv[0]:s} mired_to_rgb_fit_in.yml device')
   sys.exit(EXIT_FAILURE)
 mired_to_rgb_fit_in = sys.argv[1]
-name = sys.argv[2] if len(sys.argv) >= 3 else 'mired_to_rgb'
+device = sys.argv[2]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -77,7 +77,7 @@ print(
 // IN THE SOFTWARE.
 
 #include <assert.h>
-#include "mired_to_rgb.h"
+#include "mired_to_rgb_{0:s}.h"
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -86,41 +86,41 @@ print(
 
 #define EPSILON 1e-6
 
-void {0:s}(float mired, float *rgb) {{
+void mired_to_rgb_{1:s}(float mired, float *rgb) {{
   // validate inputs, allowing a little slack
-  assert(mired >= {1:.8e}f * (1.f - EPSILON) && mired < {2:.8e}f * (1.f + EPSILON));
+  assert(mired >= {2:.8e}f * (1.f - EPSILON) && mired < {3:.8e}f * (1.f + EPSILON));
 
   // calculate red channel
   float r;
-  if (mired < {3:.8e}f) {{
-    r = {4:.8e}f;
-{5:s}  }}
+  if (mired < {4:.8e}f) {{
+    r = {5:.8e}f;
+{6:s}  }}
   else {{
-    r = {6:.8e}f;
-{7:s}  }}
+    r = {7:.8e}f;
+{8:s}  }}
   rgb[RGB_RED] = r;
 
   // calculate green channel
   float g;
-  if (mired < {8:.8e}f) {{
-    g = {9:.8e}f;
-{10:s}  }}
+  if (mired < {9:.8e}f) {{
+    g = {10:.8e}f;
+{11:s}  }}
   else {{
-    g = {11:.8e}f;
-{12:s}  }}
+    g = {12:.8e}f;
+{13:s}  }}
   rgb[RGB_GREEN] = g;
 
   // calculate blue channel
   float b;
-  if (mired < {13:.8e}f) {{
-    b = {14:.8e}f;
-{15:s}  }}
-  else if (mired < {16:.8e}f) {{
-    b = {17:.8e}f;
-{18:s}  }}
+  if (mired < {14:.8e}f) {{
+    b = {15:.8e}f;
+{16:s}  }}
+  else if (mired < {17:.8e}f) {{
+    b = {18:.8e}f;
+{19:s}  }}
   else {{
-    b = {19:.8e}f;
-{20:s}  }}
+    b = {20:.8e}f;
+{21:s}  }}
   rgb[RGB_BLUE] = b;
 }}
 
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {{
   float mired = atof(argv[1]);
 
   float rgb[N_RGB];
-  {21:s}(mired, rgb);
+  mired_to_rgb_{22:s}(mired, rgb);
   printf(
     "mired %.3f -> RGB (%.6f, %.6f, %.6f)\\n",
     mired,
@@ -152,7 +152,8 @@ int main(int argc, char **argv) {{
   return EXIT_SUCCESS;
 }}
 #endif'''.format(
-    name,
+    device,
+    device,
     a,
     d,
     b_red,
@@ -229,6 +230,6 @@ int main(int argc, char **argv) {{
         for i in range(p_blue_cd.shape[0] - 2, -1, -1)
       ]
     ),
-    name
+    device
   )
 )

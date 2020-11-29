@@ -28,11 +28,11 @@ from python_to_numpy import python_to_numpy
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} gamma_decode_fit_in.yml [name]')
+if len(sys.argv) < 3:
+  print(f'usage: {sys.argv[0]:s} gamma_decode_fit_in.yml device')
   sys.exit(EXIT_FAILURE)
 gamma_decode_fit_in = sys.argv[1]
-name = sys.argv[2] if len(sys.argv) >= 3 else 'gamma_decode'
+device = sys.argv[2]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -83,7 +83,7 @@ post_factor = numpy.array(
 # allowed domain (-inf, 1.945), recommended domain [-epsilon, 1 + epsilon]
 # do not call with argument >= 1.945 due to table lookup overflow (unchecked)
 # minimax error is up to {1:e} relative
-def {2:s}(x):
+def gamma_decode_{2:s}(x):
   if x < {3:.16e}:
     return x * {4:.16e}
   x, exp = math.frexp(x + .055)
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     sys.exit(EXIT_FAILURE)
   x = float(sys.argv[1])
 
-  y = {9:s}(x)
+  y = gamma_decode_{9:s}(x)
   print(f'gamma encoded {{x:.6f}} -> linear {{y:.6f}}')'''.format(
     ','.join(
       [
@@ -112,7 +112,7 @@ if __name__ == '__main__':
       ]
     ),
     err,
-    name,
+    device,
     12.92 * .0031308,
     1. / 12.92,
     exp1 + 1,
@@ -127,6 +127,6 @@ if __name__ == '__main__':
       ]
     ),
     -exp0,
-    name
+    device
   )
 )

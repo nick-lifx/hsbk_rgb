@@ -22,10 +22,10 @@ all: \
 gamma_decode_srgb.py \
 gamma_encode_srgb.py \
 uv_to_rgb_srgb.py \
-rgb_to_uv_srgb.py \
-mired_to_rgb_srgb.py \
 uv_to_rgb_display_p3.py \
+rgb_to_uv_srgb.py \
 rgb_to_uv_display_p3.py \
+mired_to_rgb_srgb.py \
 mired_to_rgb_display_p3.py \
 rtheta_to_xy.py \
 xy_to_rtheta.py \
@@ -33,35 +33,35 @@ rgb_to_hsbk_srgb.py \
 rgb_to_hsbk_display_p3.py
 
 gamma_decode_srgb.py: ../prepare/gamma_decode_fit_srgb.yml
-	../prepare/gamma_decode_gen_py.py $^ gamma_decode_srgb >$@
+	../prepare/gamma_decode_gen_py.py $^ srgb >$@
 	chmod a+x $@
 
 gamma_encode_srgb.py: ../prepare/gamma_encode_fit_srgb.yml
-	../prepare/gamma_encode_gen_py.py $^ gamma_encode_srgb >$@
+	../prepare/gamma_encode_gen_py.py $^ srgb >$@
 	chmod a+x $@
 
 uv_to_rgb_srgb.py: ../prepare/primaries_srgb.yml
-	../prepare/uv_to_rgb_gen_py.py $^ srgb uv_to_rgb_srgb >$@
-	chmod a+x $@
-
-rgb_to_uv_srgb.py: ../prepare/primaries_srgb.yml
-	../prepare/rgb_to_uv_gen_py.py $^ srgb rgb_to_uv_srgb >$@
-	chmod a+x $@
-
-mired_to_rgb_srgb.py: ../prepare/mired_to_rgb_fit_srgb.yml
-	../prepare/mired_to_rgb_gen_py.py $^ mired_to_rgb_srgb >$@
+	../prepare/uv_to_rgb_gen_py.py $^ srgb srgb >$@
 	chmod a+x $@
 
 uv_to_rgb_display_p3.py: ../prepare/primaries_display_p3.yml
-	../prepare/uv_to_rgb_gen_py.py $^ srgb uv_to_rgb_display_p3 >$@
+	../prepare/uv_to_rgb_gen_py.py $^ srgb display_p3 >$@
+	chmod a+x $@
+
+rgb_to_uv_srgb.py: ../prepare/primaries_srgb.yml
+	../prepare/rgb_to_uv_gen_py.py $^ srgb srgb >$@
 	chmod a+x $@
 
 rgb_to_uv_display_p3.py: ../prepare/primaries_display_p3.yml
-	../prepare/rgb_to_uv_gen_py.py $^ srgb rgb_to_uv_display_p3 >$@
+	../prepare/rgb_to_uv_gen_py.py $^ srgb display_p3 >$@
+	chmod a+x $@
+
+mired_to_rgb_srgb.py: ../prepare/mired_to_rgb_fit_srgb.yml
+	../prepare/mired_to_rgb_gen_py.py $^ srgb >$@
 	chmod a+x $@
 
 mired_to_rgb_display_p3.py: ../prepare/mired_to_rgb_fit_display_p3.yml
-	../prepare/mired_to_rgb_gen_py.py $^ mired_to_rgb_display_p3 >$@
+	../prepare/mired_to_rgb_gen_py.py $^ display_p3 >$@
 	chmod a+x $@
 
 rtheta_to_xy.py: ../prepare/rtheta_to_xy_fit.yml

@@ -18,9 +18,9 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#ifndef _UV_TO_RGB_H
-#define _UV_TO_RGB_H
+#ifndef _RGB_TO_UV_DISPLAY_P3_H
+#define _RGB_TO_UV_DISPLAY_P3_H
 
-void uv_to_rgb(const float *uv, float *rgb);
+void rgb_to_uv_display_p3(const float *rgb, float *uv);
 
 #endif

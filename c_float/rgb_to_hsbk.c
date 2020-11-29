@@ -23,12 +23,6 @@
 #include <string.h>
 #include "rgb_to_hsbk.h"
 
-// old way (slower):
-//#include "kelv_to_rgb.h"
-
-// new way (faster):
-#include "mired_to_rgb.h"
-
 #define RGB_RED 0
 #define RGB_GREEN 1
 #define RGB_BLUE 2
@@ -68,9 +62,13 @@ static struct hue_table {
   }
 };
 
-#include "kelv_rgb_6504K.inc"
-
-void rgb_to_hsbk(const float *rgb, float kelv, float *hsbk) {
+void rgb_to_hsbk(
+  const float *kelv_rgb_6504K,
+  void (*mired_to_rgb)(float mired, float *rgb),
+  const float *rgb,
+  float kelv,
+  float *hsbk
+) {
   // validate inputs, allowing a little slack
   assert(rgb[RGB_RED] >= -EPSILON && rgb[RGB_RED] < 1.f + EPSILON);
   assert(rgb[RGB_GREEN] >= -EPSILON && rgb[RGB_GREEN] < 1.f + EPSILON);
@@ -84,11 +82,6 @@ void rgb_to_hsbk(const float *rgb, float kelv, float *hsbk) {
   }
   else {
     hsbk[HSBK_KELV] = kelv;
-
-    // old way (slower):
-    //kelv_to_rgb(kelv, kelv_rgb);
-
-    // new way (faster):
     mired_to_rgb(1e6f / kelv, kelv_rgb);
   }
 
@@ -163,7 +156,11 @@ void rgb_to_hsbk(const float *rgb, float kelv, float *hsbk) {
 #include <stdlib.h>
 #include <stdio.h>
 
-int main(int argc, char **argv) {
+int rgb_to_hsbk_standalone(
+  void (*_rgb_to_hsbk)(const float *rgb, float kelv, float *hsbk),
+  int argc,
+  char **argv
+) {
   if (argc < 4) {
     printf(
       "usage: %s R G B [kelv]\n"
@@ -179,7 +176,7 @@ int main(int argc, char **argv) {
   float kelv = argc >= 5 ? atof(argv[4]) : 6504.f;
 
   float hsbk[N_HSBK];
-  rgb_to_hsbk(rgb, kelv, hsbk);
+  _rgb_to_hsbk(rgb, kelv, hsbk);
   printf(
     "RGB (%.6f, %.6f, %.6f) -> HSBK (%.3f, %.6f, %.6f, %.3f)\n",
     rgb[RGB_RED],

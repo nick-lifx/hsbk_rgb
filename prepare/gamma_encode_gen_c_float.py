@@ -28,11 +28,11 @@ from python_to_numpy import python_to_numpy
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} gamma_encode_fit_in.yml [name]')
+if len(sys.argv) < 3:
+  print(f'usage: {sys.argv[0]:s} gamma_encode_fit_in.yml device')
   sys.exit(EXIT_FAILURE)
 gamma_encode_fit_in = sys.argv[1]
-name = sys.argv[2] if len(sys.argv) >= 3 else 'gamma_encode'
+device = sys.argv[2]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -70,23 +70,23 @@ print(
 
 #include <assert.h>
 #include <math.h>
-#include "gamma_encode.h"
+#include "gamma_encode_{0:s}.h"
 
-static float post_factor[] = {{{0:s}
+static float post_factor[] = {{{1:s}
 }};
 
 // returns approximation to:
 //   x < .0031308f ? x * 12.92f : powf(x, 1.f / 2.4f) * 1.055f - .055f
 // allowed domain (-inf, 2), recommended domain [-epsilon, 1 + epsilon)
-// minimax error is up to {1:e} relative
-float {2:s}(float x) {{
+// minimax error is up to {2:e} relative
+float gamma_encode_{3:s}(float x) {{
   if (x < .0031308f)
     return x * 12.92f;
   int exp;
   x = frexpf(x, &exp);
-  assert(exp < {3:d});
-  float y = {4:.8e}f;
-{5:s}  return y * post_factor[exp + {6:d}] - .055f;
+  assert(exp < {4:d});
+  float y = {5:.8e}f;
+{6:s}  return y * post_factor[exp + {7:d}] - .055f;
 }}
 
 #ifdef STANDALONE
@@ -104,12 +104,13 @@ int main(int argc, char **argv) {{
   }}
   float x = atof(argv[1]);
 
-  float y = {7:s}(x);
+  float y = gamma_encode_{8:s}(x);
   printf("linear %.6f -> gamma encoded %.6f\\n", x, y);
 
   return EXIT_SUCCESS;
 }}
 #endif'''.format(
+    device,
     ','.join(
       [
         f'\n  {post_factor[i]:.8e}f'
@@ -117,7 +118,7 @@ int main(int argc, char **argv) {{
       ]
     ),
     err,
-    name,
+    device,
     exp1 + 1,
     p[-1],
     ''.join(
@@ -130,6 +131,6 @@ int main(int argc, char **argv) {{
       ]
     ),
     -exp0,
-    name
+    device
   )
 )

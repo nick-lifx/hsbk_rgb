@@ -27,61 +27,104 @@ CFLAGS=-g -Wall
 	${CC} ${CFLAGS} ${CPPFLAGS} -DSTANDALONE -o $@ -c $<
 
 all: \
-hsbk_to_rgb \
-hsv_to_rgb \
-rgb_to_hsbk \
-rgb_to_hsv \
-gamma_decode \
-gamma_encode \
-uv_to_rgb \
-rgb_to_uv \
+hsbk_to_rgb_srgb \
+hsbk_to_rgb_display_p3 \
+rgb_to_hsbk_srgb \
+rgb_to_hsbk_display_p3 \
+gamma_decode_srgb \
+gamma_encode_srgb \
+uv_to_rgb_srgb \
+uv_to_rgb_display_p3 \
+rgb_to_uv_srgb \
+rgb_to_uv_display_p3 \
+mired_to_rgb_srgb \
+mired_to_rgb_display_p3 \
 kelv_to_uv \
 kelv_to_uv_deriv \
-uv_to_kelv \
-mired_to_rgb \
-hue_kelv_test \
-inv_test \
-sat_test \
-gamma_decode_srgb.c \
-gamma_encode_srgb.c \
-uv_to_rgb_srgb.c \
-rgb_to_uv_srgb.c \
-mired_to_rgb_srgb.c \
-uv_to_rgb_display_p3.c \
-rgb_to_uv_display_p3.c \
-mired_to_rgb_display_p3.c
+uv_to_kelv #\
+#hsv_to_rgb \
+#rgb_to_hsv \
+#hue_kelv_test \
+#inv_test \
+#sat_test
 
-hsbk_to_rgb: hsbk_to_rgb_standalone.o mired_to_rgb.o
+hsbk_to_rgb_srgb: \
+hsbk_to_rgb_srgb_standalone.o \
+hsbk_to_rgb_standalone.o \
+mired_to_rgb_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
-hsv_to_rgb: hsv_to_rgb.o hsbk_to_rgb.o mired_to_rgb.o
-	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
-
-rgb_to_hsbk: rgb_to_hsbk_standalone.o mired_to_rgb.o
-	${CC} ${CFLAGS} -o $@ $^
-
-rgb_to_hsbk_standalone.o: rgb_to_hsbk.c kelv_rgb_6504K.inc
-
-kelv_rgb_6504K.inc: kelv_rgb_6504K_gen
-	./kelv_rgb_6504K_gen >$@
-
-kelv_rgb_6504K_gen: kelv_rgb_6504K_gen.o hsbk_to_rgb.o mired_to_rgb.o
-	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
-
-rgb_to_hsv: rgb_to_hsv.o rgb_to_hsbk.o mired_to_rgb.o
-	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
-
-gamma_decode: gamma_decode_standalone.o
-	${CC} ${CFLAGS} -o $@ $^
-
-gamma_encode: gamma_encode_standalone.o
-	${CC} ${CFLAGS} -o $@ $^
-
-uv_to_rgb: uv_to_rgb_standalone.o gamma_encode.o
+hsbk_to_rgb_display_p3: \
+hsbk_to_rgb_display_p3_standalone.o \
+hsbk_to_rgb_standalone.o \
+mired_to_rgb_display_p3.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
-rgb_to_uv: rgb_to_uv_standalone.o gamma_decode.o
+rgb_to_hsbk_srgb: \
+rgb_to_hsbk_srgb_standalone.o \
+rgb_to_hsbk_standalone.o \
+mired_to_rgb_srgb.o
+	${CC} ${CFLAGS} -o $@ $^
+
+rgb_to_hsbk_srgb.c: rgb_to_hsbk_gen
+	./rgb_to_hsbk_gen srgb >$@
+
+rgb_to_hsbk_display_p3: \
+rgb_to_hsbk_display_p3_standalone.o \
+rgb_to_hsbk_standalone.o \
+mired_to_rgb_display_p3.o
+	${CC} ${CFLAGS} -o $@ $^
+
+rgb_to_hsbk_display_p3.c: rgb_to_hsbk_gen
+	./rgb_to_hsbk_gen display_p3 >$@
+
+gamma_decode_srgb: gamma_decode_srgb_standalone.o
+	${CC} ${CFLAGS} -o $@ $^
+
+gamma_decode_srgb.c: ../prepare/gamma_decode_fit_srgb.yml
+	../prepare/gamma_decode_gen_c_float.py $^ srgb >$@
+
+gamma_encode_srgb: gamma_encode_srgb_standalone.o
+	${CC} ${CFLAGS} -o $@ $^
+
+gamma_encode_srgb.c: ../prepare/gamma_encode_fit_srgb.yml
+	../prepare/gamma_encode_gen_c_float.py $^ srgb >$@
+
+uv_to_rgb_srgb: uv_to_rgb_srgb_standalone.o gamma_encode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
+
+uv_to_rgb_srgb.c: ../prepare/primaries_srgb.yml
+	../prepare/uv_to_rgb_gen_c_float.py $^ srgb srgb >$@
+
+uv_to_rgb_display_p3: uv_to_rgb_display_p3_standalone.o gamma_encode_srgb.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
+
+uv_to_rgb_display_p3.c: ../prepare/primaries_display_p3.yml
+	../prepare/uv_to_rgb_gen_c_float.py $^ srgb display_p3 >$@
+
+rgb_to_uv_srgb: rgb_to_uv_srgb_standalone.o gamma_decode_srgb.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
+
+rgb_to_uv_srgb.c: ../prepare/primaries_srgb.yml
+	../prepare/rgb_to_uv_gen_c_float.py $^ srgb srgb  >$@
+
+rgb_to_uv_display_p3: rgb_to_uv_display_p3_standalone.o gamma_decode_srgb.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
+
+rgb_to_uv_display_p3.c: ../prepare/primaries_display_p3.yml
+	../prepare/rgb_to_uv_gen_c_float.py $^ srgb display_p3 >$@
+
+mired_to_rgb_srgb: mired_to_rgb_srgb_standalone.o
+	${CC} ${CFLAGS} -o $@ $^
+
+mired_to_rgb_srgb.c: ../prepare/mired_to_rgb_fit_srgb.yml
+	../prepare/mired_to_rgb_gen_c_float.py $^ srgb >$@
+
+mired_to_rgb_display_p3: mired_to_rgb_display_p3_standalone.o
+	${CC} ${CFLAGS} -o $@ $^
+
+mired_to_rgb_display_p3.c: ../prepare/mired_to_rgb_fit_display_p3.yml
+	../prepare/mired_to_rgb_gen_c_float.py $^ display_p3 >$@
 
 kelv_to_uv: kelv_to_uv_standalone.o
 	${CC} ${CFLAGS} -o $@ $^
@@ -92,8 +135,11 @@ kelv_to_uv_deriv: kelv_to_uv_deriv_standalone.o
 uv_to_kelv: uv_to_kelv_standalone.o kelv_to_uv_deriv.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
-mired_to_rgb: mired_to_rgb_standalone.o
-	${CC} ${CFLAGS} -o $@ $^
+hsv_to_rgb: hsv_to_rgb.o hsbk_to_rgb.o mired_to_rgb.o
+	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
+
+rgb_to_hsv: rgb_to_hsv.o rgb_to_hsbk.o mired_to_rgb.o
+	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
 hue_kelv_test: hue_kelv_test.o hsbk_to_rgb.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
@@ -104,55 +150,46 @@ inv_test: inv_test.o hsbk_to_rgb.o rgb_to_hsbk.o mired_to_rgb.o
 sat_test: sat_test.o hsbk_to_rgb.o mired_to_rgb.o rgb_to_uv.o gamma_decode.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
-gamma_decode_srgb.c: ../prepare/gamma_decode_fit_srgb.yml
-	../prepare/gamma_decode_gen_c_float.py $^ >$@
-
-gamma_encode_srgb.c: ../prepare/gamma_encode_fit_srgb.yml
-	../prepare/gamma_encode_gen_c_float.py $^ >$@
-
-uv_to_rgb_srgb.c: ../prepare/primaries_srgb.yml
-	../prepare/uv_to_rgb_gen_c_float.py $^ >$@
-
-rgb_to_uv_srgb.c: ../prepare/primaries_srgb.yml
-	../prepare/rgb_to_uv_gen_c_float.py $^ >$@
-
-mired_to_rgb_srgb.c: ../prepare/mired_to_rgb_fit_srgb.yml
-	../prepare/mired_to_rgb_gen_c_float.py $^ >$@
-
-uv_to_rgb_display_p3.c: ../prepare/primaries_display_p3.yml
-	../prepare/uv_to_rgb_gen_c_float.py $^ >$@
-
-rgb_to_uv_display_p3.c: ../prepare/primaries_display_p3.yml
-	../prepare/rgb_to_uv_gen_c_float.py $^ >$@
-
-mired_to_rgb_display_p3.c: ../prepare/mired_to_rgb_fit_display_p3.yml
-	../prepare/mired_to_rgb_gen_c_float.py $^ >$@
+# most generator scripts live in ../prepare, but this one is special,
+# as it needs to run the previously generated code in this directory
+# (it must link to both srgb and display_p3 so list both dependencies)
+rgb_to_hsbk_gen: \
+rgb_to_hsbk_gen.o \
+mired_to_rgb_srgb.o \
+mired_to_rgb_display_p3.o
+	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
 clean:
 	rm -f \
-hsbk_to_rgb \
-hsv_to_rgb \
-rgb_to_hsbk \
-kelv_rgb_6504K.inc \
-kelv_rgb_6504K_gen \
-rgb_to_hsv \
-gamma_decode \
-gamma_encode \
-uv_to_rgb \
-rgb_to_uv \
+hsbk_to_rgb_srgb \
+hsbk_to_rgb_display_p3 \
+rgb_to_hsbk_srgb \
+rgb_to_hsbk_srgb.c \
+rgb_to_hsbk_display_p3 \
+rgb_to_hsbk_display_p3.c \
+gamma_decode_srgb \
+gamma_decode_srgb.c \
+gamma_encode_srgb \
+gamma_encode_srgb.c \
+uv_to_rgb_srgb \
+uv_to_rgb_srgb.c \
+uv_to_rgb_display_p3 \
+uv_to_rgb_display_p3.c \
+rgb_to_uv_srgb \
+rgb_to_uv_srgb.c \
+rgb_to_uv_display_p3 \
+rgb_to_uv_display_p3.c \
+mired_to_rgb_srgb \
+mired_to_rgb_srgb.c \
+mired_to_rgb_display_p3 \
+mired_to_rgb_display_p3.c \
 kelv_to_uv \
 kelv_to_uv_deriv \
 uv_to_kelv \
-mired_to_rgb \
+hsv_to_rgb \
+rgb_to_hsv \
 hue_kelv_test \
 inv_test \
 sat_test \
-gamma_decode_srgb.c \
-gamma_encode_srgb.c \
-uv_to_rgb_srgb.c \
-rgb_to_uv_srgb.c \
-mired_to_rgb_srgb.c \
-uv_to_rgb_display_p3.c \
-rgb_to_uv_display_p3.c \
-mired_to_rgb_display_p3.c \
+rgb_to_hsbk_gen \
 *.o

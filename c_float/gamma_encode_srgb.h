@@ -18,38 +18,9 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#include <stdio.h>
-#include "hsbk_to_rgb.h"
+#ifndef _GAMMA_ENCODE_SRGB_H
+#define _GAMMA_ENCODE_SRGB_H
 
-#define EXIT_SUCCESS 0
-#define EXIT_FAILURE 1
+float gamma_encode_srgb(float x);
 
-#define HSBK_HUE 0
-#define HSBK_SAT 1
-#define HSBK_BR 2
-#define HSBK_KELV 3
-#define N_HSBK 4
-
-#define RGB_RED 0
-#define RGB_GREEN 1
-#define RGB_BLUE 2
-#define N_RGB 3
-
-// precompute RGB for 6504K, used for rgb_to_hsbk with kelv == 0.f
-
-int main(void) {
-  float hsbk[N_HSBK] = {0.f, 0.f, 1.f, 6504.f};
-  float rgb[N_RGB];
-  hsbk_to_rgb(hsbk, rgb);
-  printf(
-    "static float kelv_rgb_6504K[N_RGB] = {\n"
-      "  %.8e,\n"
-      "  %.8e,\n"
-      "  %.8e\n"
-      "};\n",
-      rgb[RGB_RED],
-      rgb[RGB_GREEN],
-      rgb[RGB_BLUE]
-  );
-  return EXIT_SUCCESS;
-}
+#endif

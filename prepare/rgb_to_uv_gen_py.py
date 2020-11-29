@@ -38,12 +38,12 @@ UVL_V = 1
 UVL_L = 2
 N_UVL = 3
 
-if len(sys.argv) < 3:
-  print(f'usage: {sys.argv[0]:s} primaries_in.yml gamma_curve [name]')
+if len(sys.argv) < 4:
+  print(f'usage: {sys.argv[0]:s} primaries_in.yml gamma_curve device')
   sys.exit(EXIT_FAILURE)
 primaries_in = sys.argv[1]
 gamma_curve = sys.argv[2]
-name = sys.argv[3] if len(sys.argv) >= 4 else 'rgb_to_uv'
+device = sys.argv[3]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -101,7 +101,7 @@ rgb_to_UVL = numpy.array(
   numpy.double
 )
 
-def {11:s}(rgb):
+def rgb_to_uv_{11:s}(rgb):
   # validate inputs, allowing a little slack
   assert numpy.all(rgb >= -EPSILON) and numpy.all(rgb < 1. + EPSILON)
   assert numpy.sum(rgb) >= EPSILON
@@ -131,7 +131,7 @@ if __name__ == '__main__':
     sys.exit(EXIT_FAILURE)
   rgb = numpy.array([float(i) for i in sys.argv[1:4]], numpy.double)
 
-  uv = {13:s}(rgb)
+  uv = rgb_to_uv_{13:s}(rgb)
   print(
     f'RGB ({{rgb[RGB_RED]:.6f}}, {{rgb[RGB_GREEN]:.6f}}, {{rgb[RGB_BLUE]:.6f}}) -> uv ({{uv[UV_u]:.6f}}, {{uv[UV_v]:.6f}})'
   )'''.format(
@@ -146,8 +146,8 @@ if __name__ == '__main__':
     rgb_to_UVL[UVL_L, RGB_RED],
     rgb_to_UVL[UVL_L, RGB_GREEN],
     rgb_to_UVL[UVL_L, RGB_BLUE],
-    name,
+    device,
     gamma_curve,
-    name
+    device 
   )
 )

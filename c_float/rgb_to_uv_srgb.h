@@ -18,9 +18,9 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#ifndef _GAMMA_ENCODE_H
-#define _GAMMA_ENCODE_H
+#ifndef _RGB_TO_UV_SRGB_H
+#define _RGB_TO_UV_SRGB_H
 
-float gamma_encode(float x);
+void rgb_to_uv_srgb(const float *rgb, float *uv);
 
 #endif

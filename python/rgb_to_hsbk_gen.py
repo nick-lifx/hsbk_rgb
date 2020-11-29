@@ -33,15 +33,16 @@ RGB_GREEN = 1
 RGB_BLUE = 2
 N_RGB = 3
 
+# precompute RGB for 6504K, used for rgb_to_hsbk with kelv == None
+# most generator scripts live in ../prepare, but this one is special,
+# as it needs to run the previously generated code in this directory
+
 if len(sys.argv) < 2:
   print(f'usage: {sys.argv[0]:s} device')
   print('device in {{srgb, display_p3}}')
   sys.exit(EXIT_FAILURE)
 device = sys.argv[1]
 
-# precompute RGB for 6504K, used for rgb_to_hsbk with kelv == None
-# most generator scripts live in ../prepare, but this one is special,
-# as it needs to run the previously generated code in this directory
 rgb = {
   'srgb': mired_to_rgb_srgb,
   'display_p3': mired_to_rgb_display_p3
