@@ -46,14 +46,14 @@ seed = int(sys.argv[1])
 count = int(sys.argv[2])
 kelv = float(sys.argv[3]) if len(sys.argv) >= 4 else None
 
-rgb_to_hsbk, hsbk_to_rgb = {
+hsbk_to_rgb, rgb_to_hsbk = {
   'srgb': (
-    rgb_to_hsbk_srgb,
-    hsbk_to_rgb_srgb
+    hsbk_to_rgb_srgb,
+    rgb_to_hsbk_srgb
   ),
   'display_p3': (
-    rgb_to_hsbk_display_p3,
-    hsbk_to_rgb_display_p3
+    hsbk_to_rgb_display_p3,
+    rgb_to_hsbk_display_p3
   )
 }[device]
 

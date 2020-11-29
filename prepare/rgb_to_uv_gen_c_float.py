@@ -96,7 +96,7 @@ print(
 #define EPSILON 1e-6f
 
 // this is precomputed for the particular primaries in use
-float rgb_to_UVL[N_UVL][N_RGB] = {{
+static float rgb_to_UVL[N_UVL][N_RGB] = {{
   {{{2:.8e}f, {3:.8e}f, {4:.8e}f}},
   {{{5:.8e}f, {6:.8e}f, {7:.8e}f}},
   {{{8:.8e}f, {9:.8e}f, {10:.8e}f}}

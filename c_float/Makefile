@@ -41,12 +41,12 @@ mired_to_rgb_srgb \
 mired_to_rgb_display_p3 \
 kelv_to_uv \
 kelv_to_uv_deriv \
-uv_to_kelv #\
-#hsv_to_rgb \
-#rgb_to_hsv \
-#hue_kelv_test \
-#inv_test \
-#sat_test
+uv_to_kelv \
+hsv_to_rgb \
+rgb_to_hsv \
+hue_kelv_test \
+inv_test \
+sat_test
 
 hsbk_to_rgb_srgb: \
 hsbk_to_rgb_srgb_standalone.o \
@@ -135,19 +135,55 @@ kelv_to_uv_deriv: kelv_to_uv_deriv_standalone.o
 uv_to_kelv: uv_to_kelv_standalone.o kelv_to_uv_deriv.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
-hsv_to_rgb: hsv_to_rgb.o hsbk_to_rgb.o mired_to_rgb.o
+hsv_to_rgb: \
+hsv_to_rgb.o \
+hsbk_to_rgb_srgb.o \
+hsbk_to_rgb_display_p3.o \
+hsbk_to_rgb.o \
+mired_to_rgb_srgb.o \
+mired_to_rgb_display_p3.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
-rgb_to_hsv: rgb_to_hsv.o rgb_to_hsbk.o mired_to_rgb.o
+rgb_to_hsv: \
+rgb_to_hsv.o \
+rgb_to_hsbk_srgb.o \
+rgb_to_hsbk_display_p3.o \
+rgb_to_hsbk.o \
+mired_to_rgb_srgb.o \
+mired_to_rgb_display_p3.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
-hue_kelv_test: hue_kelv_test.o hsbk_to_rgb.o mired_to_rgb.o
+hue_kelv_test: \
+hue_kelv_test.o \
+hsbk_to_rgb_srgb.o \
+hsbk_to_rgb_display_p3.o \
+hsbk_to_rgb.o \
+mired_to_rgb_srgb.o \
+mired_to_rgb_display_p3.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
-inv_test: inv_test.o hsbk_to_rgb.o rgb_to_hsbk.o mired_to_rgb.o
+inv_test: \
+inv_test.o \
+hsbk_to_rgb_srgb.o \
+hsbk_to_rgb_display_p3.o \
+hsbk_to_rgb.o \
+rgb_to_hsbk_srgb.o \
+rgb_to_hsbk_display_p3.o \
+rgb_to_hsbk.o \
+mired_to_rgb_srgb.o \
+mired_to_rgb_display_p3.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
-sat_test: sat_test.o hsbk_to_rgb.o mired_to_rgb.o rgb_to_uv.o gamma_decode.o
+sat_test: \
+sat_test.o \
+hsbk_to_rgb_srgb.o \
+hsbk_to_rgb_display_p3.o \
+hsbk_to_rgb.o \
+mired_to_rgb_srgb.o \
+mired_to_rgb_display_p3.o \
+rgb_to_uv_srgb.o \
+rgb_to_uv_display_p3.o \
+gamma_decode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
 # most generator scripts live in ../prepare, but this one is special,

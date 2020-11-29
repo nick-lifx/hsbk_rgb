@@ -23,7 +23,6 @@
 import imageio
 import numpy
 import sys
-from gamma_decode_srgb import gamma_decode_srgb
 from hsbk_to_rgb_display_p3 import hsbk_to_rgb_display_p3
 from hsbk_to_rgb_srgb import hsbk_to_rgb_srgb
 from rgb_to_uv_display_p3 import rgb_to_uv_display_p3
@@ -39,20 +38,18 @@ if len(sys.argv) >= 3 and sys.argv[1] == '--device':
 if len(sys.argv) < 2:
   print(f'usage: {sys.argv[0]:s} [--device device] image_out')
   print('image_out = name of PNG file to create (will be overwritten)')
-  print('creates 361 x 376 x 3 image with 0..360 degrees by 1, 1500..9000 Kelvin by 20')
+  print('creates 361 x 376 image with 0..360 degrees by 1, 1500..9000 Kelvin by 20')
   sys.exit(EXIT_FAILURE)
 image_out = sys.argv[1]
 
-gamma_decode, rgb_to_uv, hsbk_to_rgb = {
+hsbk_to_rgb, rgb_to_uv = {
   'srgb': (
-    gamma_decode_srgb,
-    rgb_to_uv_srgb,
-    hsbk_to_rgb_srgb
+    hsbk_to_rgb_srgb,
+    rgb_to_uv_srgb
   ),
   'display_p3': (
-    gamma_decode_srgb,
-    rgb_to_uv_display_p3,
-    hsbk_to_rgb_display_p3
+    hsbk_to_rgb_display_p3,
+    rgb_to_uv_display_p3
   )
 }[device]
 
