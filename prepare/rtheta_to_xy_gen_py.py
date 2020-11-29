@@ -31,10 +31,9 @@ EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
 if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} rtheta_to_xy_fit_in.yml [name]')
+  print(f'usage: {sys.argv[0]:s} rtheta_to_xy_fit_in.yml')
   sys.exit(EXIT_FAILURE)
 rtheta_to_xy_fit_in = sys.argv[1]
-name = sys.argv[2] if len(sys.argv) >= 3 else 'rtheta_to_xy'
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -90,19 +89,19 @@ N_RTHETA = 2
 # returns approximation to:
 #   r * math.cos(theta), r * math.sin(theta)
 # minimax error is up to {0:e} resp. {1:e} on domain [-pi/4, pi/4)
-def {2:s}(rtheta):
+def rtheta_to_xy(rtheta):
   r = rtheta[RTHETA_r]
   theta = rtheta[RTHETA_theta]
 
-  theta *= {3:.16e}
+  theta *= {2:.16e}
   i = int(round(theta))
   theta -= i
   theta2 = theta * theta
 
-  x = {4:.16e}
-{5:s}
-  y = {6:.16e}
-{7:s}  y *= theta
+  x = {3:.16e}
+{4:s}
+  y = {5:.16e}
+{6:s}  y *= theta
 
   if i & 1:
     x, y = -y, x
@@ -124,11 +123,10 @@ if __name__ == '__main__':
     sys.exit(EXIT_FAILURE)
   rtheta = numpy.array([float(i) for i in sys.argv[1:3]], numpy.double)
 
-  xy = {8:s}(rtheta)
+  xy = rtheta_to_xy(rtheta)
   print(f'rtheta ({{rtheta[RTHETA_r]:.6f}}, {{rtheta[RTHETA_theta]:.6f}}) -> xy ({{xy[XY_x]:.6f}}, {{xy[XY_y]:.6f}})')'''.format(
     p_err,
     q_err,
-    name,
     theta_scale,
     p[-1],
     ''.join(
@@ -149,7 +147,6 @@ if __name__ == '__main__':
         )
         for i in range(q.shape[0] - 2, -1, -1)
       ]
-    ),
-    name
+    )
   )
 )

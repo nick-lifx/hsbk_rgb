@@ -30,10 +30,9 @@ EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
 if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} xy_to_rtheta_fit_in.yml [name]')
+  print(f'usage: {sys.argv[0]:s} xy_to_rtheta_fit_in.yml')
   sys.exit(EXIT_FAILURE)
 xy_to_rtheta_fit_in = sys.argv[1]
-name = sys.argv[2] if len(sys.argv) >= 3 else 'xy_to_rtheta'
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -84,26 +83,26 @@ N_RTHETA = 2
 #   math.sqrt(x ** 2 + y ** 2), atan2(y, x)
 # x and y cannot both be 0 (but can be arbitrarily small)
 # minimax error is up to {0:e} relative resp. {1:e} absolute
-def {2:s}(xy):
+def xy_to_rtheta(xy):
   x = xy[XY_x]
   y = xy[XY_y]
 
   theta = 0.
   if y >= x:
-    theta = {3:.16e} if y >= 0. else {4:.16e}
+    theta = {2:.16e} if y >= 0. else {3:.16e}
     x = -x
     y = -y
   if y < -x:
-    theta -= {5:.16e}
+    theta -= {4:.16e}
     x, y = -y, x
 
   slope = y / x
   slope2 = slope * slope
 
-  r = {6:.16e}
-{7:s}
-  s = {8:.16e}
-{9:s}  s *= slope
+  r = {5:.16e}
+{6:s}
+  s = {7:.16e}
+{8:s}  s *= slope
 
   return numpy.array([x * r, theta + s], numpy.double)
 
@@ -120,11 +119,10 @@ if __name__ == '__main__':
     sys.exit(EXIT_FAILURE)
   xy = numpy.array([float(i) for i in sys.argv[1:3]], numpy.double)
 
-  rtheta = {10:s}(xy)
+  rtheta = xy_to_rtheta(xy)
   print(f'xy ({{xy[XY_x]:.6f}}, {{xy[XY_y]:.6f}}) -> rtheta ({{rtheta[RTHETA_r]:.6f}}, {{rtheta[RTHETA_theta]:.6f}})')'''.format(
     p_err,
     q_err,
-    name,
     math.pi,
     -math.pi,
     .5 * math.pi,
@@ -147,7 +145,6 @@ if __name__ == '__main__':
         )
         for i in range(q.shape[0] - 2, -1, -1)
       ]
-    ),
-    name
+    )
   )
 )

@@ -24,9 +24,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "gamma_decode.h"
-#include "hsbk_to_rgb.h"
-#include "rgb_to_uv.h"
+#include <string.h>
+#include "hsbk_to_rgb_display_p3.h"
+#include "hsbk_to_rgb_srgb.h"
+#include "rgb_to_uv_display_p3.h"
+#include "rgb_to_uv_srgb.h"
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -44,16 +46,36 @@
 #define N_UV 2
 
 int main(int argc, char **argv) {
+  const char *device = "srgb";
+  if (argc >= 3 && strcmp(argv[1], "--device") == 0) {
+    device = argv[2];
+    memmove(argv + 1, argv + 3, (argc - 3) * sizeof(char **));
+    argc -= 2;
+  }
   if (argc < 2) {
     printf(
-      "usage: %s image_out\n"
+      "usage: %s [--device device] image_out\n"
+        "device in {srgb, display_p3}, default srgb\n"
         "image_out = name of PNG file to create (will be overwritten)\n"
-        "creates 361 x 376 x 3 image with 0..360 degrees by 1, 1500..9000 Kelvin by 20\n",
+        "creates 361 x 376 image with 0..360 degrees by 1, 1500..9000 Kelvin by 20\n",
       argv[0]
     );
     exit(EXIT_FAILURE);
   }
-  char *image_out = argv[1];
+  const char *image_out = argv[1];
+
+  void (*hsbk_to_rgb)(const int32_t *hsbk, int32_t *rgb);
+  void (*rgb_to_uv)(const int32_t *rgb, int32_t *uv);
+  if (strcmp(device, "srgb") == 0) {
+    hsbk_to_rgb = hsbk_to_rgb_srgb;
+    rgb_to_uv = rgb_to_uv_srgb;
+  }
+  else if (strcmp(device, "display_p3") == 0) {
+    hsbk_to_rgb = hsbk_to_rgb_display_p3;
+    rgb_to_uv = rgb_to_uv_display_p3;
+  }
+  else
+    abort();
 
   // find chromaticities of the hue space by 1 degree increments
   int32_t hue_uv[361][N_UV];

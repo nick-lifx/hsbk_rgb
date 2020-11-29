@@ -18,11 +18,11 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#ifndef _UV_TO_RGB_H
-#define _UV_TO_RGB_H
+#ifndef _GAMMA_DECODE_SRGB_H
+#define _GAMMA_DECODE_SRGB_H
 
 #include <stdint.h>
 
-void uv_to_rgb(const int32_t *uv, int32_t *rgb);
+int32_t gamma_decode_srgb(int32_t x);
 
 #endif

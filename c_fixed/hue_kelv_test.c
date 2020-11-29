@@ -24,7 +24,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "hsbk_to_rgb.h"
+#include <string.h>
+#include "hsbk_to_rgb_display_p3.h"
+#include "hsbk_to_rgb_srgb.h"
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -40,9 +42,16 @@
 #define EPSILON 1e-6
 
 int main(int argc, char **argv) {
+  const char *device = "srgb";
+  if (argc >= 3 && strcmp(argv[1], "--device") == 0) {
+    device = argv[2];
+    memmove(argv + 1, argv + 3, (argc - 3) * sizeof(char **));
+    argc -= 2;
+  }
   if (argc < 4) {
     printf(
-      "usage: %s sat br image_out\n"
+      "usage: %s [--device device] sat br image_out\n"
+        "device in {srgb, display_p3}, default srgb\n"
         "sat = saturation as fraction (0 to 1)\n"
         "br = brightness as fraction (0 to 1)\n"
         "image_out = name of PNG file to create (will be overwritten)\n"
@@ -53,7 +62,15 @@ int main(int argc, char **argv) {
   }
   int32_t sat = (int32_t)roundf(ldexpf(atof(argv[1]), 30));
   int32_t br = (int32_t)roundf(ldexpf(atof(argv[2]), 30));
-  char *image_out = argv[3];
+  const char *image_out = argv[3];
+
+  void (*hsbk_to_rgb)(const int32_t *hsbk, int32_t *rgb);
+  if (strcmp(device, "srgb") == 0)
+    hsbk_to_rgb = hsbk_to_rgb_srgb;
+  else if (strcmp(device, "display_p3") == 0)
+    hsbk_to_rgb = hsbk_to_rgb_display_p3;
+  else
+    abort();
 
   int32_t image[376][361][N_RGB];
   for (int i = 0; i < 376; ++i) {

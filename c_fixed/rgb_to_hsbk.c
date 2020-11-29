@@ -19,15 +19,8 @@
 // IN THE SOFTWARE.
 
 #include <assert.h>
-#include <math.h>
 #include <string.h>
 #include "rgb_to_hsbk.h"
-
-// old way (slower):
-//#include "kelv_to_rgb.h"
-
-// new way (faster):
-#include "mired_to_rgb.h"
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -42,8 +35,6 @@
 
 #define EPSILON (1 << 10)
 
-#include "kelv_rgb_6504K.inc"
-
 // arguments in 2:30 fixed point
 // results as follows:
 //   hue in 0:32 fixed point
@@ -52,7 +43,13 @@
 //   Kelvin in 16:16 fixed point
 // all are signed, so the hue is taken to be in [180, 180), but
 // if cast to unsigned then it would equivalently be in [0, 360)
-void rgb_to_hsbk(const int32_t *rgb, int32_t kelv, int32_t *hsbk) {
+void rgb_to_hsbk(
+  const int32_t *kelv_rgb_6504K,
+  void (*mired_to_rgb)(int32_t mired, int32_t *rgb),
+  const int32_t *rgb,
+  int32_t kelv,
+  int32_t *hsbk
+) {
   // validate inputs, allowing a little slack
   assert(rgb[RGB_RED] >= -EPSILON && rgb[RGB_RED] < (1 << 30) + EPSILON);
   assert(rgb[RGB_GREEN] >= -EPSILON && rgb[RGB_GREEN] < (1 << 30) + EPSILON);
@@ -68,11 +65,6 @@ void rgb_to_hsbk(const int32_t *rgb, int32_t kelv, int32_t *hsbk) {
   }
   else {
     hsbk[HSBK_KELV] = kelv;
-
-    // old way (slower):
-    //kelv_to_rgb(kelv, kelv_rgb);
-
-    // new way (faster):
     mired_to_rgb(
       (int32_t)(((1000000LL << 33) / kelv + 1) >> 1),
       kelv_rgb
@@ -195,10 +187,15 @@ void rgb_to_hsbk(const int32_t *rgb, int32_t kelv, int32_t *hsbk) {
 }
 
 #ifdef STANDALONE
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-int main(int argc, char **argv) {
+int rgb_to_hsbk_standalone(
+  void (*_rgb_to_hsbk)(const int32_t *rgb, int32_t kelv, int32_t *hsbk),
+  int argc,
+  char **argv
+) {
   if (argc < 4) {
     printf(
       "usage: %s R G B [kelv]\n"
@@ -219,7 +216,7 @@ int main(int argc, char **argv) {
     argc >= 5 ? (int32_t)roundf(ldexpf(atof(argv[4]), 16)) : (int32_t)0;
 
   int32_t hsbk[N_HSBK];
-  rgb_to_hsbk(rgb, kelv, hsbk);
+  _rgb_to_hsbk(rgb, kelv, hsbk);
   printf(
     "RGB (%.6f, %.6f, %.6f) -> HSBK (%.3f, %.6f, %.6f, %.3f)\n",
     ldexpf(rgb[RGB_RED], -30),

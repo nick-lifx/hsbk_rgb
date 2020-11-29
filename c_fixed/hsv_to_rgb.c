@@ -25,7 +25,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "hsbk_to_rgb.h"
+#include "hsbk_to_rgb_display_p3.h"
+#include "hsbk_to_rgb_srgb.h"
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -46,9 +47,16 @@
 #define EPSILON 1e-6
 
 int main(int argc, char **argv) {
+  const char *device = "srgb";
+  if (argc >= 3 && strcmp(argv[1], "--device") == 0) {
+    device = argv[2];
+    memmove(argv + 1, argv + 3, (argc - 3) * sizeof(char **));
+    argc -= 2;
+  }
   if (argc < 3) {
     printf(
-      "usage: %s image_in image_out [kelv]\n"
+      "usage: %s [--device device] image_in image_out [kelv]\n"
+        "device in {srgb, display_p3}, default srgb\n"
         "image_in = name of PNG file (HSV pixels) to read\n"
         "image_out = name of PNG file to create (will be overwritten)\n"
         "kelv = implicit colour temperature to apply to HSV pixels (default 6504K)\n",
@@ -56,8 +64,8 @@ int main(int argc, char **argv) {
     );
     exit(EXIT_FAILURE);
   }
-  char *image_in = argv[1];
-  char *image_out = argv[2];
+  const char *image_in = argv[1];
+  const char *image_out = argv[2];
   int32_t kelv =
     argc >= 4 ?
       (int32_t)roundf(ldexpf(atof(argv[3]), 16)) :
@@ -68,6 +76,14 @@ int main(int argc, char **argv) {
     perror(image_in);
     exit(EXIT_FAILURE);
   }
+
+  void (*hsbk_to_rgb)(const int32_t *hsbk, int32_t *rgb);
+  if (strcmp(device, "srgb") == 0)
+    hsbk_to_rgb = hsbk_to_rgb_srgb;
+  else if (strcmp(device, "display_p3") == 0)
+    hsbk_to_rgb = hsbk_to_rgb_display_p3;
+  else
+    abort();
 
   png_structp png_ptr = png_create_read_struct(
     PNG_LIBPNG_VER_STRING,

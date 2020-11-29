@@ -30,11 +30,22 @@ EXIT_FAILURE = 1
 
 EPSILON = 1e-8
 
-if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} primaries_in.yml [name]')
+RGB_RED = 0
+RGB_GREEN = 1
+RGB_BLUE = 2
+N_RGB = 3
+
+UVL_U = 0
+UVL_V = 1
+UVL_L = 2
+N_UVL = 3
+
+if len(sys.argv) < 4:
+  print(f'usage: {sys.argv[0]:s} primaries_in.yml gamma_curve device')
   sys.exit(EXIT_FAILURE)
 primaries_in = sys.argv[1]
-name = sys.argv[2] if len(sys.argv) >= 3 else 'rgb_to_uv'
+gamma_curve = sys.argv[2]
+device = sys.argv[3]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -84,8 +95,8 @@ print(
 // IN THE SOFTWARE.
 
 #include <assert.h>
-#include "rgb_to_uv.h"
-#include "gamma_decode.h"
+#include "rgb_to_uv_{0:s}.h"
+#include "gamma_decode_{1:s}.h"
 
 #define UV_u 0
 #define UV_v 1
@@ -104,13 +115,13 @@ print(
 #define EPSILON (1 << 10)
 
 // this is precomputed for the particular primaries in use
-int32_t rgb_to_UVL[N_UVL][N_RGB] = {{
-  {{{0:.8e}f, {1:.8e}f, {2:.8e}f}},
-  {{{3:.8e}f, {4:.8e}f, {5:.8e}f}},
-  {{{6:.8e}f, {7:.8e}f, {8:.8e}f}}
+static int32_t rgb_to_UVL[N_UVL][N_RGB] = {{
+  {{{2:.8e}f, {3:.8e}f, {4:.8e}f}},
+  {{{5:.8e}f, {6:.8e}f, {7:.8e}f}},
+  {{{8:.8e}f, {9:.8e}f, {10:.8e}f}}
 }};
 
-void {9:s}(const int32_t *rgb, int32_t *uv) {{
+void rgb_to_uv_{11:s}(const int32_t *rgb, int32_t *uv) {{
   // validate inputs, allowing a little slack
   assert(rgb[RGB_RED] >= -EPSILON && rgb[RGB_RED] < (1 << 30) + EPSILON);
   assert(rgb[RGB_GREEN] >= -EPSILON && rgb[RGB_GREEN] < (1 << 30) + EPSILON);
@@ -119,7 +130,7 @@ void {9:s}(const int32_t *rgb, int32_t *uv) {{
 
   int32_t rgb1[N_RGB];
   for (int i = 0; i < N_RGB; ++i)
-    rgb1[i] = gamma_decode(rgb[i]);
+    rgb1[i] = gamma_decode_{12:s}(rgb[i]);
 
   int32_t UVL[N_UVL];
   for (int i = 0; i < N_UVL; ++i) {{
@@ -157,7 +168,7 @@ int main(int argc, char **argv) {{
   }};
 
   int32_t uv[N_UV];
-  {10:s}(rgb, uv);
+  rgb_to_uv_{13:s}(rgb, uv);
   printf(
     "RGB (%.6f, %.6f, %.6f) -> uv (%.6f, %.6f)\\n",
     ldexpf(rgb[RGB_RED], -30),
@@ -170,16 +181,19 @@ int main(int argc, char **argv) {{
   return EXIT_SUCCESS;
 }}
 #endif'''.format(
-    rgb_to_UVL[0, 0],
-    rgb_to_UVL[0, 1],
-    rgb_to_UVL[0, 2],
-    rgb_to_UVL[1, 0],
-    rgb_to_UVL[1, 1],
-    rgb_to_UVL[1, 2],
-    rgb_to_UVL[2, 0],
-    rgb_to_UVL[2, 1],
-    rgb_to_UVL[2, 2],
-    name,
-    name
+    device,
+    gamma_curve,
+    rgb_to_UVL[UVL_U, RGB_RED],
+    rgb_to_UVL[UVL_U, RGB_GREEN],
+    rgb_to_UVL[UVL_U, RGB_BLUE],
+    rgb_to_UVL[UVL_V, RGB_RED],
+    rgb_to_UVL[UVL_V, RGB_GREEN],
+    rgb_to_UVL[UVL_V, RGB_BLUE],
+    rgb_to_UVL[UVL_L, RGB_RED],
+    rgb_to_UVL[UVL_L, RGB_GREEN],
+    rgb_to_UVL[UVL_L, RGB_BLUE],
+    device,
+    gamma_curve,
+    device 
   )
 )

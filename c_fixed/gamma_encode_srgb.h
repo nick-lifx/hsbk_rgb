@@ -18,15 +18,11 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#ifndef _HSBK_TO_RGB_H
-#define _HSBK_TO_RGB_H
+#ifndef _GAMMA_ENCODE_SRGB_H
+#define _GAMMA_ENCODE_SRGB_H
 
 #include <stdint.h>
 
-void hsbk_to_rgb(
-  void (*mired_to_rgb)(int32_t mired, int32_t *rgb),
-  const int32_t *hsbk,
-  int32_t *rgb
-);
+int32_t gamma_encode_srgb(int32_t x);
 
 #endif

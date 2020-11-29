@@ -18,15 +18,11 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#ifndef _HSBK_TO_RGB_H
-#define _HSBK_TO_RGB_H
+#ifndef _RGB_TO_UV_DISPLAY_P3_H
+#define _RGB_TO_UV_DISPLAY_P3_H
 
 #include <stdint.h>
 
-void hsbk_to_rgb(
-  void (*mired_to_rgb)(int32_t mired, int32_t *rgb),
-  const int32_t *hsbk,
-  int32_t *rgb
-);
+void rgb_to_uv_display_p3(const int32_t *rgb, int32_t *uv);
 
 #endif

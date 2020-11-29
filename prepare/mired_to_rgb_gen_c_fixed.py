@@ -36,11 +36,11 @@ MIRED_EXP = -16
 # results in 2:30 fixed point
 RGB_EXP = -30
 
-if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} mired_to_rgb_fit_in.yml [name]')
+if len(sys.argv) < 3:
+  print(f'usage: {sys.argv[0]:s} mired_to_rgb_fit_in.yml device')
   sys.exit(EXIT_FAILURE)
 mired_to_rgb_fit_in = sys.argv[1]
-name = sys.argv[2] if len(sys.argv) >= 3 else 'mired_to_rgb'
+device = sys.argv[2]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -146,7 +146,7 @@ print(
 // IN THE SOFTWARE.
 
 #include <assert.h>
-#include "mired_to_rgb.h"
+#include "mired_to_rgb_{0:s}.h"
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -155,41 +155,41 @@ print(
 
 #define EPSILON (1 << 6)
 
-void {0:s}(int32_t mired, int32_t *rgb) {{
+void mired_to_rgb_{1:s}(int32_t mired, int32_t *rgb) {{
   // validate inputs, allowing a little slack
-  assert(mired >= {1:s} - EPSILON && mired < {2:s} + EPSILON);
+  assert(mired >= {2:s} - EPSILON && mired < {3:s} + EPSILON);
 
   // calculate red channel
   int32_t r;
-  if (mired < {3:s}) {{
-    r = {4:s};
-{5:s}  }}
+  if (mired < {4:s}) {{
+    r = {5:s};
+{6:s}  }}
   else {{
-    r = {6:s};
-{7:s}  }}
+    r = {7:s};
+{8:s}  }}
   rgb[RGB_RED] = r;
 
   // calculate green channel
   int32_t g;
-  if (mired < {8:s}) {{
-    g = {9:s};
-{10:s}  }}
+  if (mired < {9:s}) {{
+    g = {10:s};
+{11:s}  }}
   else {{
-    g = {11:s};
-{12:s}  }}
+    g = {12:s};
+{13:s}  }}
   rgb[RGB_GREEN] = g;
 
   // calculate blue channel
   int32_t b;
-  if (mired < {13:s}) {{
-    b = {14:s};
-{15:s}  }}
-  else if (mired < {16:s}) {{
-    b = {17:s};
-{18:s}  }}
+  if (mired < {14:s}) {{
+    b = {15:s};
+{16:s}  }}
+  else if (mired < {17:s}) {{
+    b = {18:s};
+{19:s}  }}
   else {{
-    b = {19:s};
-{20:s}  }}
+    b = {20:s};
+{21:s}  }}
   rgb[RGB_BLUE] = b;
 }}
 
@@ -210,7 +210,7 @@ int main(int argc, char **argv) {{
   int32_t mired = (int32_t)roundf(ldexpf(atof(argv[1]), 16));
 
   int32_t rgb[N_RGB];
-  {21:s}(mired, rgb);
+  mired_to_rgb_{22:s}(mired, rgb);
   printf(
     "mired %.3f -> RGB (%.6f, %.6f, %.6f)\\n",
     ldexpf(mired, -16),
@@ -222,7 +222,8 @@ int main(int argc, char **argv) {{
   return EXIT_SUCCESS;
 }}
 #endif'''.format(
-    name,
+    device,
+    device,
     to_hex(int(round(math.ldexp(a, -MIRED_EXP)))),
     to_hex(int(round(math.ldexp(d, -MIRED_EXP)))),
     to_hex(int(round(math.ldexp(b_red, -MIRED_EXP)))),
@@ -306,6 +307,6 @@ int main(int argc, char **argv) {{
         for i in range(p_blue_cd.shape[0] - 2, -1, -1)
       ]
     ),
-    name
+    device
   )
 )

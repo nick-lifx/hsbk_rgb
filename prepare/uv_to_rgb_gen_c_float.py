@@ -76,8 +76,8 @@ print(
 // IN THE SOFTWARE.
 
 #include <assert.h>
-#include "uv_to_rgb_{0:s}.h"
-#include "gamma_encode_{1:s}.h"
+#include "gamma_encode_{0:s}.h"
+#include "uv_to_rgb_{1:s}.h"
 
 #define UV_u 0
 #define UV_v 1
@@ -170,8 +170,8 @@ int main(int argc, char **argv) {{
   return EXIT_SUCCESS;
 }}
 #endif'''.format(
-    device,
     gamma_curve,
+    device,
     UVL_to_rgb[RGB_RED, UVL_U],
     UVL_to_rgb[RGB_RED, UVL_V],
     UVL_to_rgb[RGB_RED, UVL_L],

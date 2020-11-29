@@ -32,11 +32,11 @@ EXIT_FAILURE = 1
 
 EPSILON = 1e-8
 
-if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} gamma_decode_fit_in.yml [name]')
+if len(sys.argv) < 3:
+  print(f'usage: {sys.argv[0]:s} gamma_decode_fit_in.yml device')
   sys.exit(EXIT_FAILURE)
 gamma_decode_fit_in = sys.argv[1]
-name = sys.argv[2] if len(sys.argv) >= 3 else 'gamma_decode'
+device = sys.argv[2]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -87,21 +87,21 @@ print(
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#include "gamma_decode.h"
+#include "gamma_decode_{0:s}.h"
 
-static int32_t post_factor[] = {{{0:s}
+static int32_t post_factor[] = {{{1:s}
 }};
 
 // argument and result in 2:30 fixed point
 // returns approximation to:
 //   x < 12.92f * .0031308f ? x / 12.92f : powf((x + .055f) / 1.055f, 2.4f)
 // allowed domain [-2, 1.945), recommended domain [-epsilon, 1 + epsilon)
-// minimax error is up to {1:e} relative
-int32_t {2:s}(int32_t x) {{
-  if (x < {3:s})
-    return (int32_t)((x * {4:s}LL + {5:s}LL) >> {6:d});
-  x += {7:s};
-  int exp = {8:d};
+// minimax error is up to {2:e} relative
+int32_t gamma_decode_{3:s}(int32_t x) {{
+  if (x < {4:s})
+    return (int32_t)((x * {5:s}LL + {6:s}LL) >> {7:d});
+  x += {8:s};
+  int exp = {9:d};
   if ((x & 0x78000000) == 0) {{
     x <<= 4;
     exp -= 4;
@@ -114,8 +114,8 @@ int32_t {2:s}(int32_t x) {{
     x <<= 1;
     exp -= 1;
   }}
-  int32_t y = {9:s};
-{10:s}  return (int32_t)(((int64_t)y * post_factor[exp] + {11:s}LL) >> {12:d});
+  int32_t y = {10:s};
+{11:s}  return (int32_t)(((int64_t)y * post_factor[exp] + {12:s}LL) >> {13:d});
 }}
 
 #ifdef STANDALONE
@@ -134,12 +134,13 @@ int main(int argc, char **argv) {{
   }}
   int32_t x = (int32_t)roundf(ldexpf(atof(argv[1]), 30));
 
-  int32_t y = {13:s}(x);
+  int32_t y = gamma_decode_{14:s}(x);
   printf("gamma encoded %.6f -> linear %.6f\\n", ldexpf(x, -30), ldexpf(y, -30));
 
   return EXIT_SUCCESS;
 }}
 #endif'''.format(
+    device,
     ','.join(
       [
         f'\n  {to_hex(post_factor[i]):s}'
@@ -147,7 +148,7 @@ int main(int argc, char **argv) {{
       ]
     ),
     err,
-    name,
+    device,
     to_hex(int(round(math.ldexp(12.92 * .0031308, 30)))),
     to_hex(int(round(math.ldexp(1. / 12.92, 34)))),
     to_hex(1 << 33),
@@ -167,6 +168,6 @@ int main(int argc, char **argv) {{
     ),
     to_hex(1 << (y_shr - 1)),
     y_shr,
-    name
+    device
   )
 )

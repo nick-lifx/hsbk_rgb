@@ -22,13 +22,6 @@
 #include <math.h>
 #include "hsbk_to_rgb.h"
 
-// old way (slower):
-//#include "kelv_to_uv.h"
-//#include "uv_to_rgb.h"
-
-// new way (faster):
-#include "mired_to_rgb.h"
-
 #define RGB_RED 0
 #define RGB_GREEN 1
 #define RGB_BLUE 2
@@ -39,11 +32,6 @@
 #define HSBK_BR 2
 #define HSBK_KELV 3
 #define N_HSBK 4
-
-// old way (slower):
-//#define UV_u 0
-//#define UV_v 1
-//#define N_UV 2
 
 #define EPSILON0 (1 << 10)
 #define EPSILON1 (1 << 6)
@@ -56,7 +44,11 @@
 // results in 2:30 fixed point
 // all are signed, so the hue is taken to be in [180, 180), but
 // if cast to unsigned then it would equivalently be in [0, 360)
-void hsbk_to_rgb(const int32_t *hsbk, int32_t *rgb) {
+void hsbk_to_rgb(
+  void (*mired_to_rgb)(int32_t mired, int32_t *rgb),
+  const int32_t *hsbk,
+  int32_t *rgb
+) {
   // validate inputs, allowing a little slack
   // the hue does not matter as it will be normalized modulo 360
   int64_t hue = hsbk[HSBK_HUE];
@@ -114,13 +106,6 @@ void hsbk_to_rgb(const int32_t *hsbk, int32_t *rgb) {
   // this section computes kelv_rgb from kelv
 
   int32_t kelv_rgb[N_RGB];
-
-  // old way (slower):
-  //int32_t uv[N_UV];
-  //kelv_to_uv(kelv, uv);
-  //uv_to_rgb(uv, kelv_rgb);
-
-  // new way (faster):
   mired_to_rgb(
     (int32_t)(((1000000LL << 33) / kelv + 1) >> 1),
     kelv_rgb
@@ -161,7 +146,11 @@ void hsbk_to_rgb(const int32_t *hsbk, int32_t *rgb) {
 #include <stdlib.h>
 #include <stdio.h>
 
-int main(int argc, char **argv) {
+int hsbk_to_rgb_standalone(
+  void (*_hsbk_to_rgb)(const int32_t *hsbk, int32_t *rgb),
+  int argc,
+  char **argv
+) {
   if (argc < 4) {
     printf(
       "usage: %s hue sat br [kelv]\n"
@@ -183,7 +172,7 @@ int main(int argc, char **argv) {
   };
 
   int32_t rgb[N_RGB];
-  hsbk_to_rgb(hsbk, rgb);
+  _hsbk_to_rgb(hsbk, rgb);
   printf(
     "HSBK (%.3f, %.6f, %.6f, %.3f) -> RGB (%.6f, %.6f, %.6f)\n",
     (uint32_t)hsbk[HSBK_HUE] * (float)(360. / (1LL << 32)),
