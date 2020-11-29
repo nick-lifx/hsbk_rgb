@@ -39,15 +39,3 @@ clean:
 	${MAKE} -C c_float clean
 	${MAKE} -C c_fixed clean
 	${MAKE} -C prepare clean
-
-install_srgb:
-	${MAKE} -C prepare $@
-	${MAKE} -C python
-	${MAKE} -C c_float
-	${MAKE} -C c_fixed
-
-install_display_p3:
-	${MAKE} -C prepare $@
-	${MAKE} -C python
-	${MAKE} -C c_float
-	${MAKE} -C c_fixed

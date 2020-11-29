@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2020 Nick Downing
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,13 +21,6 @@
 import math
 import numpy
 import sys
-from kelv_rgb_6504K import kelv_rgb_6504K
-
-# old way (slower):
-#from kelv_to_rgb import kelv_to_rgb
-
-# new way (faster):
-from mired_to_rgb import mired_to_rgb
 
 RGB_RED = 0
 RGB_GREEN = 1
@@ -63,7 +54,7 @@ hue_table = [
   }
 ]
 
-def rgb_to_hsbk(rgb, kelv = None):
+def rgb_to_hsbk(kelv_rgb_6504K, mired_to_rgb, rgb, kelv = None):
   # validate inputs, allowing a little slack
   assert numpy.all(rgb >= -EPSILON) and numpy.all(rgb < 1. + EPSILON)
 
@@ -73,11 +64,6 @@ def rgb_to_hsbk(rgb, kelv = None):
     kelv_rgb = kelv_rgb_6504K
   else:
     hsbk[HSBK_KELV] = kelv
-
-    # old way (slower):
-    #kelv_rgb = kelv_to_rgb(kelv)
-
-    # new way (faster):
     kelv_rgb = mired_to_rgb(1e6 / kelv)
 
   br = numpy.max(rgb)
@@ -127,7 +113,7 @@ def rgb_to_hsbk(rgb, kelv = None):
 
   return hsbk
 
-if __name__ == '__main__':
+def standalone(_rgb_to_hsbk):
   import sys
 
   EXIT_SUCCESS = 0
@@ -148,7 +134,7 @@ if __name__ == '__main__':
   rgb = numpy.array([float(i) for i in sys.argv[1:4]], numpy.double)
   kelv = float(sys.argv[4]) if len(sys.argv) >= 5 else None
 
-  hsbk = rgb_to_hsbk(rgb, kelv)
+  hsbk = _rgb_to_hsbk(rgb, kelv)
   print(
     f'RGB ({rgb[RGB_RED]:.6f}, {rgb[RGB_GREEN]:.6f}, {rgb[RGB_BLUE]:.6f}) -> HSBK ({hsbk[HSBK_HUE]:.3f}, {hsbk[HSBK_SAT]:.6f}, {hsbk[HSBK_BR]:.6f}, {hsbk[HSBK_KELV]:.3f})'
   )

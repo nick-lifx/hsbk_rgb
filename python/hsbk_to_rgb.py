@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2020 Nick Downing
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,14 +20,6 @@
 
 import math
 import numpy
-import sys
-
-# old way (slower):
-#from kelv_to_uv import kelv_to_uv
-#from uv_to_rgb import uv_to_rgb
-
-# new way (faster):
-from mired_to_rgb import mired_to_rgb
 
 HSBK_HUE = 0
 HSBK_SAT = 1
@@ -51,7 +41,7 @@ hue_sequence = numpy.array(
   numpy.double
 )
 
-def hsbk_to_rgb(hsbk):
+def hsbk_to_rgb(mired_to_rgb, hsbk):
   # validate inputs, allowing a little slack
   # the hue does not matter as it will be normalized modulo 360
   hue = hsbk[HSBK_HUE]
@@ -80,10 +70,6 @@ def hsbk_to_rgb(hsbk):
 
   # this section computes kelv_rgb from kelv
 
-  # old way (slower):
-  #kelv_rgb = uv_to_rgb(kelv_to_uv(kelv))
-
-  # new way (faster):
   kelv_rgb = mired_to_rgb(1e6 / kelv)
 
   # this section applies the saturation
@@ -106,7 +92,7 @@ def hsbk_to_rgb(hsbk):
 
   return rgb
 
-if __name__ == '__main__':
+def standalone(_hsbk_to_rgb):
   import sys
 
   EXIT_SUCCESS = 0
@@ -134,7 +120,7 @@ if __name__ == '__main__':
     numpy.double
   )
 
-  rgb = hsbk_to_rgb(hsbk)
+  rgb = _hsbk_to_rgb(hsbk)
   print(
     f'HSBK ({hsbk[HSBK_HUE]:.3f}, {hsbk[HSBK_SAT]:.6f}, {hsbk[HSBK_BR]:.6f}, {hsbk[HSBK_KELV]:.3f}) -> RGB ({rgb[RGB_RED]:.6f}, {rgb[RGB_GREEN]:.6f}, {rgb[RGB_BLUE]:.6f})'
   )

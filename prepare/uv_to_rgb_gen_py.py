@@ -28,11 +28,22 @@ from python_to_numpy import python_to_numpy
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]:s} primaries_in.yml [name]')
+RGB_RED = 0
+RGB_GREEN = 1
+RGB_BLUE = 2
+N_RGB = 3
+
+UVL_U = 0
+UVL_V = 1
+UVL_L = 2
+N_UVL = 3
+
+if len(sys.argv) < 3:
+  print(f'usage: {sys.argv[0]:s} primaries_in.yml gamma_curve [name]')
   sys.exit(EXIT_FAILURE)
 primaries_in = sys.argv[1]
-name = sys.argv[2] if len(sys.argv) >= 3 else 'uv_to_rgb'
+gamma_curve = sys.argv[2]
+name = sys.argv[3] if len(sys.argv) >= 4 else 'uv_to_rgb'
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -66,7 +77,7 @@ print(
 # SOFTWARE.
 
 import numpy
-from gamma_encode import gamma_encode
+from gamma_encode_{0:s} import gamma_encode_{0:s}
 
 RGB_RED = 0
 RGB_GREEN = 1
@@ -83,14 +94,14 @@ EPSILON = 1e-6
 # this is precomputed for the particular primaries in use
 UVL_to_rgb = numpy.array(
   [
-    [{0:.16e}, {1:.16e}, {2:.16e}],
-    [{3:.16e}, {4:.16e}, {5:.16e}],
-    [{6:.16e}, {7:.16e}, {8:.16e}]
+    [{2:.16e}, {3:.16e}, {4:.16e}],
+    [{5:.16e}, {6:.16e}, {7:.16e}],
+    [{8:.16e}, {9:.16e}, {10:.16e}]
   ],
   numpy.double
 )
 
-def {9:s}(uv):
+def {11:s}(uv):
   # validate inputs, allowing a little slack
   assert numpy.all(uv >= -EPSILON) and numpy.sum(uv) < 1. + EPSILON
 
@@ -111,7 +122,7 @@ def {9:s}(uv):
   # return gamma-encoded (R, G, B) tuple according to the SRGB gamma curve
   # because displaying it on a monitor will gamma-decode it in the process
   return numpy.array(
-    [gamma_encode(rgb[i]) for i in range(N_RGB)],
+    [gamma_encode_{12:s}(rgb[i]) for i in range(N_RGB)],
     numpy.double
   )
 
@@ -133,20 +144,23 @@ if __name__ == '__main__':
     sys.exit(EXIT_FAILURE)
   uv = numpy.array([float(i) for i in sys.argv[1:3]], numpy.double)
 
-  rgb = {10:s}(uv)
+  rgb = {13:s}(uv)
   print(
     f'uv ({{uv[UV_u]:.6f}}, {{uv[UV_v]:.6f}}) -> RGB ({{rgb[RGB_RED]:.6f}}, {{rgb[RGB_GREEN]:.6f}}, {{rgb[RGB_BLUE]:.6f}})'
   )'''.format(
-    UVL_to_rgb[0, 0],
-    UVL_to_rgb[0, 1],
-    UVL_to_rgb[0, 2],
-    UVL_to_rgb[1, 0],
-    UVL_to_rgb[1, 1],
-    UVL_to_rgb[1, 2],
-    UVL_to_rgb[2, 0],
-    UVL_to_rgb[2, 1],
-    UVL_to_rgb[2, 2],
+    gamma_curve,
+    gamma_curve,
+    UVL_to_rgb[RGB_RED, UVL_U],
+    UVL_to_rgb[RGB_RED, UVL_V],
+    UVL_to_rgb[RGB_RED, UVL_L],
+    UVL_to_rgb[RGB_GREEN, UVL_U],
+    UVL_to_rgb[RGB_GREEN, UVL_V],
+    UVL_to_rgb[RGB_GREEN, UVL_L],
+    UVL_to_rgb[RGB_BLUE, UVL_U],
+    UVL_to_rgb[RGB_BLUE, UVL_V],
+    UVL_to_rgb[RGB_BLUE, UVL_L],
     name,
+    gamma_curve,
     name
   )
 )

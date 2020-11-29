@@ -41,7 +41,15 @@ uv_to_kelv \
 mired_to_rgb \
 hue_kelv_test \
 inv_test \
-sat_test
+sat_test \
+gamma_decode_srgb.c \
+gamma_encode_srgb.c \
+uv_to_rgb_srgb.c \
+rgb_to_uv_srgb.c \
+mired_to_rgb_srgb.c \
+uv_to_rgb_display_p3.c \
+rgb_to_uv_display_p3.c \
+mired_to_rgb_display_p3.c
 
 hsbk_to_rgb: hsbk_to_rgb_standalone.o mired_to_rgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
@@ -96,6 +104,30 @@ inv_test: inv_test.o hsbk_to_rgb.o rgb_to_hsbk.o mired_to_rgb.o
 sat_test: sat_test.o hsbk_to_rgb.o mired_to_rgb.o rgb_to_uv.o gamma_decode.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
+gamma_decode_srgb.c: ../prepare/gamma_decode_fit_srgb.yml
+	../prepare/gamma_decode_gen_c_float.py $^ >$@
+
+gamma_encode_srgb.c: ../prepare/gamma_encode_fit_srgb.yml
+	../prepare/gamma_encode_gen_c_float.py $^ >$@
+
+uv_to_rgb_srgb.c: ../prepare/primaries_srgb.yml
+	../prepare/uv_to_rgb_gen_c_float.py $^ >$@
+
+rgb_to_uv_srgb.c: ../prepare/primaries_srgb.yml
+	../prepare/rgb_to_uv_gen_c_float.py $^ >$@
+
+mired_to_rgb_srgb.c: ../prepare/mired_to_rgb_fit_srgb.yml
+	../prepare/mired_to_rgb_gen_c_float.py $^ >$@
+
+uv_to_rgb_display_p3.c: ../prepare/primaries_display_p3.yml
+	../prepare/uv_to_rgb_gen_c_float.py $^ >$@
+
+rgb_to_uv_display_p3.c: ../prepare/primaries_display_p3.yml
+	../prepare/rgb_to_uv_gen_c_float.py $^ >$@
+
+mired_to_rgb_display_p3.c: ../prepare/mired_to_rgb_fit_display_p3.yml
+	../prepare/mired_to_rgb_gen_c_float.py $^ >$@
+
 clean:
 	rm -f \
 hsbk_to_rgb \
@@ -115,4 +147,12 @@ mired_to_rgb \
 hue_kelv_test \
 inv_test \
 sat_test \
+gamma_decode_srgb.c \
+gamma_encode_srgb.c \
+uv_to_rgb_srgb.c \
+rgb_to_uv_srgb.c \
+mired_to_rgb_srgb.c \
+uv_to_rgb_display_p3.c \
+rgb_to_uv_display_p3.c \
+mired_to_rgb_display_p3.c \
 *.o
