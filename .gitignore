@@ -8,9 +8,7 @@
 /c_fixed/gamma_encode_srgb
 /c_fixed/gamma_encode_srgb.c
 /c_fixed/hsbk_to_rgb_display_p3
-/c_fixed/hsbk_to_rgb_display_p3.c
 /c_fixed/hsbk_to_rgb_srgb
-/c_fixed/hsbk_to_rgb_srgb.c
 /c_fixed/hsv_to_rgb
 /c_fixed/hue_kelv_test
 /c_fixed/inv_test
@@ -39,9 +37,7 @@
 /c_float/gamma_encode_srgb
 /c_float/gamma_encode_srgb.c
 /c_float/hsbk_to_rgb_display_p3
-/c_float/hsbk_to_rgb_display_p3.c
 /c_float/hsbk_to_rgb_srgb
-/c_float/hsbk_to_rgb_srgb.c
 /c_float/hsv_to_rgb
 /c_float/hue_kelv_test
 /c_float/inv_test
@@ -79,8 +75,6 @@
 /prepare/xy_to_rtheta_fit.yml
 /python/gamma_decode_srgb.py
 /python/gamma_encode_srgb.py
-/python/hsbk_to_rgb_display_p3.py
-/python/hsbk_to_rgb_srgb.py
 /python/mired_to_rgb_display_p3.py
 /python/mired_to_rgb_srgb.py
 /python/rgb_to_hsbk_display_p3.py
