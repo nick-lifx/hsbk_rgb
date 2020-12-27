@@ -43,6 +43,11 @@ yaml = ruamel.yaml.YAML(typ = 'safe')
 
 with open(gamma_encode_fit_in) as fin:
   gamma_encode_fit = python_to_numpy(yaml.load(fin))
+gamma_a = gamma_encode_fit['gamma_a']
+gamma_b = gamma_encode_fit['gamma_b']
+gamma_c = gamma_encode_fit['gamma_c']
+gamma_d = gamma_encode_fit['gamma_d']
+gamma_e = gamma_encode_fit['gamma_e']
 a = gamma_encode_fit['a']
 b = gamma_encode_fit['b']
 p = gamma_encode_fit['p']
@@ -94,13 +99,13 @@ static int32_t post_factor[] = {{{1:s}
 
 // argument and result in 2:30 fixed point
 // returns approximation to:
-//   x < .0031308f ? x * 12.92f : powf(x, 1.f / 2.4f) * 1.055f - .055f
+//   x < {2:s}f ? x * {3:s}f : powf(x, 1.f / {4:s}f) * {5:s}f - {6:s}f
 // allowed domain [-2, 2), recommended domain [-epsilon, 1 + epsilon)
-// minimax error is up to {2:e} relative
-int32_t gamma_encode_{3:s}(int32_t x) {{
-  if (x < {4:s})
-    return (int32_t)((x * {5:s}LL + {6:s}LL) >> {7:d});
-  int exp = {8:d};
+// minimax error is up to {7:e} relative
+int32_t gamma_encode_{8:s}(int32_t x) {{
+  if (x < {9:s})
+    return (int32_t)((x * {10:s}LL + {11:s}LL) >> {12:d});
+  int exp = {13:d};
   if ((x & 0x7f800000) == 0) {{
     x <<= 8;
     exp -= 8;
@@ -117,8 +122,8 @@ int32_t gamma_encode_{3:s}(int32_t x) {{
     x <<= 1;
     exp -= 1;
   }}
-  int32_t y = {9:s};
-{10:s}  return (int32_t)(((int64_t)y * post_factor[exp] - {11:s}LL) >> {12:d});
+  int32_t y = {14:s};
+{15:s}  return (int32_t)(((int64_t)y * post_factor[exp] - {16:s}LL) >> {17:d});
 }}
 
 #ifdef STANDALONE
@@ -137,7 +142,7 @@ int main(int argc, char **argv) {{
   }}
   int32_t x = (int32_t)roundf(ldexpf(atof(argv[1]), 30));
 
-  int32_t y = gamma_encode_{13:s}(x);
+  int32_t y = gamma_encode_{18:s}(x);
   printf("gamma encoded %.6f -> linear %.6f\\n", ldexpf(x, -30), ldexpf(y, -30));
 
   return EXIT_SUCCESS;
@@ -150,10 +155,15 @@ int main(int argc, char **argv) {{
         for i in range(post_factor.shape[0])
       ]
     ),
+    str(gamma_b),
+    str(gamma_a),
+    str(gamma_e),
+    str(gamma_d),
+    str(gamma_c),
     err,
     device,
-    to_hex(int(round(math.ldexp(.0031308, 30)))),
-    to_hex(int(round(math.ldexp(12.92, 27)))),
+    to_hex(int(round(math.ldexp(gamma_b, 30)))),
+    to_hex(int(round(math.ldexp(gamma_a, 27)))),
     to_hex(1 << 26),
     27,
     1 - exp0, # 2:30 argument has exponent -1 when viewed in 1:31 fixed point
@@ -168,7 +178,9 @@ int main(int argc, char **argv) {{
         for i in range(p.shape[0] - 2, -1, -1)
       ]
     ),
-    to_hex(int(round(math.ldexp(.055, 30 + int(y_shr)))) - (1 << (y_shr - 1))),
+    to_hex(
+      int(round(math.ldexp(gamma_c, 30 + int(y_shr)))) - (1 << (y_shr - 1))
+    ),
     y_shr,
     device
   )

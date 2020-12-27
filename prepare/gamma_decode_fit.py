@@ -40,23 +40,32 @@ diag = False
 if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
   diag = True
   del sys.argv[1]
-if len(sys.argv) < 2:
-  print(f'usage: {sys.argv[0]} gamma_decode_fit_out.yml')
+if len(sys.argv) < 3:
+  print(f'usage: {sys.argv[0]} model_in.yml gamma_decode_fit_out.yml')
   sys.exit(EXIT_FAILURE)
-gamma_decode_fit_out = sys.argv[1]
+model_in = sys.argv[1]
+gamma_decode_fit_out = sys.argv[2]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
 
+with open(model_in) as fin:
+  model = python_to_numpy(yaml.load(fin))
+gamma_a = model['gamma_a']
+gamma_b = model['gamma_b']
+gamma_c = model['gamma_c']
+gamma_d = model['gamma_d']
+gamma_e = model['gamma_e']
+
 # function to be approximated
 def f(x):
-  return (x / 1.055) ** 2.4
-a = 12.92 * .0031308 + .055
-b = 1.055
+  return (x / gamma_d) ** gamma_e
+a = gamma_a * gamma_b + gamma_c
+b = gamma_d
 
 # to use:
 # def gamma_decode(x):
-#   return x / 12.92 if x < 12.92 * .0031308 else f(x + .055)
+#   return x / gamma_a if x < gamma_a * gamma_b else f(x + gamma_c)
 
 # find approximating polynomial (relative error criterion)
 p, _, err = remez(f, .5, 1., ORDER, ERR_ORDER, 1)
@@ -70,7 +79,7 @@ _, exp1 = math.frexp(b * (1. + EPSILON))
 # given argument is pre-multiplied by 2^-i, find compensating post-factor
 post_factor = numpy.array(
   [
-    math.ldexp(1., -i) ** -2.4
+    math.ldexp(1., -i) ** -gamma_e
     for i in range(exp0, exp1 + 1)
   ],
   numpy.double
@@ -90,6 +99,11 @@ if diag:
   matplotlib.pyplot.show()
 
 gamma_decode_fit = {
+  'gamma_a': gamma_a,
+  'gamma_b': gamma_b,
+  'gamma_c': gamma_c,
+  'gamma_d': gamma_d,
+  'gamma_e': gamma_e,
   'a': a,
   'b': b,
   'p': p,

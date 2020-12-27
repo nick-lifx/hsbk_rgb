@@ -26,10 +26,10 @@ mired_to_rgb_fit_display_p3.yml \
 rtheta_to_xy_fit.yml \
 xy_to_rtheta_fit.yml
 
-gamma_decode_fit_srgb.yml:
+gamma_decode_fit_srgb.yml: ../monitor/srgb/model.yml
 	./gamma_decode_fit.py $^ $@
 
-gamma_encode_fit_srgb.yml:
+gamma_encode_fit_srgb.yml: ../monitor/srgb/model.yml
 	./gamma_encode_fit.py $^ $@
 
 mired_to_rgb_fit_srgb.yml: ../monitor/srgb/model.yml

@@ -39,6 +39,11 @@ yaml = ruamel.yaml.YAML(typ = 'safe')
 
 with open(gamma_encode_fit_in) as fin:
   gamma_encode_fit = python_to_numpy(yaml.load(fin))
+gamma_a = gamma_encode_fit['gamma_a']
+gamma_b = gamma_encode_fit['gamma_b']
+gamma_c = gamma_encode_fit['gamma_c']
+gamma_d = gamma_encode_fit['gamma_d']
+gamma_e = gamma_encode_fit['gamma_e']
 p = gamma_encode_fit['p']
 err = gamma_encode_fit['err']
 exp0 = gamma_encode_fit['exp0']
@@ -76,17 +81,18 @@ static float post_factor[] = {{{1:s}
 }};
 
 // returns approximation to:
-//   x < .0031308f ? x * 12.92f : powf(x, 1.f / 2.4f) * 1.055f - .055f
+//   x < {2:s}f ? x * {3:s}f : powf(x, 1.f / {4:s}f) * {5:s}f - {6:s}f
 // allowed domain (-inf, 2), recommended domain [-epsilon, 1 + epsilon)
-// minimax error is up to {2:e} relative
-float gamma_encode_{3:s}(float x) {{
-  if (x < .0031308f)
-    return x * 12.92f;
+// do not call with argument >= 2 due to table lookup overflow (unchecked)
+// minimax error is up to {7:e} relative
+float gamma_encode_{8:s}(float x) {{
+  if (x < {9:.8e}f)
+    return x * {10:.8e}f;
   int exp;
   x = frexpf(x, &exp);
-  assert(exp < {4:d});
-  float y = {5:.8e}f;
-{6:s}  return y * post_factor[exp + {7:d}] - .055f;
+  assert(exp < {11:d});
+  float y = {12:.8e}f;
+{13:s}  return y * post_factor[exp + {14:d}] - {15:.8e}f;
 }}
 
 #ifdef STANDALONE
@@ -104,7 +110,7 @@ int main(int argc, char **argv) {{
   }}
   float x = atof(argv[1]);
 
-  float y = gamma_encode_{8:s}(x);
+  float y = gamma_encode_{16:s}(x);
   printf("linear %.6f -> gamma encoded %.6f\\n", x, y);
 
   return EXIT_SUCCESS;
@@ -117,8 +123,15 @@ int main(int argc, char **argv) {{
         for i in range(post_factor.shape[0])
       ]
     ),
+    str(gamma_b),
+    str(gamma_a),
+    str(gamma_e),
+    str(gamma_d),
+    str(gamma_c),
     err,
     device,
+    gamma_b,
+    gamma_a,
     exp1 + 1,
     p[-1],
     ''.join(
@@ -131,6 +144,7 @@ int main(int argc, char **argv) {{
       ]
     ),
     -exp0,
+    gamma_c,
     device
   )
 )

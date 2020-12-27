@@ -39,6 +39,11 @@ yaml = ruamel.yaml.YAML(typ = 'safe')
 
 with open(gamma_decode_fit_in) as fin:
   gamma_decode_fit = python_to_numpy(yaml.load(fin))
+gamma_a = gamma_decode_fit['gamma_a']
+gamma_b = gamma_decode_fit['gamma_b']
+gamma_c = gamma_decode_fit['gamma_c']
+gamma_d = gamma_decode_fit['gamma_d']
+gamma_e = gamma_decode_fit['gamma_e']
 p = gamma_decode_fit['p']
 err = gamma_decode_fit['err']
 exp0 = gamma_decode_fit['exp0']
@@ -79,17 +84,17 @@ post_factor = numpy.array(
 )
 
 # returns approximation to:
-#   x / 12.92 if x < 12.92 * .0031308 else ((x + .055) / 1.055) ** 2.4
-# allowed domain (-inf, 1.945), recommended domain [-epsilon, 1 + epsilon]
-# do not call with argument >= 1.945 due to table lookup overflow (unchecked)
-# minimax error is up to {1:e} relative
-def gamma_decode_{2:s}(x):
-  if x < {3:.16e}:
-    return x * {4:.16e}
-  x, exp = math.frexp(x + .055)
-  assert exp < {5:d}
-  y = {6:.16e}
-{7:s}  return y * post_factor[exp + {8:d}]
+#   x / {1:s} if x < {2:s} * {3:s} else ((x + {4:s}) / {5:s}) ** {6:s}
+# allowed domain (-inf, {7:s}), recommended domain [-epsilon, 1 + epsilon]
+# do not call with argument >= {8:s} due to table lookup overflow (unchecked)
+# minimax error is up to {9:e} relative
+def gamma_decode_{10:s}(x):
+  if x < {11:.16e}:
+    return x * {12:.16e}
+  x, exp = math.frexp(x + {13:.16e})
+  assert exp < {14:d}
+  y = {15:.16e}
+{16:s}  return y * post_factor[exp + {17:d}]
 
 if __name__ == '__main__':
   import sys
@@ -103,7 +108,7 @@ if __name__ == '__main__':
     sys.exit(EXIT_FAILURE)
   x = float(sys.argv[1])
 
-  y = gamma_decode_{9:s}(x)
+  y = gamma_decode_{18:s}(x)
   print(f'gamma encoded {{x:.6f}} -> linear {{y:.6f}}')'''.format(
     ','.join(
       [
@@ -111,10 +116,19 @@ if __name__ == '__main__':
         for i in range(post_factor.shape[0])
       ]
     ),
+    str(gamma_a),
+    str(gamma_a),
+    str(gamma_b),
+    str(gamma_c),
+    str(gamma_d),
+    str(gamma_e),
+    str(2. - gamma_c),
+    str(2. - gamma_c),
     err,
     device,
-    12.92 * .0031308,
-    1. / 12.92,
+    gamma_a * gamma_b,
+    1. / gamma_a,
+    gamma_c,
     exp1 + 1,
     p[-1],
     ''.join(

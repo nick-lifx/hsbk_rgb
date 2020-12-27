@@ -43,6 +43,11 @@ yaml = ruamel.yaml.YAML(typ = 'safe')
 
 with open(gamma_decode_fit_in) as fin:
   gamma_decode_fit = python_to_numpy(yaml.load(fin))
+gamma_a = gamma_decode_fit['gamma_a']
+gamma_b = gamma_decode_fit['gamma_b']
+gamma_c = gamma_decode_fit['gamma_c']
+gamma_d = gamma_decode_fit['gamma_d']
+gamma_e = gamma_decode_fit['gamma_e']
 a = gamma_decode_fit['a']
 b = gamma_decode_fit['b']
 p = gamma_decode_fit['p']
@@ -94,14 +99,15 @@ static int32_t post_factor[] = {{{1:s}
 
 // argument and result in 2:30 fixed point
 // returns approximation to:
-//   x < 12.92f * .0031308f ? x / 12.92f : powf((x + .055f) / 1.055f, 2.4f)
-// allowed domain [-2, 1.945), recommended domain [-epsilon, 1 + epsilon)
-// minimax error is up to {2:e} relative
-int32_t gamma_decode_{3:s}(int32_t x) {{
-  if (x < {4:s})
-    return (int32_t)((x * {5:s}LL + {6:s}LL) >> {7:d});
-  x += {8:s};
-  int exp = {9:d};
+//   x < {2:s}f * {3:s}f ? x / {4:s}f : powf((x + {5:s}f) / {6:s}f, {7:s}f)
+// allowed domain (-inf, {8:s}), recommended domain [-epsilon, 1 + epsilon)
+// do not call with argument >= {9:s} due to table lookup overflow (unchecked)
+// minimax error is up to {10:e} relative
+int32_t gamma_decode_{11:s}(int32_t x) {{
+  if (x < {12:s})
+    return (int32_t)((x * {13:s}LL + {14:s}LL) >> {15:d});
+  x += {16:s};
+  int exp = {17:d};
   if ((x & 0x78000000) == 0) {{
     x <<= 4;
     exp -= 4;
@@ -114,8 +120,8 @@ int32_t gamma_decode_{3:s}(int32_t x) {{
     x <<= 1;
     exp -= 1;
   }}
-  int32_t y = {10:s};
-{11:s}  return (int32_t)(((int64_t)y * post_factor[exp] + {12:s}LL) >> {13:d});
+  int32_t y = {18:s};
+{19:s}  return (int32_t)(((int64_t)y * post_factor[exp] + {20:s}LL) >> {21:d});
 }}
 
 #ifdef STANDALONE
@@ -134,7 +140,7 @@ int main(int argc, char **argv) {{
   }}
   int32_t x = (int32_t)roundf(ldexpf(atof(argv[1]), 30));
 
-  int32_t y = gamma_decode_{14:s}(x);
+  int32_t y = gamma_decode_{22:s}(x);
   printf("gamma encoded %.6f -> linear %.6f\\n", ldexpf(x, -30), ldexpf(y, -30));
 
   return EXIT_SUCCESS;
@@ -147,13 +153,21 @@ int main(int argc, char **argv) {{
         for i in range(post_factor.shape[0])
       ]
     ),
+    str(gamma_a),
+    str(gamma_b),
+    str(gamma_a),
+    str(gamma_c),
+    str(gamma_d),
+    str(gamma_e),
+    str(2. - gamma_c),
+    str(2. - gamma_c),
     err,
     device,
-    to_hex(int(round(math.ldexp(12.92 * .0031308, 30)))),
-    to_hex(int(round(math.ldexp(1. / 12.92, 34)))),
+    to_hex(int(round(math.ldexp(gamma_a * gamma_b, 30)))),
+    to_hex(int(round(math.ldexp(1. / gamma_a, 34)))),
     to_hex(1 << 33),
     34,
-    to_hex(int(round(math.ldexp(.055, 30)))),
+    to_hex(int(round(math.ldexp(gamma_c, 30)))),
     1 - exp0, # 2:30 argument has exponent -1 when viewed in 1:31 fixed point
     to_hex(p[-1]),
     ''.join(

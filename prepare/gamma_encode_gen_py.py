@@ -39,6 +39,11 @@ yaml = ruamel.yaml.YAML(typ = 'safe')
 
 with open(gamma_encode_fit_in) as fin:
   gamma_encode_fit = python_to_numpy(yaml.load(fin))
+gamma_a = gamma_encode_fit['gamma_a']
+gamma_b = gamma_encode_fit['gamma_b']
+gamma_c = gamma_encode_fit['gamma_c']
+gamma_d = gamma_encode_fit['gamma_d']
+gamma_e = gamma_encode_fit['gamma_e']
 p = gamma_encode_fit['p']
 err = gamma_encode_fit['err']
 exp0 = gamma_encode_fit['exp0']
@@ -79,17 +84,17 @@ post_factor = numpy.array(
 )
 
 # returns approximation to:
-#   x * 12.92 if x < .0031308 else (x ** (1. / 2.4) * 1.055) - .055
+#   x * {1:s} if x < {2:s} else (x ** (1. / {3:s}) * {4:s}) - {5:s}
 # allowed domain (-inf, 2), recommended domain [-epsilon, 1 + epsilon]
 # do not call with argument >= 2 due to table lookup overflow (unchecked)
-# minimax error is up to {1:e} relative
-def gamma_encode_{2:s}(x):
-  if x < .0031308:
-    return x * 12.92
+# minimax error is up to {6:e} relative
+def gamma_encode_{7:s}(x):
+  if x < {8:.16e}:
+    return x * {9:.16e}
   x, exp = math.frexp(x)
-  assert exp < {3:d}
-  y = {4:.16e}
-{5:s}  return y * post_factor[exp + {6:d}] - .055
+  assert exp < {10:d}
+  y = {11:.16e}
+{12:s}  return y * post_factor[exp + {13:d}] - {14:.16e}
 
 if __name__ == '__main__':
   import sys
@@ -103,7 +108,7 @@ if __name__ == '__main__':
     sys.exit(EXIT_FAILURE)
   x = float(sys.argv[1])
 
-  y = gamma_encode_{7:s}(x)
+  y = gamma_encode_{15:s}(x)
   print(f'linear {{x:.6f}} -> gamma encoded {{y:.6f}}')'''.format(
     ','.join(
       [
@@ -111,8 +116,15 @@ if __name__ == '__main__':
         for i in range(post_factor.shape[0])
       ]
     ),
+    str(gamma_a),
+    str(gamma_b),
+    str(gamma_e),
+    str(gamma_d),
+    str(gamma_c),
     err,
     device,
+    gamma_b,
+    gamma_a,
     exp1 + 1,
     p[-1],
     ''.join(
@@ -125,6 +137,7 @@ if __name__ == '__main__':
       ]
     ),
     -exp0,
+    gamma_c,
     device
   )
 )
