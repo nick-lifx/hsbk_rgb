@@ -48,6 +48,11 @@ UVL_v = 1
 UVL_L = 2
 N_UVL = 3
 
+UVW_U = 0
+UVW_V = 1
+UVW_W = 2
+N_UVW = 3
+
 ERR_ORDER = 18
 
 # approximation order can be set separately for each channel and interval
@@ -117,6 +122,48 @@ def mired_to_rgb(mired):
 
   return mired_UVW @ UVW_to_rgb
 
+# in cd part (when blue is < 0) use warm/cool algorithm to mix red and
+# green to produce the correct CCT
+def mired_to_wc(mired):
+  mired_uv = mired_to_uv.mired_to_uv_multi(mired)
+  mired_uv_deriv = mired_to_uv.mired_to_uv_deriv_multi(mired)
+
+  wc = []
+  for i in range(mired.shape[0]):
+    # find wc and UVW = wc @ primaries_UVW such that
+    #   U + V + W = 1
+    #   UV @ mired_uv_deriv = mired_uv @ mired_uv_deriv
+    wc.append(
+      numpy.linalg.solve(
+        numpy.stack(
+          [
+            numpy.sum(primaries_UVW[:RGB_BLUE, :], 1),
+            primaries_UVW[:RGB_BLUE, :UVW_W] @ mired_uv_deriv[i, :]
+          ],
+          0
+        ),
+        numpy.array(
+          [1., mired_uv[i, :] @ mired_uv_deriv[i, :]],
+          numpy.double
+        )
+      )
+    )
+  wc = numpy.stack(wc, 0)
+
+  # checking
+  #UVW = wc @ primaries_UVW[:RGB_BLUE, :]
+  #print('UVW', UVW)
+  #print(
+  #  'UV @ mired_uv_deriv',
+  #  numpy.einsum('ij,ij->i', UVW[:, :UVW_W], mired_uv_deriv),
+  #)
+  #print(
+  #  'mired_uv @ mired_uv_deriv',
+  #  numpy.einsum('ij,ij->i', mired_uv, mired_uv_deriv)
+  #)
+
+  return wc
+
 # mired scale must meet the following specification:
 #   a <= x <= b: blue is at 1, red and green are increasing
 #   b <= x <= c: red is at 1, blue and green are decreasing
@@ -162,6 +209,17 @@ if c_estimate < MIRED_MAX else
 )
 print('c', c)
 
+# convenience routine to separate mireds into cd region (warm/cool)
+# and other (red/green/blue), and then solve the regions separately
+def mired_to_rgb_or_wc(x):
+  mask = x >= c
+  mired_rgb = numpy.zeros((x.shape[0], N_RGB), numpy.double)
+  if not numpy.all(mask):
+    mired_rgb[~mask, :] = mired_to_rgb(x[~mask])
+  if numpy.any(mask):
+    mired_rgb[mask, :RGB_BLUE] = mired_to_wc(x[mask])
+  return mired_rgb
+
 # red channel
 def f(x):
   mired_rgb = mired_to_rgb(x)
@@ -194,7 +252,7 @@ p_green_ab, _, p_green_ab_err = remez(
 print('p_green_ab', p_green_ab)
 print('p_green_ab_err', p_green_ab_err)
 def f(x):
-  mired_rgb = mired_to_rgb(x)
+  mired_rgb = mired_to_rgb_or_wc(x)
   return gamma_encode(mired_rgb[:, RGB_GREEN] / mired_rgb[:, RGB_RED])
 p_green_bd, _, p_green_bd_err = remez(
   f,
@@ -211,7 +269,7 @@ print('p_green_bd_err', p_green_bd_err)
 p_blue_ab = numpy.array([1.], numpy.double)
 p_blue_ab_err = 0.
 def f(x):
-  mired_rgb = mired_to_rgb(x)
+  mired_rgb = mired_to_rgb_or_wc(x)
   return gamma_encode(mired_rgb[:, RGB_BLUE] / mired_rgb[:, RGB_RED])
 p_blue_bc, _, p_blue_bc_err = remez(
   f,
