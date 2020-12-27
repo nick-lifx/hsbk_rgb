@@ -22,11 +22,11 @@
 
 import numpy
 import math
+import mired_to_uv
 import poly
 import ruamel.yaml
 import sys
 from any_f_to_poly import any_f_to_poly
-from blackbody_spectrum import blackbody_spectra
 from numpy_to_python import numpy_to_python
 from python_to_numpy import python_to_numpy
 from remez import remez
@@ -39,38 +39,14 @@ RGB_GREEN = 1
 RGB_BLUE = 2
 N_RGB = 3
 
-RGBW_RED = 0
-RGBW_GREEN = 1
-RGBW_BLUE = 2
-RGBW_WHITE = 3
-N_RGBW = 4
+UV_u = 0
+UV_v = 1
+N_UV = 2
 
-XY_x = 0
-XY_y = 1
-N_XY = 2
-
-XYZ_X = 0
-XYZ_Y = 1
-XYZ_Z = 2
-N_XYZ = 3
-
-# see https://en.wikipedia.org/wiki/CIE_1960_color_space
-XYZ_to_UVW = numpy.array(
-  [
-    [2. / 3., 0., 0.],
-    [0., 1., 0.],
-    [-1. / 2., 3. / 2, 1. / 2.]
-  ],
-  numpy.double
-)
-
-# see https://en.wikipedia.org/wiki/SRGB
-def gamma_encode(x):
-  x = numpy.copy(x)
-  mask = x < .0031308
-  x[mask] *= 12.92
-  x[~mask] = x[~mask] ** (1. / 2.4) * 1.055 - .055
-  return x
+UVL_u = 0
+UVL_v = 1
+UVL_L = 2
+N_UVL = 3
 
 ERR_ORDER = 18
 
@@ -99,9 +75,9 @@ if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
   diag = True
   del sys.argv[1]
 if len(sys.argv) < 5:
-  print(f'usage: {sys.argv[0]:s} [--diag] primaries_in.yml b_estimate c_estimate mired_to_rgb_fit_out.yml')
+  print(f'usage: {sys.argv[0]:s} [--diag] model_in.yml b_estimate c_estimate mired_to_rgb_fit_out.yml')
   sys.exit(EXIT_FAILURE)
-primaries_in = sys.argv[1]
+model_in = sys.argv[1]
 b_estimate = float(sys.argv[2])
 c_estimate = float(sys.argv[3])
 mired_to_rgb_fit_out = sys.argv[4]
@@ -109,28 +85,37 @@ mired_to_rgb_fit_out = sys.argv[4]
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
 
-with open('standard_observer_2deg.yml') as fin:
-  standard_observer_2deg = python_to_numpy(yaml.load(fin))
+with open(model_in) as fin:
+  model = python_to_numpy(yaml.load(fin))
+gamma_a = model['gamma_a']
+gamma_b = model['gamma_b']
+gamma_c = model['gamma_c']
+gamma_d = model['gamma_d']
+gamma_e = model['gamma_e']
+primaries_uvL = model['primaries_uvL']
 
-with open(primaries_in) as fin:
-  primaries = python_to_numpy(yaml.load(fin))
-XYZ_to_rgb = primaries['XYZ_to_rgb']
+def gamma_encode(x):
+  y = numpy.zeros_like(x)
+  mask = x >= gamma_b
+  y[~mask] = x[~mask] * gamma_a
+  y[mask] = x[mask] ** (1. / gamma_e) * gamma_d - gamma_c
+  return y
 
-# functions to be approximated
-def mired_to_XYZ(x):
-  return numpy.einsum(
-    'ij,ik->kj',
-    blackbody_spectra(1e6 / x),
-    standard_observer_2deg
-  )
+u = primaries_uvL[:, UVL_u]
+v = primaries_uvL[:, UVL_v]
+L = primaries_uvL[:, UVL_L]
+primaries_UVW = numpy.stack([u, v, 1. - u - v], 1) * L[:, numpy.newaxis]
+ 
+# note: below is transposed so use rgb @ UVW_to_rgb, not UVW_to_rgb @ rgb
+UVW_to_rgb = numpy.linalg.inv(primaries_UVW)
+def mired_to_rgb(mired):
+  mired_uv = mired_to_uv.mired_to_uv_multi(mired)
 
-# to use:
-# def f_r(x):
-#   return XYZ_to_rgb[RGB_RED, :] @ mired_to_XYZ(x)
-# def f_g(x):
-#   return XYZ_to_rgb[RGB_GREEN, :] @ mired_to_XYZ(x)
-# def f_b(x):
-#   return XYZ_to_rgb[RGB_BLUE, :] @ mired_to_XYZ(x)
+  u = mired_uv[:, UV_u]
+  v = mired_uv[:, UV_v]
+  mired_UVW = numpy.stack([u, v, 1. - u - v], 1)
+
+  return mired_UVW @ UVW_to_rgb
 
 # mired scale must meet the following specification:
 #   a <= x <= b: blue is at 1, red and green are increasing
@@ -145,7 +130,8 @@ print('d', d)
 
 # find b, i.e. where red meets blue
 def f(x):
-  return (XYZ_to_rgb[RGB_RED, :] - XYZ_to_rgb[RGB_BLUE, :]) @ mired_to_XYZ(x)
+  mired_rgb = mired_to_rgb(x)
+  return mired_rgb[:, RGB_RED] - mired_rgb[:, RGB_BLUE]
 b = poly.newton(
   any_f_to_poly(
     f,
@@ -157,26 +143,29 @@ b = poly.newton(
 )
 print('b', b)
 
-# find c, i.e. where blue meets 0
+# find c, d, i.e. where blue meets 0
 def f(x):
-  return XYZ_to_rgb[RGB_BLUE, :] @ mired_to_XYZ(x)
-c = poly.newton(
-  any_f_to_poly(
-    f,
-    c_estimate - INTERSECT_EXTRA_DOMAIN,
-    c_estimate + INTERSECT_EXTRA_DOMAIN,
-    ERR_ORDER
-  ),
-  c_estimate
+  mired_rgb = mired_to_rgb(x)
+  return mired_rgb[:, RGB_BLUE]
+c = (
+  poly.newton(
+    any_f_to_poly(
+      f,
+      c_estimate - INTERSECT_EXTRA_DOMAIN,
+      c_estimate + INTERSECT_EXTRA_DOMAIN,
+      ERR_ORDER
+    ),
+    c_estimate
+  )
+if c_estimate < MIRED_MAX else
+  MIRED_MAX
 )
 print('c', c)
 
 # red channel
 def f(x):
-  XYZ = mired_to_XYZ(x)
-  return gamma_encode(
-    (XYZ_to_rgb[RGB_RED, :] @ XYZ) / (XYZ_to_rgb[RGB_BLUE, :] @ XYZ)
-  )
+  mired_rgb = mired_to_rgb(x)
+  return gamma_encode(mired_rgb[:, RGB_RED] / mired_rgb[:, RGB_BLUE])
 p_red_ab, _, p_red_ab_err = remez(
   f,
   a - FIT_EXTRA_DOMAIN,
@@ -192,10 +181,8 @@ p_red_bd_err = 0.
 
 # green channel
 def f(x):
-  XYZ = mired_to_XYZ(x)
-  return gamma_encode(
-    (XYZ_to_rgb[RGB_GREEN, :] @ XYZ) / (XYZ_to_rgb[RGB_BLUE, :] @ XYZ)
-  )
+  mired_rgb = mired_to_rgb(x)
+  return gamma_encode(mired_rgb[:, RGB_GREEN] / mired_rgb[:, RGB_BLUE])
 p_green_ab, _, p_green_ab_err = remez(
   f,
   a - FIT_EXTRA_DOMAIN,
@@ -207,10 +194,8 @@ p_green_ab, _, p_green_ab_err = remez(
 print('p_green_ab', p_green_ab)
 print('p_green_ab_err', p_green_ab_err)
 def f(x):
-  XYZ = mired_to_XYZ(x)
-  return gamma_encode(
-    (XYZ_to_rgb[RGB_GREEN, :] @ XYZ) / (XYZ_to_rgb[RGB_RED, :] @ XYZ)
-  )
+  mired_rgb = mired_to_rgb(x)
+  return gamma_encode(mired_rgb[:, RGB_GREEN] / mired_rgb[:, RGB_RED])
 p_green_bd, _, p_green_bd_err = remez(
   f,
   b - FIT_EXTRA_DOMAIN,
@@ -226,10 +211,8 @@ print('p_green_bd_err', p_green_bd_err)
 p_blue_ab = numpy.array([1.], numpy.double)
 p_blue_ab_err = 0.
 def f(x):
-  XYZ = mired_to_XYZ(x)
-  return gamma_encode(
-    (XYZ_to_rgb[RGB_BLUE, :] @ XYZ) / (XYZ_to_rgb[RGB_RED, :] @ XYZ)
-  )
+  mired_rgb = mired_to_rgb(x)
+  return gamma_encode(mired_rgb[:, RGB_BLUE] / mired_rgb[:, RGB_RED])
 p_blue_bc, _, p_blue_bc_err = remez(
   f,
   b - FIT_EXTRA_DOMAIN,
@@ -243,14 +226,18 @@ print('p_blue_bc_err', p_blue_bc_err)
 p_blue_cd = numpy.array([0.], numpy.double)
 p_blue_cd_err = 0.
 
-# fix discontinuities by setting b, c to exact intersections after fitting
+# fix discontinuities by setting b, c, d to exact intersections after fitting
 b_red = poly.newton(poly.add(p_red_ab, -p_red_bd), b)
 print('b_red', b_red)
 b_green = poly.newton(poly.add(p_green_ab, -p_green_bd), b)
 print('b_green', b_green)
 b_blue = poly.newton(poly.add(p_blue_ab, -p_blue_bc), b)
 print('b_blue', b_blue)
-c_blue = poly.newton(poly.add(p_blue_bc, -p_blue_cd), c)
+c_blue = (
+  poly.newton(poly.add(p_blue_bc, -p_blue_cd), c)
+if c < MIRED_MAX else
+  MIRED_MAX
+)
 print('c_blue', c_blue)
 
 if diag:
@@ -262,17 +249,11 @@ if diag:
   x = numpy.concatenate([x_ab, x_bd], 0)
   for i in range(N_RGB):
     def f_ab(x):
-      XYZ = mired_to_XYZ(x)
-      #return XYZ_to_rgb[i, :] @ XYZ
-      return gamma_encode(
-        (XYZ_to_rgb[i, :] @ XYZ) / (XYZ_to_rgb[RGB_BLUE, :] @ XYZ)
-      )
+      mired_rgb = mired_to_rgb(x)
+      return gamma_encode(mired_rgb[:, i] / mired_rgb[:, RGB_BLUE])
     def f_bd(x):
-      XYZ = mired_to_XYZ(x)
-      #return XYZ_to_rgb[i, :] @ XYZ
-      return gamma_encode(
-        (XYZ_to_rgb[i, :] @ XYZ) / (XYZ_to_rgb[RGB_RED, :] @ XYZ)
-      )
+      mired_rgb = mired_to_rgb(x)
+      return gamma_encode(mired_rgb[:, i] / mired_rgb[:, RGB_RED])
     y = numpy.concatenate([f_ab(x_ab), f_bd(x_bd)], 0)
     matplotlib.pyplot.plot(x, y)
 

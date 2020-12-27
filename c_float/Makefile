@@ -93,25 +93,25 @@ gamma_encode_srgb.c: ../prepare/gamma_encode_fit_srgb.yml
 uv_to_rgb_srgb: uv_to_rgb_srgb_standalone.o gamma_encode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
-uv_to_rgb_srgb.c: ../prepare/primaries_srgb.yml
+uv_to_rgb_srgb.c: ../monitor/srgb/model.yml
 	../prepare/uv_to_rgb_gen_c_float.py $^ srgb srgb >$@
 
 uv_to_rgb_display_p3: uv_to_rgb_display_p3_standalone.o gamma_encode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
-uv_to_rgb_display_p3.c: ../prepare/primaries_display_p3.yml
+uv_to_rgb_display_p3.c: ../monitor/display_p3/model.yml
 	../prepare/uv_to_rgb_gen_c_float.py $^ srgb display_p3 >$@
 
 rgb_to_uv_srgb: rgb_to_uv_srgb_standalone.o gamma_decode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
-rgb_to_uv_srgb.c: ../prepare/primaries_srgb.yml
+rgb_to_uv_srgb.c: ../monitor/srgb/model.yml
 	../prepare/rgb_to_uv_gen_c_float.py $^ srgb srgb  >$@
 
 rgb_to_uv_display_p3: rgb_to_uv_display_p3_standalone.o gamma_decode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
-rgb_to_uv_display_p3.c: ../prepare/primaries_display_p3.yml
+rgb_to_uv_display_p3.c: ../monitor/display_p3/model.yml
 	../prepare/rgb_to_uv_gen_c_float.py $^ srgb display_p3 >$@
 
 mired_to_rgb_srgb: mired_to_rgb_srgb_standalone.o

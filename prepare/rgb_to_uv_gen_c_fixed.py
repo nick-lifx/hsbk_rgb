@@ -36,23 +36,42 @@ RGB_BLUE = 2
 N_RGB = 3
 
 UVL_U = 0
+UVL_u = 0
 UVL_V = 1
+UVL_v = 1
 UVL_L = 2
 N_UVL = 3
 
 if len(sys.argv) < 4:
-  print(f'usage: {sys.argv[0]:s} primaries_in.yml gamma_curve device')
+  print(f'usage: {sys.argv[0]:s} model_in.yml gamma_curve device')
   sys.exit(EXIT_FAILURE)
-primaries_in = sys.argv[1]
+model_in = sys.argv[1]
 gamma_curve = sys.argv[2]
 device = sys.argv[3]
 
 yaml = ruamel.yaml.YAML(typ = 'safe')
 #numpy.set_printoptions(threshold = numpy.inf)
 
-with open(primaries_in) as fin:
-  primaries = python_to_numpy(yaml.load(fin))
-rgb_to_UVL = primaries['rgb_to_UVL']
+with open(model_in) as fin:
+  model = python_to_numpy(yaml.load(fin))
+primaries_uvL = model['primaries_uvL']
+
+u = primaries_uvL[:, UVL_u]
+v = primaries_uvL[:, UVL_v]
+L = primaries_uvL[:, UVL_L]
+primaries_UVW = numpy.stack([u, v, 1. - u - v], 1) * L[:, numpy.newaxis]
+
+# create a special version in which L = U + V + W
+# this makes it easier to convert uv <-> RGB directly
+# note: UVL differs from uvL as U, V are scaled by the L
+rgb_to_UVL = numpy.array(
+  [
+    [1., 0., 0.],
+    [0., 1., 0.],
+    [1., 1., 1.]
+  ],
+  numpy.double
+) @ primaries_UVW.transpose()
 
 # choose precision so that we can store the matrix and also the extreme values
 # of the conversion result, which are at all combinations of extreme R, G, B
@@ -102,7 +121,9 @@ print(
 #define UV_v 1
 #define N_UV 2
 
+#define UVL_u 0
 #define UVL_U 0
+#define UVL_v 1
 #define UVL_V 1
 #define UVL_L 2
 #define N_UVL 3

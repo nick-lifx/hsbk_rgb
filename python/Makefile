@@ -40,19 +40,19 @@ gamma_encode_srgb.py: ../prepare/gamma_encode_fit_srgb.yml
 	../prepare/gamma_encode_gen_py.py $^ srgb >$@
 	chmod a+x $@
 
-uv_to_rgb_srgb.py: ../prepare/primaries_srgb.yml
+uv_to_rgb_srgb.py: ../monitor/srgb/model.yml
 	../prepare/uv_to_rgb_gen_py.py $^ srgb srgb >$@
 	chmod a+x $@
 
-uv_to_rgb_display_p3.py: ../prepare/primaries_display_p3.yml
+uv_to_rgb_display_p3.py: ../monitor/display_p3/model.yml
 	../prepare/uv_to_rgb_gen_py.py $^ srgb display_p3 >$@
 	chmod a+x $@
 
-rgb_to_uv_srgb.py: ../prepare/primaries_srgb.yml
+rgb_to_uv_srgb.py: ../monitor/srgb/model.yml
 	../prepare/rgb_to_uv_gen_py.py $^ srgb srgb >$@
 	chmod a+x $@
 
-rgb_to_uv_display_p3.py: ../prepare/primaries_display_p3.yml
+rgb_to_uv_display_p3.py: ../monitor/display_p3/model.yml
 	../prepare/rgb_to_uv_gen_py.py $^ srgb display_p3 >$@
 	chmod a+x $@
 

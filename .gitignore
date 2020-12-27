@@ -72,8 +72,6 @@
 /prepare/gamma_encode_fit_srgb.yml
 /prepare/mired_to_rgb_fit_display_p3.yml
 /prepare/mired_to_rgb_fit_srgb.yml
-/prepare/primaries_display_p3.yml
-/prepare/primaries_srgb.yml
 /prepare/rtheta_to_xy_fit.yml
 /prepare/xy_to_rtheta_fit.yml
 /python/gamma_decode_srgb.py

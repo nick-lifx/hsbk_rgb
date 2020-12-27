@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Copyright (c) 2020 Nick Downing
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,16 +30,31 @@ CONST_c1 = 2. * math.pi * CONST_h * CONST_c ** 2
 CONST_c2 = CONST_h * CONST_c / CONST_k
 
 standard_observer_lambda = numpy.linspace(360e-9, 830e-9, 471, numpy.double)
+
 c1_on_lambda_5 = CONST_c1 / standard_observer_lambda ** 5
 c2_on_lambda = CONST_c2 / standard_observer_lambda
-
-def blackbody_spectra(kelv):
-  return c1_on_lambda_5[:, numpy.newaxis] / (
-    numpy.exp(c2_on_lambda[:, numpy.newaxis] / kelv[numpy.newaxis, :]) - 1.
+def blackbody_spectrum_multi(kelv):
+  return c1_on_lambda_5[numpy.newaxis, :] / (
+    numpy.exp(c2_on_lambda[numpy.newaxis, :] / kelv[:, numpy.newaxis]) - 1.
   )
 
 def blackbody_spectrum(kelv):
-  return c1_on_lambda_5 / (numpy.exp(c2_on_lambda / kelv) - 1.)
+  return blackbody_spectrum_multi(
+    numpy.array([kelv], numpy.double)
+  )[0, :]
+
+c1_c2_on_lambda_6 = CONST_c1 * CONST_c2 / standard_observer_lambda ** 6
+c2_on_lambda = CONST_c2 / standard_observer_lambda
+def blackbody_spectrum_deriv_multi(kelv):
+  e = numpy.exp(c2_on_lambda[numpy.newaxis, :] / kelv[:, numpy.newaxis])
+  return c1_c2_on_lambda_6[numpy.newaxis, :] * e / (
+    (kelv[:, numpy.newaxis] * (e - 1.)) ** 2
+  )
+
+def blackbody_spectrum_deriv(kelv):
+  return blackbody_spectrum_deriv_multi(
+    numpy.array([kelv], numpy.double)
+  )[0, :]
 
 if __name__ == '__main__':
   import ruamel.yaml
@@ -45,6 +62,12 @@ if __name__ == '__main__':
   yaml = ruamel.yaml.YAML(typ = 'safe')
   with open('standard_observer_2deg.yml') as fin:
     standard_observer_2deg = python_to_numpy(yaml.load(fin))
+
   XYZ = blackbody_spectrum(6504.) @ standard_observer_2deg
   xy = XYZ[:2] / numpy.sum(XYZ)
   print('xy', xy) # should be near (.31271, .32902)
+
+  XYZ = blackbody_spectrum_deriv(6504.) @ standard_observer_2deg
+  XYZ0 = blackbody_spectrum(6504.) @ standard_observer_2deg
+  XYZ1 = blackbody_spectrum(6504.001) @ standard_observer_2deg
+  print('XYZ', XYZ, (XYZ1 - XYZ0) / .001)
