@@ -24,8 +24,10 @@ import numpy
 import numpy.random
 import sys
 from hsbk_to_rgb_display_p3 import hsbk_to_rgb_display_p3
+from hsbk_to_rgb_rec2020 import hsbk_to_rgb_rec2020
 from hsbk_to_rgb_srgb import hsbk_to_rgb_srgb
 from rgb_to_hsbk_display_p3 import rgb_to_hsbk_display_p3
+from rgb_to_hsbk_rec2020 import rgb_to_hsbk_rec2020
 from rgb_to_hsbk_srgb import rgb_to_hsbk_srgb
 
 EXIT_SUCCESS = 0
@@ -39,7 +41,7 @@ if len(sys.argv) >= 3 and sys.argv[1] == '--device':
   del sys.argv[1:3]
 if len(sys.argv) < 3:
   print(f'usage: {sys.argv[0]:s} [--device device] seed count [kelv]')
-  print('device in {srgb, display_p3}, default srgb')
+  print('device in {srgb, display_p3, rec2020}, default srgb')
   print('checks invertibility of the RGB -> HSBK -> RGB pipeline')
   sys.exit(EXIT_FAILURE)
 seed = int(sys.argv[1])
@@ -54,6 +56,10 @@ hsbk_to_rgb, rgb_to_hsbk = {
   'display_p3': (
     hsbk_to_rgb_display_p3,
     rgb_to_hsbk_display_p3
+  ),
+  'rec2020': (
+    hsbk_to_rgb_rec2020,
+    rgb_to_hsbk_rec2020
   )
 }[device]
 

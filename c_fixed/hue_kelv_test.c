@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "hsbk_to_rgb_display_p3.h"
+#include "hsbk_to_rgb_rec2020.h"
 #include "hsbk_to_rgb_srgb.h"
 
 #define RGB_RED 0
@@ -51,7 +52,7 @@ int main(int argc, char **argv) {
   if (argc < 4) {
     printf(
       "usage: %s [--device device] sat br image_out\n"
-        "device in {srgb, display_p3}, default srgb\n"
+        "device in {srgb, display_p3, rec2020}, default srgb\n"
         "sat = saturation as fraction (0 to 1)\n"
         "br = brightness as fraction (0 to 1)\n"
         "image_out = name of PNG file to create (will be overwritten)\n"
@@ -69,6 +70,8 @@ int main(int argc, char **argv) {
     hsbk_to_rgb = hsbk_to_rgb_srgb;
   else if (strcmp(device, "display_p3") == 0)
     hsbk_to_rgb = hsbk_to_rgb_display_p3;
+  else if (strcmp(device, "rec2020") == 0)
+    hsbk_to_rgb = hsbk_to_rgb_rec2020;
   else
     abort();
 

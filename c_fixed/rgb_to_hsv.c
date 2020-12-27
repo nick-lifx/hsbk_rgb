@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "rgb_to_hsbk_display_p3.h"
+#include "rgb_to_hsbk_rec2020.h"
 #include "rgb_to_hsbk_srgb.h"
 
 #define RGB_RED 0
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
   if (argc < 3) {
     printf(
       "usage: %s [--device device] image_in image_out [kelv]\n"
-        "device in {srgb, display_p3}, default srgb\n"
+        "device in {srgb, display_p3, rec2020}, default srgb\n"
         "image_in = name of PNG file to read\n"
         "image_out = name of PNG file (HSV pixels) to create (will be overwritten)\n"
         "kelv = implicit colour temperature to apply to HSV pixels (default 6504K)\n",
@@ -80,6 +81,8 @@ int main(int argc, char **argv) {
     rgb_to_hsbk = rgb_to_hsbk_srgb;
   else if (strcmp(device, "display_p3") == 0)
     rgb_to_hsbk = rgb_to_hsbk_display_p3;
+  else if (strcmp(device, "rec2020") == 0)
+    rgb_to_hsbk = rgb_to_hsbk_rec2020;
   else
     abort();
 

@@ -24,6 +24,7 @@ import imageio
 import numpy
 import sys
 from hsbk_to_rgb_display_p3 import hsbk_to_rgb_display_p3
+from hsbk_to_rgb_rec2020 import hsbk_to_rgb_rec2020
 from hsbk_to_rgb_srgb import hsbk_to_rgb_srgb
 
 EXIT_SUCCESS = 0
@@ -37,7 +38,7 @@ if len(sys.argv) >= 3 and sys.argv[1] == '--device':
   del sys.argv[1:3]
 if len(sys.argv) < 4:
   print(f'usage: {sys.argv[0]:s} [--device device] sat br image_out')
-  print('device in {srgb, display_p3}, default srgb')
+  print('device in {srgb, display_p3, rec2020}, default srgb')
   print('sat = saturation as fraction (0 to 1)')
   print('br = brightness as fraction (0 to 1)')
   print('image_out = name of PNG file to create (will be overwritten)')
@@ -49,7 +50,8 @@ image_out = sys.argv[3]
 
 hsbk_to_rgb = {
   'srgb': hsbk_to_rgb_srgb,
-  'display_p3': hsbk_to_rgb_display_p3
+  'display_p3': hsbk_to_rgb_display_p3,
+  'rec2020': hsbk_to_rgb_rec2020
 }[device]
 
 image = numpy.zeros((376, 361, 3), numpy.double)

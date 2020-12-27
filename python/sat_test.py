@@ -24,8 +24,10 @@ import imageio
 import numpy
 import sys
 from hsbk_to_rgb_display_p3 import hsbk_to_rgb_display_p3
+from hsbk_to_rgb_rec2020 import hsbk_to_rgb_rec2020
 from hsbk_to_rgb_srgb import hsbk_to_rgb_srgb
 from rgb_to_uv_display_p3 import rgb_to_uv_display_p3
+from rgb_to_uv_rec2020 import rgb_to_uv_rec2020
 from rgb_to_uv_srgb import rgb_to_uv_srgb
 
 EXIT_SUCCESS = 0
@@ -50,6 +52,10 @@ hsbk_to_rgb, rgb_to_uv = {
   'display_p3': (
     hsbk_to_rgb_display_p3,
     rgb_to_uv_display_p3
+  ),
+  'rec2020': (
+    hsbk_to_rgb_rec2020,
+    rgb_to_uv_rec2020
   )
 }[device]
 

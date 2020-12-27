@@ -29,16 +29,23 @@ CFLAGS=-g -Wall
 all: \
 hsbk_to_rgb_srgb \
 hsbk_to_rgb_display_p3 \
+hsbk_to_rgb_rec2020 \
 rgb_to_hsbk_srgb \
 rgb_to_hsbk_display_p3 \
+rgb_to_hsbk_rec2020 \
 gamma_decode_srgb \
+gamma_decode_rec2020 \
 gamma_encode_srgb \
+gamma_encode_rec2020 \
 uv_to_rgb_srgb \
 uv_to_rgb_display_p3 \
+uv_to_rgb_rec2020 \
 rgb_to_uv_srgb \
 rgb_to_uv_display_p3 \
+rgb_to_uv_rec2020 \
 mired_to_rgb_srgb \
 mired_to_rgb_display_p3 \
+mired_to_rgb_rec2020 \
 kelv_to_uv \
 hsv_to_rgb \
 rgb_to_hsv \
@@ -60,6 +67,12 @@ hsbk_to_rgb_standalone.o \
 mired_to_rgb_display_p3.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
+hsbk_to_rgb_rec2020: \
+hsbk_to_rgb_rec2020_standalone.o \
+hsbk_to_rgb_standalone.o \
+mired_to_rgb_rec2020.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
+
 rgb_to_hsbk_srgb: \
 rgb_to_hsbk_srgb_standalone.o \
 rgb_to_hsbk_standalone.o \
@@ -78,17 +91,38 @@ mired_to_rgb_display_p3.o
 rgb_to_hsbk_display_p3.c: rgb_to_hsbk_gen
 	./rgb_to_hsbk_gen display_p3 >$@
 
+rgb_to_hsbk_rec2020: \
+rgb_to_hsbk_rec2020_standalone.o \
+rgb_to_hsbk_standalone.o \
+mired_to_rgb_rec2020.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
+
+rgb_to_hsbk_rec2020.c: rgb_to_hsbk_gen
+	./rgb_to_hsbk_gen rec2020 >$@
+
 gamma_decode_srgb: gamma_decode_srgb_standalone.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 gamma_decode_srgb.c: ../prepare/gamma_decode_fit_srgb.yml
 	../prepare/gamma_decode_gen_c_fixed.py $^ srgb >$@
 
+gamma_decode_rec2020: gamma_decode_rec2020_standalone.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
+
+gamma_decode_rec2020.c: ../prepare/gamma_decode_fit_rec2020.yml
+	../prepare/gamma_decode_gen_c_fixed.py $^ rec2020 >$@
+
 gamma_encode_srgb: gamma_encode_srgb_standalone.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 gamma_encode_srgb.c: ../prepare/gamma_encode_fit_srgb.yml
 	../prepare/gamma_encode_gen_c_fixed.py $^ srgb >$@
+
+gamma_encode_rec2020: gamma_encode_rec2020_standalone.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
+
+gamma_encode_rec2020.c: ../prepare/gamma_encode_fit_rec2020.yml
+	../prepare/gamma_encode_gen_c_fixed.py $^ rec2020 >$@
 
 uv_to_rgb_srgb: uv_to_rgb_srgb_standalone.o gamma_encode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
@@ -102,6 +136,12 @@ uv_to_rgb_display_p3: uv_to_rgb_display_p3_standalone.o gamma_encode_srgb.o
 uv_to_rgb_display_p3.c: ../monitor/display_p3/model.yml
 	../prepare/uv_to_rgb_gen_c_fixed.py $^ srgb display_p3 >$@
 
+uv_to_rgb_rec2020: uv_to_rgb_rec2020_standalone.o gamma_encode_rec2020.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
+
+uv_to_rgb_rec2020.c: ../monitor/rec2020/model.yml
+	../prepare/uv_to_rgb_gen_c_fixed.py $^ rec2020 rec2020 >$@
+
 rgb_to_uv_srgb: rgb_to_uv_srgb_standalone.o gamma_decode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
@@ -114,6 +154,12 @@ rgb_to_uv_display_p3: rgb_to_uv_display_p3_standalone.o gamma_decode_srgb.o
 rgb_to_uv_display_p3.c: ../monitor/display_p3/model.yml
 	../prepare/rgb_to_uv_gen_c_fixed.py $^ srgb display_p3 >$@
 
+rgb_to_uv_rec2020: rgb_to_uv_rec2020_standalone.o gamma_decode_rec2020.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
+
+rgb_to_uv_rec2020.c: ../monitor/rec2020/model.yml
+	../prepare/rgb_to_uv_gen_c_fixed.py $^ rec2020 rec2020  >$@
+
 mired_to_rgb_srgb: mired_to_rgb_srgb_standalone.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
@@ -125,6 +171,12 @@ mired_to_rgb_display_p3: mired_to_rgb_display_p3_standalone.o
 
 mired_to_rgb_display_p3.c: ../prepare/mired_to_rgb_fit_display_p3.yml
 	../prepare/mired_to_rgb_gen_c_fixed.py $^ display_p3 >$@
+
+mired_to_rgb_rec2020: mired_to_rgb_rec2020_standalone.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
+
+mired_to_rgb_rec2020.c: ../prepare/mired_to_rgb_fit_rec2020.yml
+	../prepare/mired_to_rgb_gen_c_fixed.py $^ rec2020 >$@
 
 kelv_to_uv: kelv_to_uv_standalone.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
@@ -139,51 +191,64 @@ hsv_to_rgb: \
 hsv_to_rgb.o \
 hsbk_to_rgb_srgb.o \
 hsbk_to_rgb_display_p3.o \
+hsbk_to_rgb_rec2020.o \
 hsbk_to_rgb.o \
 mired_to_rgb_srgb.o \
-mired_to_rgb_display_p3.o
+mired_to_rgb_display_p3.o \
+mired_to_rgb_rec2020.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
 rgb_to_hsv: \
 rgb_to_hsv.o \
 rgb_to_hsbk_srgb.o \
 rgb_to_hsbk_display_p3.o \
+rgb_to_hsbk_rec2020.o \
 rgb_to_hsbk.o \
 mired_to_rgb_srgb.o \
-mired_to_rgb_display_p3.o
+mired_to_rgb_display_p3.o \
+mired_to_rgb_rec2020.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
 hue_kelv_test: \
 hue_kelv_test.o \
 hsbk_to_rgb_srgb.o \
 hsbk_to_rgb_display_p3.o \
+hsbk_to_rgb_rec2020.o \
 hsbk_to_rgb.o \
 mired_to_rgb_srgb.o \
-mired_to_rgb_display_p3.o
+mired_to_rgb_display_p3.o \
+mired_to_rgb_rec2020.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
 inv_test: \
 inv_test.o \
 hsbk_to_rgb_srgb.o \
 hsbk_to_rgb_display_p3.o \
+hsbk_to_rgb_rec2020.o \
 hsbk_to_rgb.o \
 rgb_to_hsbk_srgb.o \
 rgb_to_hsbk_display_p3.o \
+rgb_to_hsbk_rec2020.o \
 rgb_to_hsbk.o \
 mired_to_rgb_srgb.o \
-mired_to_rgb_display_p3.o
+mired_to_rgb_display_p3.o \
+mired_to_rgb_rec2020.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 sat_test: \
 sat_test.o \
 hsbk_to_rgb_srgb.o \
 hsbk_to_rgb_display_p3.o \
+hsbk_to_rgb_rec2020.o \
 hsbk_to_rgb.o \
 mired_to_rgb_srgb.o \
 mired_to_rgb_display_p3.o \
+mired_to_rgb_rec2020.o \
 rgb_to_uv_srgb.o \
 rgb_to_uv_display_p3.o \
-gamma_decode_srgb.o
+rgb_to_uv_rec2020.o \
+gamma_decode_srgb.o \
+gamma_decode_rec2020.o
 	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
 
 # most generator scripts live in ../prepare, but this one is special,
@@ -192,33 +257,47 @@ gamma_decode_srgb.o
 rgb_to_hsbk_gen: \
 rgb_to_hsbk_gen.o \
 mired_to_rgb_srgb.o \
-mired_to_rgb_display_p3.o
-	${CC} ${CFLAGS} -o $@ $^ -lm -lpng
+mired_to_rgb_display_p3.o \
+mired_to_rgb_rec2020.o
+	${CC} ${CFLAGS} -o $@ $^ -lm
 
 clean:
 	rm -f \
 hsbk_to_rgb_srgb \
 hsbk_to_rgb_display_p3 \
+hsbk_to_rgb_rec2020 \
 rgb_to_hsbk_srgb \
 rgb_to_hsbk_srgb.c \
 rgb_to_hsbk_display_p3 \
 rgb_to_hsbk_display_p3.c \
+rgb_to_hsbk_rec2020 \
+rgb_to_hsbk_rec2020.c \
 gamma_decode_srgb \
 gamma_decode_srgb.c \
+gamma_decode_rec2020 \
+gamma_decode_rec2020.c \
 gamma_encode_srgb \
 gamma_encode_srgb.c \
+gamma_encode_rec2020 \
+gamma_encode_rec2020.c \
 uv_to_rgb_srgb \
 uv_to_rgb_srgb.c \
 uv_to_rgb_display_p3 \
 uv_to_rgb_display_p3.c \
+uv_to_rgb_rec2020 \
+uv_to_rgb_rec2020.c \
 rgb_to_uv_srgb \
 rgb_to_uv_srgb.c \
 rgb_to_uv_display_p3 \
 rgb_to_uv_display_p3.c \
+rgb_to_uv_rec2020 \
+rgb_to_uv_rec2020.c \
 mired_to_rgb_srgb \
 mired_to_rgb_srgb.c \
 mired_to_rgb_display_p3 \
 mired_to_rgb_display_p3.c \
+mired_to_rgb_rec2020 \
+mired_to_rgb_rec2020.c \
 kelv_to_uv \
 kelv_to_uv_deriv \
 uv_to_kelv \

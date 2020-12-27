@@ -23,6 +23,7 @@
 import numpy
 import sys
 from mired_to_rgb_display_p3 import mired_to_rgb_display_p3
+from mired_to_rgb_rec2020 import mired_to_rgb_rec2020
 from mired_to_rgb_srgb import mired_to_rgb_srgb
 
 EXIT_SUCCESS = 0
@@ -45,7 +46,8 @@ device = sys.argv[1]
 
 rgb = {
   'srgb': mired_to_rgb_srgb,
-  'display_p3': mired_to_rgb_display_p3
+  'display_p3': mired_to_rgb_display_p3,
+  'rec2020': mired_to_rgb_rec2020
 }[device](1e6 / 6504.)
 
 print(

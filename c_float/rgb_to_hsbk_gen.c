@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "mired_to_rgb_display_p3.h"
+#include "mired_to_rgb_rec2020.h"
 #include "mired_to_rgb_srgb.h"
 
 #define EXIT_SUCCESS 0
@@ -40,20 +41,25 @@ int main(int argc, char **argv) {
   if (argc < 2) {
     printf(
       "usage: %s device\n"
-        "device in {srgb, display_p3}\n",
+        "device in {srgb, display_p3, rec2020}\n",
       argv[0]
     );
     exit(EXIT_FAILURE);
   }
   const char *device = argv[1];
 
-  float rgb[N_RGB];
+  void (*mired_to_rgb)(float mired, float *rgb);
   if (strcmp(device, "srgb") == 0)
-    mired_to_rgb_srgb(1e6f / 6504.f, rgb);
+    mired_to_rgb = mired_to_rgb_srgb;
   else if (strcmp(device, "display_p3") == 0)
-    mired_to_rgb_display_p3(1e6f / 6504.f, rgb);
+    mired_to_rgb = mired_to_rgb_display_p3;
+  else if (strcmp(device, "rec2020") == 0)
+    mired_to_rgb = mired_to_rgb_rec2020;
   else
     abort();
+
+  float rgb[N_RGB];
+  mired_to_rgb(1e6f / 6504.f, rgb);
 
   printf(
     "// Copyright (c) 2020 Nick Downing\n"

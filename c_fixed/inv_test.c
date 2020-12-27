@@ -24,8 +24,10 @@
 #include <stdio.h>
 #include <string.h>
 #include "hsbk_to_rgb_display_p3.h"
+#include "hsbk_to_rgb_rec2020.h"
 #include "hsbk_to_rgb_srgb.h"
 #include "rgb_to_hsbk_display_p3.h"
+#include "rgb_to_hsbk_rec2020.h"
 #include "rgb_to_hsbk_srgb.h"
 
 #define RGB_RED 0
@@ -51,7 +53,7 @@ int main(int argc, char **argv) {
   if (argc < 3) {
     printf(
       "usage: %s [--device device] seed count [kelv]\n"
-        "device in {srgb, display_p3}, default srgb\n"
+        "device in {srgb, display_p3, rec2020}, default srgb\n"
         "checks invertibility of the RGB -> HSBK -> RGB pipeline\n",
       argv[0]
     );
@@ -71,6 +73,10 @@ int main(int argc, char **argv) {
   else if (strcmp(device, "display_p3") == 0) {
     hsbk_to_rgb = hsbk_to_rgb_display_p3;
     rgb_to_hsbk = rgb_to_hsbk_display_p3;
+  }
+  else if (strcmp(device, "rec2020") == 0) {
+    hsbk_to_rgb = hsbk_to_rgb_rec2020;
+    rgb_to_hsbk = rgb_to_hsbk_rec2020;
   }
   else
     abort();
