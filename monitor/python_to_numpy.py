@@ -18,30 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-all: python c_float c_fixed monitor prepare
+import numpy
 
-.PHONY: python
-python: prepare
-	${MAKE} -C $@
-
-.PHONY: c_float
-c_float: prepare
-	${MAKE} -C $@
-
-.PHONY: c_fixed
-c_fixed: prepare
-	${MAKE} -C $@
-
-.PHONY: monitor
-monitor: prepare
-	${MAKE} -C $@
-
-.PHONY: prepare
-prepare: monitor
-	${MAKE} -C $@
-
-clean:
-	${MAKE} -C python clean
-	${MAKE} -C c_float clean
-	${MAKE} -C c_fixed clean
-	${MAKE} -C prepare clean
+def python_to_numpy(value, dtype = numpy.double):
+  return (
+    numpy.array(value, dtype)
+  if isinstance(value, list) else
+    {i: python_to_numpy(j, dtype) for i, j in value.items()}
+  if isinstance(value, dict) else
+    value
+  )

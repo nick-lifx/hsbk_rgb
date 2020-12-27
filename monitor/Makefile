@@ -18,30 +18,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-all: python c_float c_fixed monitor prepare
+all: display_p3 rec2020 srgb
 
-.PHONY: python
-python: prepare
+.PHONY: display_p3
+display_p3:
 	${MAKE} -C $@
 
-.PHONY: c_float
-c_float: prepare
+.PHONY: rec2020
+rec2020:
 	${MAKE} -C $@
 
-.PHONY: c_fixed
-c_fixed: prepare
-	${MAKE} -C $@
-
-.PHONY: monitor
-monitor: prepare
-	${MAKE} -C $@
-
-.PHONY: prepare
-prepare: monitor
+.PHONY: srgb
+srgb:
 	${MAKE} -C $@
 
 clean:
-	${MAKE} -C python clean
-	${MAKE} -C c_float clean
-	${MAKE} -C c_fixed clean
-	${MAKE} -C prepare clean
+	${MAKE} -C display_p3 clean
+	${MAKE} -C rec2020 clean
+	${MAKE} -C srgb clean

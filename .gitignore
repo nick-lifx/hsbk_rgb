@@ -65,6 +65,9 @@
 /c_float/uv_to_rgb_display_p3.c
 /c_float/uv_to_rgb_srgb
 /c_float/uv_to_rgb_srgb.c
+/monitor/display_p3/model.yml
+/monitor/rec2020/model.yml
+/monitor/srgb/model.yml
 /prepare/gamma_decode_fit_srgb.yml
 /prepare/gamma_encode_fit_srgb.yml
 /prepare/mired_to_rgb_fit_display_p3.yml
