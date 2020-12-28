@@ -21,8 +21,6 @@
 import numpy
 #import numpy.linalg
 
-EPSILON = 1e-12
-
 def add(p, q):
   a = p.shape[0]
   b = q.shape[0]
@@ -58,10 +56,10 @@ def compose(p, x):
   return y
 
 # works, not used at the moment (isn't as numerically stable as I would like)
-#def roots(p, epsilon = EPSILON):
+#def roots(p):
 #  # return eigenvalues of the companion matrix
 #  n = p.shape[0]
-#  while n > 0 and abs(p[n - 1]) < epsilon:
+#  while n > 0 and p[n - 1] == 0.:
 #    n -= 1
 #  if n < 2:
 #    return p[:n]
@@ -139,10 +137,10 @@ def real_root(p, p_deriv, a, b, increasing):
     x = .5 * (a + b)
   return x
 
-def real_roots(p, a, b, epsilon = EPSILON):
+def real_roots(p, a, b):
   # see https://www.researchgate.net/publication/320864673_A_simple_algorithm_to_find_all_real_roots_of_a_polynomial
   n = p.shape[0]
-  while n > 0 and abs(p[n - 1]) < epsilon:
+  while n > 0 and p[n - 1] == 0.:
     n -= 1
   #print('real_roots: n', n)
   out = [a]
@@ -155,7 +153,7 @@ def real_roots(p, a, b, epsilon = EPSILON):
     else:
       p = p[:n]
       p_deriv = deriv(p)
-      x = real_roots(p_deriv, a, b, epsilon)
+      x = real_roots(p_deriv, a, b)
       #print('x', x)
       #print('p\'(x)', eval(p_deriv, x))
       y = eval(p, x)
@@ -174,15 +172,15 @@ def real_roots(p, a, b, epsilon = EPSILON):
   #print('real_roots: n', n, 'returning', numpy.array(out, numpy.double))
   return numpy.array(out, numpy.double)
 
-def extrema(p, a, b, epsilon = EPSILON):
-  x = real_roots(deriv(p), a, b, epsilon)
+def extrema(p, a, b):
+  x = real_roots(deriv(p), a, b)
   return x, eval(p, x)
 
 # returns the extrema of a list of contiguous intervals of x
 # similar to calling extrema() on each interval, but more efficient
-def interval_extrema(p, interval_x, epsilon = EPSILON):
+def interval_extrema(p, interval_x):
   n_intervals = interval_x.shape[0] - 1
-  extrema_x, extrema_y = extrema(p, interval_x[0], interval_x[-1], epsilon)
+  extrema_x, extrema_y = extrema(p, interval_x[0], interval_x[-1])
   #print('extrema_x', extrema_x)
   #print('extrema_y', extrema_y)
   #print('interval_x', interval_x)
@@ -209,6 +207,6 @@ def interval_extrema(p, interval_x, epsilon = EPSILON):
     j = k
   return out
 
-def _range(p, a, b, epsilon = EPSILON):
-  _, y = extrema(p, a, b, epsilon)
+def _range(p, a, b):
+  _, y = extrema(p, a, b)
   return numpy.min(y), numpy.max(y)

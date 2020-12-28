@@ -18,10 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import linalg
 import math
 import numpy
 import poly
-from solve_scaled import solve_scaled
 
 # convert any function to polynomial
 # done by fitting to the Chebyshev points with no attempt at optimization,
@@ -38,7 +38,7 @@ def any_f_to_poly(f, a, b, order):
   #print('x', x)
   y = f(x)
   #print('y', y)
-  p = solve_scaled(
+  p = linalg.solve(
     x[:, numpy.newaxis] ** numpy.arange(order, dtype = numpy.int32),
     y
   )
@@ -51,7 +51,7 @@ def any_f_to_poly(f, a, b, order):
     )
   )
   #print('x', x)
-  err = poly.eval(p, x) - f(x)
+  #err = poly.eval(p, x) - f(x)
   #print('err', err)
 
   return p

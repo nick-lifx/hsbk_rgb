@@ -18,14 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import linalg
 import math
 import numpy
 import poly
 from any_f_to_poly import any_f_to_poly
-from solve_scaled import solve_scaled
 
-EPSILON = 1e-12
-A_EPSILON = 1e-6
+EPSILON = 1e-6
 
 # Remez algorithm -- fit function f to polynomial p of given order
 # f is not fitted directly but via a polynomial approximation of order err_order
@@ -40,8 +39,7 @@ def remez(
   order,
   err_order,
   err_rel = 0,
-  iters = 10,
-  epsilon = EPSILON
+  iters = 10
 ):
   # put minimax nodes halfway between Chebyshev nodes on unit circle
   x = a + (b - a) * (
@@ -56,7 +54,7 @@ def remez(
     # let p be approximating polynomial, fitted to nodes with oscillation
     y = f(x)
     #print('y', y)
-    p = solve_scaled(
+    p = linalg.solve(
       numpy.concatenate(
         [
           x[:, numpy.newaxis] ** numpy.arange(order, dtype = numpy.int32),
@@ -72,7 +70,7 @@ def remez(
     osc = p[-1]
     print('osc', osc)
     p = p[:-1]
-    print('p', p)
+    #print('p', p)
 
     # let q be the error function
     q = any_f_to_poly(
@@ -85,7 +83,7 @@ def remez(
     #print('q(x)', poly.eval(q, x))
 
     # partition domain into intervals where q is positive or negative
-    intervals = poly.real_roots(q, a, b, epsilon)
+    intervals = poly.real_roots(q, a, b)
     print('intervals', intervals)
     n_intervals = intervals.shape[0] - 1
     print('n_intervals', n_intervals)
@@ -93,8 +91,9 @@ def remez(
       # there absolutely have to be at least order + 1 intervals,
       # because the oscillating fit made q go positive and negative,
       # if there isn't, it means osc is very tiny or precision error
-      print('warning: not enough intervals -- we say good enough')
-      break
+      #print('warning: not enough intervals -- we say good enough')
+      #break
+      assert False
 
     # determine if q increasing or decreasing through each boundary
     # have n_intervals - 1 boundaries, must produce n_intervals signs,
@@ -113,11 +112,12 @@ def remez(
       ) == interval_polarity
     ):
       # see above
-      print('warning: intervals not alternating -- we say good enough')
-      break
+      #print('warning: intervals not alternating -- we say good enough')
+      #break
+      assert False
 
     # within each interval, find the "global" maximum or minimum of q
-    interval_extrema = poly.interval_extrema(q, intervals, epsilon)
+    interval_extrema = poly.interval_extrema(q, intervals)
     x = []
     y = []
     for i in range(n_intervals):
@@ -159,7 +159,7 @@ def remez(
   )
   #print('q', q)
   #print('q(x)', poly.eval(q, x))
-  _, y = poly.extrema(q, a, b, epsilon)
+  _, y = poly.extrema(q, a, b)
   err = numpy.max(numpy.abs(y))
   print('err', err)
 
@@ -173,8 +173,7 @@ def remez_even(
   order,
   err_order,
   err_rel = 0,
-  iters = 10,
-  epsilon = EPSILON
+  iters = 10
 ):
   def g(x):
     return f(numpy.sqrt(x))
@@ -185,13 +184,12 @@ def remez_even(
     order,
     err_order,
     err_rel,
-    iters,
-    epsilon
+    iters
   )
 
 # fit odd polynomial in a domain symmetrical about 0
 # fits order * 2 + 1 polynomial, returns order odd coefficients
-# function won't be evaluated at 0, domain will start at A_EPSILON instead
+# function won't be evaluated at 0, domain will start at EPSILON instead
 # (because we don't have a way to take the limiting value of f(x) / x at 0)
 def remez_odd(
   f,
@@ -200,19 +198,17 @@ def remez_odd(
   err_order,
   err_rel = 0,
   iters = 10,
-  epsilon = EPSILON,
-  a_epsilon = A_EPSILON
+  epsilon = EPSILON
 ):
   def g(x):
     x = numpy.sqrt(x)
     return f(x) / x
   return remez(
     g,
-    a_epsilon ** 2,
+    epsilon ** 2,
     b ** 2,
     order,
     err_order,
     err_rel - 1,
-    iters,
-    epsilon
+    iters
   )

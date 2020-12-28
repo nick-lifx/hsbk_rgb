@@ -21,20 +21,19 @@
 import numpy
 import poly
 
-SLOP = 1e-8
-EPSILON = 1e-12
+EPSILON = 1e-8
 
 # routines for converting polynomial coefficients to fixed point
 
 # find range of each sub-polynomial encountered in Horner's rule evaluation,
 # then calculate the exponent needed to represent that range (or the exponent
 # needed to prevent the next coefficient from overflowing, whichever larger)
-def intermediate_exp(p, a, b, slop = SLOP, epsilon = EPSILON):
+def intermediate_exp(p, a, b, epsilon = EPSILON):
   _, exp = numpy.frexp(
     numpy.array(
-      [poly._range(p[i:], a, b, epsilon) for i in range(p.shape[0])],
+      [poly._range(p[i:], a, b) for i in range(p.shape[0])],
       numpy.double
-    ) * (1. + slop)
+    ) * (1. + epsilon)
   )
   exp = numpy.max(exp, 1)
   _, p_exp = numpy.frexp(p[:-1])
@@ -46,8 +45,8 @@ def intermediate_exp(p, a, b, slop = SLOP, epsilon = EPSILON):
 # then find shift amounts to align each intermediate result with next stage
 # (the shift also removes the effect of the independent variable exponent)
 # return the aligned cofficients, the shifts, and exponent of final result
-def align(p, a, b, x_exp, bits, y_exp = None, slop = SLOP, epsilon = EPSILON):
-  exp = intermediate_exp(p, a, b, slop, epsilon) - bits
+def align(p, a, b, x_exp, bits, y_exp = None, epsilon = EPSILON):
+  exp = intermediate_exp(p, a, b, epsilon) - bits
   if y_exp is not None:
     assert exp[0] <= y_exp
     exp[0] = y_exp
@@ -91,9 +90,8 @@ def poly_fixed(
   bits,
   y_exp = None,
   dtype = numpy.int64,
-  slop = SLOP,
   epsilon = EPSILON
 ):
-   c, shr, exp = align(p, a, b, x_exp, bits, y_exp, slop, epsilon)
+   c, shr, exp = align(p, a, b, x_exp, bits, y_exp, epsilon)
    c = quantize(c, shr, dtype)
    return c, shr, exp

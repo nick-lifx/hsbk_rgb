@@ -58,7 +58,7 @@ b = 1.
 
 # find approximating polynomial
 p, _, p_err = remez.remez_even(f, b, ORDER1, ERR_ORDER)
-q, _, q_err = remez.remez_odd(g, b, ORDER2, ERR_ORDER, a_epsilon = EPSILON)
+q, _, q_err = remez.remez_odd(g, b, ORDER2, ERR_ORDER, epsilon = EPSILON)
 
 # checking
 if diag:

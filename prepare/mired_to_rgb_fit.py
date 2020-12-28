@@ -53,7 +53,7 @@ UVW_V = 1
 UVW_W = 2
 N_UVW = 3
 
-ERR_ORDER = 18
+ERR_ORDER = 17
 
 # approximation order can be set separately for each channel and interval
 ORDER_RED_AB = 4
@@ -72,8 +72,6 @@ FIT_EXTRA_DOMAIN = 5.
 # fit will be valid in this range
 MIRED_MIN = 1e6 / 15000.
 MIRED_MAX = 1e6 / 1000.
-
-EPSILON = 1e-48
 
 diag = False
 if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
@@ -229,8 +227,7 @@ p_red_ab, _, p_red_ab_err = remez(
   a - FIT_EXTRA_DOMAIN,
   b + FIT_EXTRA_DOMAIN,
   ORDER_RED_AB,
-  ERR_ORDER,
-  epsilon = EPSILON
+  ERR_ORDER
 )
 print('p_red_ab', p_red_ab)
 print('p_red_ab_err', p_red_ab_err)
@@ -246,8 +243,7 @@ p_green_ab, _, p_green_ab_err = remez(
   a - FIT_EXTRA_DOMAIN,
   b + FIT_EXTRA_DOMAIN,
   ORDER_GREEN_AB,
-  ERR_ORDER,
-  epsilon = EPSILON
+  ERR_ORDER
 )
 print('p_green_ab', p_green_ab)
 print('p_green_ab_err', p_green_ab_err)
@@ -259,8 +255,7 @@ p_green_bd, _, p_green_bd_err = remez(
   b - FIT_EXTRA_DOMAIN,
   d + FIT_EXTRA_DOMAIN,
   ORDER_GREEN_BD,
-  ERR_ORDER,
-  epsilon = EPSILON
+  ERR_ORDER
 )
 print('p_green_bd', p_green_bd)
 print('p_green_bd_err', p_green_bd_err)
@@ -276,8 +271,7 @@ p_blue_bc, _, p_blue_bc_err = remez(
   b - FIT_EXTRA_DOMAIN,
   c + FIT_EXTRA_DOMAIN,
   ORDER_BLUE_BC,
-  ERR_ORDER,
-  epsilon = EPSILON
+  ERR_ORDER
 )
 print('p_blue_bc', p_blue_bc)
 print('p_blue_bc_err', p_blue_bc_err)
