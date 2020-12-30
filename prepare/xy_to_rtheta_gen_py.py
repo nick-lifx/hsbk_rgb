@@ -20,25 +20,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
 import math
 import numpy
-import ruamel.yaml
-import sys
-from python_to_numpy import python_to_numpy
+import utils.yaml_io
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
+
+#numpy.set_printoptions(threshold = numpy.inf)
 
 if len(sys.argv) < 2:
   print(f'usage: {sys.argv[0]:s} xy_to_rtheta_fit_in.yml')
   sys.exit(EXIT_FAILURE)
 xy_to_rtheta_fit_in = sys.argv[1]
 
-yaml = ruamel.yaml.YAML(typ = 'safe')
-#numpy.set_printoptions(threshold = numpy.inf)
-
-with open(xy_to_rtheta_fit_in) as fin:
-  xy_to_rtheta_fit = python_to_numpy(yaml.load(fin))
+xy_to_rtheta_fit = utils.yaml_io._import(
+  utils.yaml_io.read_file(xy_to_rtheta_fit_in)
+)
 p = xy_to_rtheta_fit['p']
 p_err = xy_to_rtheta_fit['p_err']
 q = xy_to_rtheta_fit['q']
@@ -67,6 +72,13 @@ print(
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
 
 import math
 import numpy

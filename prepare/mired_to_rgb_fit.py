@@ -20,15 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
 import numpy
 import math
 import mired_to_uv
 import poly
-import ruamel.yaml
-import sys
+import utils.yaml_io
 from any_f_to_poly import any_f_to_poly
-from numpy_to_python import numpy_to_python
-from python_to_numpy import python_to_numpy
 from remez import remez
 
 EXIT_SUCCESS = 0
@@ -73,6 +77,8 @@ FIT_EXTRA_DOMAIN = 5.
 MIRED_MIN = 1e6 / 15000.
 MIRED_MAX = 1e6 / 1000.
 
+#numpy.set_printoptions(threshold = numpy.inf)
+
 diag = False
 if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
   diag = True
@@ -85,11 +91,7 @@ b_estimate = float(sys.argv[2])
 c_estimate = float(sys.argv[3])
 mired_to_rgb_fit_out = sys.argv[4]
 
-yaml = ruamel.yaml.YAML(typ = 'safe')
-#numpy.set_printoptions(threshold = numpy.inf)
-
-with open(model_in) as fin:
-  model = python_to_numpy(yaml.load(fin))
+model = utils.yaml_io._import(utils.yaml_io.read_file(model_in))
 gamma_a = model['gamma_a']
 gamma_b = model['gamma_b']
 gamma_c = model['gamma_c']
@@ -346,27 +348,30 @@ if diag:
 
   matplotlib.pyplot.show()
 
-mired_to_rgb_fit = {
-  'a': a,
-  'b_red': float(b_red),
-  'b_green': float(b_green),
-  'b_blue': float(b_blue),
-  'c_blue': float(c_blue),
-  'd': d,
-  'p_red_ab': p_red_ab,
-  'p_red_ab_err': float(p_red_ab_err),
-  'p_red_bd': p_red_bd,
-  'p_red_bd_err': float(p_red_bd_err),
-  'p_green_ab': p_green_ab,
-  'p_green_ab_err': float(p_green_ab_err),
-  'p_green_bd': p_green_bd,
-  'p_green_bd_err': float(p_green_bd_err),
-  'p_blue_ab': p_blue_ab,
-  'p_blue_ab_err': float(p_blue_ab_err),
-  'p_blue_bc': p_blue_bc,
-  'p_blue_bc_err': float(p_blue_bc_err),
-  'p_blue_cd': p_blue_cd,
-  'p_blue_cd_err': float(p_blue_cd_err)
-}
-with open(mired_to_rgb_fit_out, 'w') as fout:
-  yaml.dump(numpy_to_python(mired_to_rgb_fit), fout)
+utils.yaml_io.write_file(
+  mired_to_rgb_fit_out,
+  utils.yaml_io.export(
+    {
+      'a': a,
+      'b_red': b_red,
+      'b_green': b_green,
+      'b_blue': b_blue,
+      'c_blue': c_blue,
+      'd': d,
+      'p_red_ab': p_red_ab,
+      'p_red_ab_err': p_red_ab_err,
+      'p_red_bd': p_red_bd,
+      'p_red_bd_err': p_red_bd_err,
+      'p_green_ab': p_green_ab,
+      'p_green_ab_err': p_green_ab_err,
+      'p_green_bd': p_green_bd,
+      'p_green_bd_err': p_green_bd_err,
+      'p_blue_ab': p_blue_ab,
+      'p_blue_ab_err': p_blue_ab_err,
+      'p_blue_bc': p_blue_bc,
+      'p_blue_bc_err': p_blue_bc_err,
+      'p_blue_cd': p_blue_cd,
+      'p_blue_cd_err': p_blue_cd_err
+    }
+  )
+)

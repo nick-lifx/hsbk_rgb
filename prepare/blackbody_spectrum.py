@@ -20,6 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
 import math
 import numpy
 
@@ -57,11 +64,13 @@ def blackbody_spectrum_deriv(kelv):
   )[0, :]
 
 if __name__ == '__main__':
-  import ruamel.yaml
-  from python_to_numpy import python_to_numpy
-  yaml = ruamel.yaml.YAML(typ = 'safe')
-  with open('standard_observer_2deg.yml') as fin:
-    standard_observer_2deg = python_to_numpy(yaml.load(fin))
+  import utils.yaml_io
+
+  standard_observer_2deg = utils.yaml_io._import(
+    utils.yaml_io.read_file(
+      os.path.join(dirname, 'standard_observer_2deg.yml')
+    )
+  )
 
   XYZ = blackbody_spectrum(6504.) @ standard_observer_2deg
   xy = XYZ[:2] / numpy.sum(XYZ)

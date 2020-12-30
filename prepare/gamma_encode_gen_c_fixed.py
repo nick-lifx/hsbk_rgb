@@ -20,17 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
 import math
 import numpy
-import ruamel.yaml
-import sys
+import utils.yaml_io
 from poly_fixed import poly_fixed
-from python_to_numpy import python_to_numpy
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
 EPSILON = 1e-8
+
+#numpy.set_printoptions(threshold = numpy.inf)
 
 if len(sys.argv) < 3:
   print(f'usage: {sys.argv[0]:s} gamma_encode_fit_in.yml device')
@@ -38,11 +45,9 @@ if len(sys.argv) < 3:
 gamma_encode_fit_in = sys.argv[1]
 device = sys.argv[2]
 
-yaml = ruamel.yaml.YAML(typ = 'safe')
-#numpy.set_printoptions(threshold = numpy.inf)
-
-with open(gamma_encode_fit_in) as fin:
-  gamma_encode_fit = python_to_numpy(yaml.load(fin))
+gamma_encode_fit = utils.yaml_io._import(
+  utils.yaml_io.read_file(gamma_encode_fit_in)
+)
 gamma_a = gamma_encode_fit['gamma_a']
 gamma_b = gamma_encode_fit['gamma_b']
 gamma_c = gamma_encode_fit['gamma_c']

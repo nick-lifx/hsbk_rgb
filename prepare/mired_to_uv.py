@@ -20,14 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# determine where to load standard_observer_2deg.yml from
+# put utils into path
+# temporary until we have proper Python packaging
 import os.path
+import sys
 dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
 
 import blackbody_spectrum
 import numpy
-import ruamel.yaml
-from python_to_numpy import python_to_numpy
+import utils.yaml_io
 
 UVW_U = 0
 UVW_V = 1
@@ -44,9 +46,11 @@ XYZ_to_UVW = numpy.array(
   numpy.double
 )
 
-yaml = ruamel.yaml.YAML(typ = 'safe')
-with open(os.path.join(dirname, 'standard_observer_2deg.yml')) as fin:
-  standard_observer_2deg = python_to_numpy(yaml.load(fin))
+standard_observer_2deg = utils.yaml_io._import(
+  utils.yaml_io.read_file(
+    os.path.join(dirname, 'standard_observer_2deg.yml')
+  )
+)
 
 def mired_to_uv_multi(mired):
   UVW = numpy.einsum(

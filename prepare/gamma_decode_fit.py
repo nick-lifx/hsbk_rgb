@@ -20,13 +20,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
 import numpy
 import math
 import poly
-import ruamel.yaml
-import sys
-from numpy_to_python import numpy_to_python
-from python_to_numpy import python_to_numpy
+import utils.yaml_io
 from remez import remez
 
 EXIT_SUCCESS = 0
@@ -35,6 +39,8 @@ EXIT_FAILURE = 1
 ORDER = 7
 ERR_ORDER = 21
 EPSILON = 1e-12
+
+#numpy.set_printoptions(threshold = numpy.inf)
 
 diag = False
 if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
@@ -46,11 +52,7 @@ if len(sys.argv) < 3:
 model_in = sys.argv[1]
 gamma_decode_fit_out = sys.argv[2]
 
-yaml = ruamel.yaml.YAML(typ = 'safe')
-#numpy.set_printoptions(threshold = numpy.inf)
-
-with open(model_in) as fin:
-  model = python_to_numpy(yaml.load(fin))
+model = utils.yaml_io._import(utils.yaml_io.read_file(model_in))
 gamma_a = model['gamma_a']
 gamma_b = model['gamma_b']
 gamma_c = model['gamma_c']
@@ -98,19 +100,22 @@ if diag:
   matplotlib.pyplot.plot(x, g(x))
   matplotlib.pyplot.show()
 
-gamma_decode_fit = {
-  'gamma_a': gamma_a,
-  'gamma_b': gamma_b,
-  'gamma_c': gamma_c,
-  'gamma_d': gamma_d,
-  'gamma_e': gamma_e,
-  'a': a,
-  'b': b,
-  'p': p,
-  'err': float(err),
-  'exp0': exp0,
-  'exp1': exp1,
-  'post_factor': post_factor
-}
-with open(gamma_decode_fit_out, 'w') as fout:
-  yaml.dump(numpy_to_python(gamma_decode_fit), fout)
+utils.yaml_io.write_file(
+  gamma_decode_fit_out,
+  utils.yaml_io.export(
+    {
+      'gamma_a': gamma_a,
+      'gamma_b': gamma_b,
+      'gamma_c': gamma_c,
+      'gamma_d': gamma_d,
+      'gamma_e': gamma_e,
+      'a': a,
+      'b': b,
+      'p': p,
+      'err': err,
+      'exp0': exp0,
+      'exp1': exp1,
+      'post_factor': post_factor
+    }
+  )
+)

@@ -20,10 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import numpy
-import ruamel.yaml
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
 import sys
-from python_to_numpy import python_to_numpy
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
+import numpy
+import utils.yaml_io
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -42,6 +47,8 @@ UVL_v = 1
 UVL_L = 2
 N_UVL = 3
 
+#numpy.set_printoptions(threshold = numpy.inf)
+
 if len(sys.argv) < 4:
   print(f'usage: {sys.argv[0]:s} model_in.yml gamma_curve device')
   sys.exit(EXIT_FAILURE)
@@ -49,11 +56,7 @@ model_in = sys.argv[1]
 gamma_curve = sys.argv[2]
 device = sys.argv[3]
 
-yaml = ruamel.yaml.YAML(typ = 'safe')
-#numpy.set_printoptions(threshold = numpy.inf)
-
-with open(model_in) as fin:
-  model = python_to_numpy(yaml.load(fin))
+model = utils.yaml_io._import(utils.yaml_io.read_file(model_in))
 primaries_uvL = model['primaries_uvL']
 
 u = primaries_uvL[:, UVL_u]

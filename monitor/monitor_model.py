@@ -20,12 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
 import numpy
 import numpy.linalg
-import ruamel.yaml
-import sys
-from numpy_to_python import numpy_to_python
-from python_to_numpy import python_to_numpy
+import utils.yaml_io
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -60,6 +64,8 @@ XYZ_to_UVW = numpy.array(
   numpy.double
 )
 
+#numpy.set_printoptions(threshold = numpy.inf)
+
 if len(sys.argv) < 8:
   print(f'usage: {sys.argv[0]:s} a b c d e rgbw_to_xy_in.yml model_out.yml')
   print('gamma decode function is:')
@@ -75,16 +81,12 @@ gamma_e = float(sys.argv[5])
 rgbw_to_xy_in = sys.argv[6]
 model_out = sys.argv[7]
 
-yaml = ruamel.yaml.YAML(typ = 'safe')
-#numpy.set_printoptions(threshold = numpy.inf)
-
 # contains the published (x, y) primaries of the SRGB (or other) system
 # see https://en.wikipedia.org/wiki/SRGB
 # across is R, G, B, W and down is x, y
 # the last one is not actually a primary but the so-called white point
 # this means that R + G + B all at full intensity should make the given (x, y)
-with open(rgbw_to_xy_in) as fin:
-  rgbw_to_xy = python_to_numpy(yaml.load(fin))
+rgbw_to_xy = utils.yaml_io._import(utils.yaml_io.read_file(rgbw_to_xy_in))
 
 # add the missing z row, to convert the primaries from (x, y) to (X, Y, Z)
 # see https://en.wikipedia.org/wiki/CIE_1931_color_space#CIE_xy_chromaticity_diagram_and_the_CIE_xyY_color_space
@@ -110,13 +112,16 @@ V = rgb_to_UVW[UVW_V, :]
 L = numpy.sum(rgb_to_UVW, 0)
 primaries_uvL = numpy.stack([U / L, V / L, L], 1)
 
-model = {
-  'gamma_a': gamma_a,
-  'gamma_b': gamma_b,
-  'gamma_c': gamma_c,
-  'gamma_d': gamma_d,
-  'gamma_e': gamma_e,
-  'primaries_uvL': primaries_uvL
-}
-with open(model_out, 'w') as fout:
-  yaml.dump(numpy_to_python(model), fout)
+utils.yaml_io.write_file(
+  model_out,
+  utils.yaml_io.export(
+    {
+      'gamma_a': gamma_a,
+      'gamma_b': gamma_b,
+      'gamma_c': gamma_c,
+      'gamma_d': gamma_d,
+      'gamma_e': gamma_e,
+      'primaries_uvL': primaries_uvL
+    }
+  )
+)

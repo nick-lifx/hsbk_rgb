@@ -20,14 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
 import numpy
 import math
 import poly
 import remez
-import ruamel.yaml
-import sys
-from numpy_to_python import numpy_to_python
-from python_to_numpy import python_to_numpy
+import utils.yaml_io
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -37,6 +41,8 @@ ORDER2 = 3
 ERR_ORDER = 16
 EPSILON = 1e-4
 
+#numpy.set_printoptions(threshold = numpy.inf)
+
 diag = False
 if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
   diag = True
@@ -45,9 +51,6 @@ if len(sys.argv) < 2:
   print(f'usage: {sys.argv[0]} rtheta_to_xy_fit_out.yml')
   sys.exit(EXIT_FAILURE)
 rtheta_to_xy_fit_out = sys.argv[1]
-
-yaml = ruamel.yaml.YAML(typ = 'safe')
-#numpy.set_printoptions(threshold = numpy.inf)
 
 # function to be approximated
 f = numpy.cos
@@ -70,13 +73,16 @@ if diag:
   matplotlib.pyplot.plot(x, poly.eval(q, x ** 2) * x)
   matplotlib.pyplot.show()
 
-rtheta_to_xy_fit = {
-  'a': a,
-  'b': b,
-  'p': p,
-  'p_err': float(p_err),
-  'q': q,
-  'q_err': float(q_err)
-}
-with open(rtheta_to_xy_fit_out, 'w') as fout:
-  yaml.dump(numpy_to_python(rtheta_to_xy_fit), fout)
+utils.yaml_io.write_file(
+  rtheta_to_xy_fit_out,
+  utils.yaml_io.export(
+    {
+      'a': a,
+      'b': b,
+      'p': p,
+      'p_err': p_err,
+      'q': q,
+      'q_err': q_err
+    }
+  )
+)
