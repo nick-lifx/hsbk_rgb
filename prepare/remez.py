@@ -18,10 +18,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
 import linalg
 import math
+import mpmath
 import numpy
-import poly
+import utils.poly
 from any_f_to_poly import any_f_to_poly
 
 EPSILON = 1e-6
@@ -74,16 +82,32 @@ def remez(
 
     # let q be the error function
     q = any_f_to_poly(
-      lambda x: (poly.eval(p, x) - f(x)) * x ** -err_rel,
+      lambda x: (
+        (
+          numpy.array(
+            utils.poly.eval_multi(mpmath.matrix(p), mpmath.matrix(x)),
+            numpy.double
+          ) - f(x)
+        ) * x ** -err_rel
+      ),
       a,
       b,
       err_order
     )
     #print('q', q)
-    #print('q(x)', poly.eval(q, x))
+    #print(
+    #  'q(x)',
+    #  numpy.array(
+    #    utils.poly.eval_multi(mpmath.matrix(q), mpmath.matrix(x)),
+    #    numpy.double
+    #  )
+    #)
 
     # partition domain into intervals where q is positive or negative
-    intervals = poly.real_roots(q, a, b)
+    intervals = numpy.array(
+      utils.poly.real_roots(mpmath.matrix(q), a, b),
+      numpy.double
+    )
     print('intervals', intervals)
     n_intervals = intervals.shape[0] - 1
     print('n_intervals', n_intervals)
@@ -98,7 +122,13 @@ def remez(
     # determine if q increasing or decreasing through each boundary
     # have n_intervals - 1 boundaries, must produce n_intervals signs,
     # then check that the intervals are actually alternating in sign
-    interval_pos = poly.eval(poly.deriv(q), intervals[1:-1]) >= 0.
+    interval_pos = numpy.array(
+      utils.poly.eval_multi(
+        utils.poly.deriv(mpmath.matrix(q)),
+        mpmath.matrix(intervals[1:-1])
+      ),
+      numpy.double
+    ) >= 0.
     #print('interval_pos', interval_pos)
     interval_polarity = not interval_pos[0] # sign of first interval
     #print('interval_polarity', interval_polarity)
@@ -117,7 +147,13 @@ def remez(
       assert False
 
     # within each interval, find the "global" maximum or minimum of q
-    interval_extrema = poly.interval_extrema(q, intervals)
+    interval_extrema = [
+      (numpy.array(i, numpy.double), numpy.array(j, numpy.double))
+      for i, j in utils.poly.interval_extrema(
+        mpmath.matrix(q),
+        mpmath.matrix(intervals)
+      )
+    ]
     x = []
     y = []
     for i in range(n_intervals):
@@ -147,19 +183,36 @@ def remez(
       n_intervals -= 1
 
     # checking
-    err = poly.eval(q, x)
+    err = numpy.array(
+      utils.poly.eval_multi(mpmath.matrix(q), mpmath.matrix(x)),
+      numpy.double
+    )
     print('err', err)
 
   # final minimax error analysis
   q = any_f_to_poly(
-    lambda x: (poly.eval(p, x) - f(x)) * x ** -err_rel,
+    lambda x: (
+      (
+        numpy.array(
+          utils.poly.eval_multi(mpmath.matrix(p), mpmath.matrix(x)),
+          numpy.double
+        ) - f(x)
+      ) * x ** -err_rel
+    ),
     a,
     b,
     err_order
   )
   #print('q', q)
-  #print('q(x)', poly.eval(q, x))
-  _, y = poly.extrema(q, a, b)
+  #print(
+  #  'q(x)',
+  #  numpy.array(
+  #    utils.poly.eval_multi(mpmath.matrix(q), mpmath.matrix(x)),
+  #    numpy.double
+  #  )
+  #)
+  _, y = utils.poly.extrema(mpmath.matrix(q), a, b)
+  y = numpy.array(y, numpy.double)
   err = numpy.max(numpy.abs(y))
   print('err', err)
 

@@ -29,7 +29,6 @@ sys.path.append(os.path.join(dirname, '..'))
 
 import numpy
 import math
-import poly
 import remez
 import utils.yaml_io
 
@@ -58,19 +57,33 @@ g = numpy.sin
 a = -.25 * math.pi
 b = .25 * math.pi
 
-# find approximating polynomial
+# find approximating utils.poly.omial
 p, _, p_err = remez.remez_even(f, b, ORDER1, ERR_ORDER)
 q, _, q_err = remez.remez_odd(g, b, ORDER2, ERR_ORDER, epsilon = EPSILON)
 
 # checking
 if diag:
   import matplotlib.pyplot
+  import mpmath
+  import utils.poly
 
   x = numpy.linspace(a, b, 1000, numpy.double)
   matplotlib.pyplot.plot(x, f(x))
-  matplotlib.pyplot.plot(x, poly.eval(p, x ** 2))
+  matplotlib.pyplot.plot(
+    x,
+    numpy.array(
+      utils.poly.eval_multi(mpmath.matrix(p), mpmath.matrix(x ** 2)),
+      numpy.double
+    )
+  )
   matplotlib.pyplot.plot(x, g(x))
-  matplotlib.pyplot.plot(x, poly.eval(q, x ** 2) * x)
+  matplotlib.pyplot.plot(
+    x,
+    numpy.array(
+      utils.poly.eval_multi(mpmath.matrix(q), mpmath.matrix(x ** 2)),
+      numpy.double
+    ) * x
+  )
   matplotlib.pyplot.show()
 
 utils.yaml_io.write_file(

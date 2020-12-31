@@ -18,55 +18,54 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import numpy
-#import numpy.linalg
+import mpmath
+
+# mpmath can't convert an empty list to a vector
+# it seems to be trying to determine cols from first list entry
+def vector(x):
+  return mpmath.matrix(x) if len(x) else mpmath.matrix(0, 1)
 
 def add(p, q):
-  a = p.shape[0]
-  b = q.shape[0]
-  r = numpy.zeros((max(a, b),), numpy.double)
+  a = p.rows
+  b = q.rows
+  r = mpmath.matrix(max(a, b), 1)
   r[:a] = p
   r[:b] += q
   return r
 
 def mul(p, q):
-  a = p.shape[0]
-  b = q.shape[0]
-  r = numpy.zeros((a + b - 1,), numpy.double)
-  for i in range(b):
-    r[i:i + a] += q[i:i + 1] * p
+  a = p.rows
+  b = q.rows
+  r = mpmath.matrix(a + b - 1, 1)
+  for i in range(a):
+    for j in range(b):
+      r[i + j] += p[i] * q[j]
   return r
 
 def deriv(p):
-  return p[1:] * numpy.arange(1, p.shape[0], dtype = numpy.int32)
+  return vector([p[i] * i for i in range(1, p.rows)])
 
 def eval(p, x):
   # Horner's rule
-  y = numpy.zeros_like(x)
-  for i in range(p.shape[0] - 1, -1, -1):
+  y = mpmath.mpf(0.)
+  for i in range(p.rows - 1, -1, -1):
     y = y * x + p[i]
+  return y
+
+def eval_multi(p, x):
+  # Horner's rule
+  y = mpmath.matrix(x.rows, 1)
+  for i in range(p.rows - 1, -1, -1):
+    y = vector([y[i] * x[i] for i in range(x.rows)]) + p[i]
   return y
 
 def compose(p, x):
   # Horner's rule where x is a polynomial
-  y = p[-1:]
-  for i in range(p.shape[0] - 2, -1, -1):
+  y = p[p.rows - 1:]
+  for i in range(p.rows - 2, -1, -1):
     y = mul(y, x)
     y[0] += p[i]
   return y
-
-# works, not used at the moment (isn't as numerically stable as I would like)
-#def roots(p):
-#  # return eigenvalues of the companion matrix
-#  n = p.shape[0]
-#  while n > 0 and p[n - 1] == 0.:
-#    n -= 1
-#  if n < 2:
-#    return p[:n]
-#  c = numpy.zeros((n - 1, n - 1), numpy.double)
-#  c[1:, :-1] = numpy.identity(n - 2, numpy.double)
-#  c[:, -1] = -p[:n - 1] / p[n - 1]
-#  return numpy.linalg.eigvals(c)
 
 # this has no protection from division by zero
 # it should only be called when properties of function are known in advance
@@ -77,10 +76,17 @@ def newton(p, x, iters = 10):
     print('i', i, 'x', x, 'p(x)', eval(p, x))
   return x
 
+def newton_multi(p, x, iters = 10):
+  p_deriv = deriv(p)
+  for i in range(iters):
+    x -= eval_multi(p, x) / eval_multi(p_deriv, x)
+    print('i', i, 'x', x, 'p(x)', eval_multi(p, x))
+  return x
+
 def real_root(p, p_deriv, a, b, increasing):
   #print('real_root: p', p, 'p_deriv', p_deriv)
-  #y_a = eval(p, a)
-  #y_b = eval(p, b)
+  #y_a = eval_multi(p, a)
+  #y_b = eval_multi(p, b)
   #print('a', a, 'p(a)', y_a, 'b', b, 'p(b)', y_b, 'increasing', increasing)
   #assert (y_a <= 0. and y_b > 0.) if increasing else (y_a >= 0 and y_b < 0.)
   x = .5 * (a + b)
@@ -139,7 +145,7 @@ def real_root(p, p_deriv, a, b, increasing):
 
 def real_roots(p, a, b):
   # see https://www.researchgate.net/publication/320864673_A_simple_algorithm_to_find_all_real_roots_of_a_polynomial
-  n = p.shape[0]
+  n = p.rows
   while n > 0 and p[n - 1] == 0.:
     n -= 1
   #print('real_roots: n', n)
@@ -155,10 +161,10 @@ def real_roots(p, a, b):
       p_deriv = deriv(p)
       x = real_roots(p_deriv, a, b)
       #print('x', x)
-      #print('p\'(x)', eval(p_deriv, x))
-      y = eval(p, x)
+      #print('p\'(x)', eval_multi(p_deriv, x))
+      y = eval_multi(p, x)
       #print('p(x)', y)
-      for i in range(x.shape[0] - 1):
+      for i in range(x.rows - 1):
         if y[i + 1] < 0.:
           if y[i] >= 0.:
             out.append(real_root(p, p_deriv, x[i], x[i + 1], False))
@@ -169,22 +175,22 @@ def real_roots(p, a, b):
           out.append(x[i + 1])
   if out[-1] < b:
     out.append(b)
-  #print('real_roots: n', n, 'returning', numpy.array(out, numpy.double))
-  return numpy.array(out, numpy.double)
+  #print('real_roots: n', n, 'returning', mpmath.matrix(out))
+  return mpmath.matrix(out)
 
 def extrema(p, a, b):
   x = real_roots(deriv(p), a, b)
-  return x, eval(p, x)
+  return x, eval_multi(p, x)
 
 # returns the extrema of a list of contiguous intervals of x
 # similar to calling extrema() on each interval, but more efficient
 def interval_extrema(p, interval_x):
-  n_intervals = interval_x.shape[0] - 1
-  extrema_x, extrema_y = extrema(p, interval_x[0], interval_x[-1])
+  n_intervals = interval_x.rows - 1
+  extrema_x, extrema_y = extrema(p, interval_x[0], interval_x[n_intervals])
   #print('extrema_x', extrema_x)
   #print('extrema_y', extrema_y)
   #print('interval_x', interval_x)
-  interval_y = eval(p, interval_x) # first and last will match extrema_y
+  interval_y = eval_multi(p, interval_x) # first and last will match extrema_y
   #print('interval_y', interval_y)
   out = []
   j = 1
@@ -194,13 +200,11 @@ def interval_extrema(p, interval_x):
       k += 1
     out.append(
       (
-        numpy.array(
-          [interval_x[i]] + list(extrema_x[j:k]) + [interval_x[i + 1]],
-          numpy.double
+        mpmath.matrix(
+          [interval_x[i]] + list(extrema_x[j:k]) + [interval_x[i + 1]]
         ),
-        numpy.array(
-          [interval_y[i]] + list(extrema_y[j:k]) + [interval_y[i + 1]],
-          numpy.double
+        mpmath.matrix(
+          [interval_y[i]] + list(extrema_y[j:k]) + [interval_y[i + 1]]
         )
       )
     )
@@ -209,4 +213,4 @@ def interval_extrema(p, interval_x):
 
 def _range(p, a, b):
   _, y = extrema(p, a, b)
-  return numpy.min(y), numpy.max(y)
+  return min(y), max(y)

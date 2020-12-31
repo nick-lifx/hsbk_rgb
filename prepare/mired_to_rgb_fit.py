@@ -29,8 +29,9 @@ sys.path.append(os.path.join(dirname, '..'))
 
 import numpy
 import math
+import mpmath
 import mired_to_uv
-import poly
+import utils.poly
 import utils.yaml_io
 from any_f_to_poly import any_f_to_poly
 from remez import remez
@@ -179,14 +180,18 @@ print('d', d)
 def f(x):
   mired_rgb = mired_to_rgb(x)
   return mired_rgb[:, RGB_RED] - mired_rgb[:, RGB_BLUE]
-b = poly.newton(
-  any_f_to_poly(
-    f,
-    b_estimate - INTERSECT_EXTRA_DOMAIN,
-    b_estimate + INTERSECT_EXTRA_DOMAIN,
-    ERR_ORDER
-  ),
-  b_estimate
+b = float(
+  utils.poly.newton(
+    mpmath.matrix(
+      any_f_to_poly(
+        f,
+        b_estimate - INTERSECT_EXTRA_DOMAIN,
+        b_estimate + INTERSECT_EXTRA_DOMAIN,
+        ERR_ORDER
+      )
+    ),
+    b_estimate
+  )
 )
 print('b', b)
 
@@ -195,14 +200,18 @@ def f(x):
   mired_rgb = mired_to_rgb(x)
   return mired_rgb[:, RGB_BLUE]
 c = (
-  poly.newton(
-    any_f_to_poly(
-      f,
-      c_estimate - INTERSECT_EXTRA_DOMAIN,
-      c_estimate + INTERSECT_EXTRA_DOMAIN,
-      ERR_ORDER
-    ),
-    c_estimate
+  float(
+    utils.poly.newton(
+      mpmath.matrix(
+        any_f_to_poly(
+          f,
+          c_estimate - INTERSECT_EXTRA_DOMAIN,
+          c_estimate + INTERSECT_EXTRA_DOMAIN,
+          ERR_ORDER
+        )
+      ),
+      c_estimate
+    )
   )
 if c_estimate < MIRED_MAX else
   MIRED_MAX
@@ -281,14 +290,34 @@ p_blue_cd = numpy.array([0.], numpy.double)
 p_blue_cd_err = 0.
 
 # fix discontinuities by setting b, c, d to exact intersections after fitting
-b_red = poly.newton(poly.add(p_red_ab, -p_red_bd), b)
+b_red = float(
+  utils.poly.newton(
+    utils.poly.add(mpmath.matrix(p_red_ab), mpmath.matrix(-p_red_bd)),
+    b
+  )
+)
 print('b_red', b_red)
-b_green = poly.newton(poly.add(p_green_ab, -p_green_bd), b)
+b_green = float(
+  utils.poly.newton(
+    utils.poly.add(mpmath.matrix(p_green_ab), mpmath.matrix(-p_green_bd)),
+    b
+  )
+)
 print('b_green', b_green)
-b_blue = poly.newton(poly.add(p_blue_ab, -p_blue_bc), b)
+b_blue = float(
+  utils.poly.newton(
+    utils.poly.add(mpmath.matrix(p_blue_ab), mpmath.matrix(-p_blue_bc)),
+    b
+  )
+)
 print('b_blue', b_blue)
 c_blue = (
-  poly.newton(poly.add(p_blue_bc, -p_blue_cd), c)
+  float(
+    utils.poly.newton(
+      utils.poly.add(mpmath.matrix(p_blue_bc), mpmath.matrix(-p_blue_cd)),
+      c
+    )
+  )
 if c < MIRED_MAX else
   MIRED_MAX
 )
@@ -316,7 +345,16 @@ if diag:
   x_bd = numpy.linspace(b_red, d, 1000, numpy.double)
   x = numpy.concatenate([x_ab, x_bd], 0)
   y = numpy.concatenate(
-    [poly.eval(p_red_ab, x_ab), poly.eval(p_red_bd, x_bd)],
+    [
+      numpy.array(
+        utils.poly.eval_multi(mpmath.matrix(p_red_ab), mpmath.matrix(x_ab)),
+        numpy.double
+      ),
+      numpy.array(
+        utils.poly.eval_multi(mpmath.matrix(p_red_bd), mpmath.matrix(x_bd)),
+        numpy.double
+      )
+    ],
     0
   )
   matplotlib.pyplot.plot(x, y)
@@ -326,7 +364,16 @@ if diag:
   x_bd = numpy.linspace(b_green, d, 1000, numpy.double)
   x = numpy.concatenate([x_ab, x_bd], 0)
   y = numpy.concatenate(
-    [poly.eval(p_green_ab, x_ab), poly.eval(p_green_bd, x_bd)],
+    [
+      numpy.array(
+        utils.poly.eval_multi(mpmath.matrix(p_green_ab), mpmath.matrix(x_ab)),
+        numpy.double
+      ),
+      numpy.array(
+        utils.poly.eval_multi(mpmath.matrix(p_green_bd), mpmath.matrix(x_bd)),
+        numpy.double
+      )
+    ],
     0
   )
   matplotlib.pyplot.plot(x, y)
@@ -338,9 +385,18 @@ if diag:
   x = numpy.concatenate([x_ab, x_bc, x_cd], 0)
   y = numpy.concatenate(
     [
-      poly.eval(p_blue_ab, x_ab),
-      poly.eval(p_blue_bc, x_bc),
-      poly.eval(p_blue_cd, x_cd)
+      numpy.array(
+        utils.poly.eval_multi(mpmath.matrix(p_blue_ab), mpmath.matrix(x_ab)),
+        numpy.double
+      ),
+      numpy.array(
+        utils.poly.eval_multi(mpmath.matrix(p_blue_bc), mpmath.matrix(x_bc)),
+        numpy.double
+      ),
+      numpy.array(
+        utils.poly.eval_multi(mpmath.matrix(p_blue_cd), mpmath.matrix(x_cd)),
+        numpy.double
+      )
     ],
     0
   )

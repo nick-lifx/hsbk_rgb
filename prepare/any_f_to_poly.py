@@ -18,10 +18,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
 import linalg
 import math
+import mpmath
 import numpy
-import poly
+import utils.poly
 
 # convert any function to polynomial
 # done by fitting to the Chebyshev points with no attempt at optimization,
@@ -51,7 +59,10 @@ def any_f_to_poly(f, a, b, order):
     )
   )
   #print('x', x)
-  #err = poly.eval(p, x) - f(x)
-  #print('err', err)
+  err = numpy.array(
+    utils.poly.eval_multi(mpmath.matrix(p), mpmath.matrix(x)),
+    numpy.double
+  ) - f(x)
+  print('err', err)
 
   return p

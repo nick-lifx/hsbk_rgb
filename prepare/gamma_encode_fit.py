@@ -29,7 +29,6 @@ sys.path.append(os.path.join(dirname, '..'))
 
 import numpy
 import math
-import poly
 import utils.yaml_io
 from remez import remez
 
@@ -90,10 +89,15 @@ post_factor = numpy.array(
 # checking
 if diag:
   import matplotlib.pyplot
+  import mpmath
+  import utils.poly
 
   def g(x):
     x, exp = numpy.frexp(x)
-    return poly.eval(p, x) * post_factor[exp - exp0]
+    return numpy.array(
+      utils.poly.eval_multi(mpmath.matrix(p), mpmath.matrix(x)),
+      numpy.double
+    ) * post_factor[exp - exp0]
 
   x = numpy.linspace(a, b, 1000, numpy.double)
   matplotlib.pyplot.plot(x, f(x))

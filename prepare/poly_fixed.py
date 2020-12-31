@@ -18,8 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
+import mpmath
 import numpy
-import poly
+import utils.poly
 
 EPSILON = 1e-8
 
@@ -31,7 +39,10 @@ EPSILON = 1e-8
 def intermediate_exp(p, a, b, epsilon = EPSILON):
   _, exp = numpy.frexp(
     numpy.array(
-      [poly._range(p[i:], a, b) for i in range(p.shape[0])],
+      [
+        utils.poly._range(mpmath.matrix(p[i:]), a, b)
+        for i in range(p.shape[0])
+      ],
       numpy.double
     ) * (1. + epsilon)
   )

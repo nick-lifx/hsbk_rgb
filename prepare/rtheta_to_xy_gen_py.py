@@ -28,8 +28,9 @@ dirname = os.path.dirname(__file__)
 sys.path.append(os.path.join(dirname, '..'))
 
 import math
+import mpmath
 import numpy
-import poly
+import utils.poly
 import utils.yaml_io
 
 EXIT_SUCCESS = 0
@@ -53,8 +54,14 @@ q_err = rtheta_to_xy_fit['q_err']
 # rescale domain to compensate for range reduction code on entry
 theta_scale = 2. / math.pi
 r = numpy.array([0., 1. / theta_scale ** 2], numpy.double)
-p = poly.compose(p, r)
-q = poly.compose(q, r) / theta_scale
+p = numpy.array(
+  utils.poly.compose(mpmath.matrix(p), mpmath.matrix(r)),
+  numpy.double
+)
+q = numpy.array(
+  utils.poly.compose(mpmath.matrix(q), mpmath.matrix(r)),
+  numpy.double
+) / theta_scale
 
 print(
   '''#!/usr/bin/env python3
