@@ -29,7 +29,8 @@ sys.path.append(os.path.join(dirname, '..'))
 
 import numpy
 import math
-import remez
+import mpmath
+import utils.remez
 import utils.yaml_io
 
 EXIT_SUCCESS = 0
@@ -39,6 +40,8 @@ ORDER1 = 4
 ORDER2 = 3
 ERR_ORDER = 16
 EPSILON = 1e-4
+
+mpmath.mp.prec = 212
 
 #numpy.set_printoptions(threshold = numpy.inf)
 
@@ -52,23 +55,41 @@ if len(sys.argv) < 2:
 rtheta_to_xy_fit_out = sys.argv[1]
 
 # function to be approximated
-f = numpy.cos
-g = numpy.sin
+def f(x):
+  return mpmath.matrix(
+    [mpmath.cos(x[i]) for i in range(x.rows)]
+  )
+def g(x):
+  return mpmath.matrix(
+    [mpmath.sin(x[i]) for i in range(x.rows)]
+  )
 a = -.25 * math.pi
 b = .25 * math.pi
 
-# find approximating utils.poly.omial
-p, _, p_err = remez.remez_even(f, b, ORDER1, ERR_ORDER)
-q, _, q_err = remez.remez_odd(g, b, ORDER2, ERR_ORDER, epsilon = EPSILON)
+# find approximating polynomial
+p, _, p_err = utils.remez.remez_even(f, b, ORDER1, ERR_ORDER)
+p = numpy.array(p, numpy.double)
+p_err = float(p_err)
+q, _, q_err = utils.remez.remez_odd(
+  g,
+  b,
+  ORDER2,
+  ERR_ORDER,
+  epsilon = EPSILON
+)
+q = numpy.array(q, numpy.double)
+q_err = float(q_err)
 
 # checking
 if diag:
   import matplotlib.pyplot
-  import mpmath
   import utils.poly
 
   x = numpy.linspace(a, b, 1000, numpy.double)
-  matplotlib.pyplot.plot(x, f(x))
+  matplotlib.pyplot.plot(
+    x,
+    numpy.array(f(mpmath.matrix(x)), numpy.double)
+  )
   matplotlib.pyplot.plot(
     x,
     numpy.array(
@@ -76,7 +97,10 @@ if diag:
       numpy.double
     )
   )
-  matplotlib.pyplot.plot(x, g(x))
+  matplotlib.pyplot.plot(
+    x,
+    numpy.array(g(mpmath.matrix(x)), numpy.double)
+  )
   matplotlib.pyplot.plot(
     x,
     numpy.array(

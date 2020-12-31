@@ -33,8 +33,8 @@ import mpmath
 import utils.mired_to_uv
 import utils.poly
 import utils.poly_fit
+import utils.remez
 import utils.yaml_io
-from remez import remez
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -77,6 +77,8 @@ FIT_EXTRA_DOMAIN = 5.
 # fit will be valid in this range
 MIRED_MIN = 1e6 / 15000.
 MIRED_MAX = 1e6 / 1000.
+
+mpmath.mp.prec = 212
 
 #numpy.set_printoptions(threshold = numpy.inf)
 
@@ -227,15 +229,19 @@ def mired_to_rgb_or_wc(x):
 
 # red channel
 def f(x):
-  mired_rgb = mired_to_rgb(x)
-  return gamma_encode(mired_rgb[:, RGB_RED] / mired_rgb[:, RGB_BLUE])
-p_red_ab, _, p_red_ab_err = remez(
+  mired_rgb = mired_to_rgb(numpy.array(x, numpy.double))
+  return mpmath.matrix(
+    gamma_encode(mired_rgb[:, RGB_RED] / mired_rgb[:, RGB_BLUE])
+  )
+p_red_ab, _, p_red_ab_err = utils.remez.remez(
   f,
   a - FIT_EXTRA_DOMAIN,
   b + FIT_EXTRA_DOMAIN,
   ORDER_RED_AB,
   ERR_ORDER
 )
+p_red_ab = numpy.array(p_red_ab, numpy.double)
+p_red_ab_err = float(p_red_ab_err)
 print('p_red_ab', p_red_ab)
 print('p_red_ab_err', p_red_ab_err)
 p_red_bd = numpy.array([1.], numpy.double)
@@ -243,27 +249,35 @@ p_red_bd_err = 0.
 
 # green channel
 def f(x):
-  mired_rgb = mired_to_rgb(x)
-  return gamma_encode(mired_rgb[:, RGB_GREEN] / mired_rgb[:, RGB_BLUE])
-p_green_ab, _, p_green_ab_err = remez(
+  mired_rgb = mired_to_rgb(numpy.array(x, numpy.double))
+  return mpmath.matrix(
+    gamma_encode(mired_rgb[:, RGB_GREEN] / mired_rgb[:, RGB_BLUE])
+  )
+p_green_ab, _, p_green_ab_err = utils.remez.remez(
   f,
   a - FIT_EXTRA_DOMAIN,
   b + FIT_EXTRA_DOMAIN,
   ORDER_GREEN_AB,
   ERR_ORDER
 )
+p_green_ab = numpy.array(p_green_ab, numpy.double)
+p_green_ab_err = float(p_green_ab_err)
 print('p_green_ab', p_green_ab)
 print('p_green_ab_err', p_green_ab_err)
 def f(x):
-  mired_rgb = mired_to_rgb_or_wc(x)
-  return gamma_encode(mired_rgb[:, RGB_GREEN] / mired_rgb[:, RGB_RED])
-p_green_bd, _, p_green_bd_err = remez(
+  mired_rgb = mired_to_rgb_or_wc(numpy.array(x, numpy.double))
+  return mpmath.matrix(
+    gamma_encode(mired_rgb[:, RGB_GREEN] / mired_rgb[:, RGB_RED])
+  )
+p_green_bd, _, p_green_bd_err = utils.remez.remez(
   f,
   b - FIT_EXTRA_DOMAIN,
   d + FIT_EXTRA_DOMAIN,
   ORDER_GREEN_BD,
   ERR_ORDER
 )
+p_green_bd = numpy.array(p_green_bd, numpy.double)
+p_green_bd_err = float(p_green_bd_err)
 print('p_green_bd', p_green_bd)
 print('p_green_bd_err', p_green_bd_err)
 
@@ -271,15 +285,19 @@ print('p_green_bd_err', p_green_bd_err)
 p_blue_ab = numpy.array([1.], numpy.double)
 p_blue_ab_err = 0.
 def f(x):
-  mired_rgb = mired_to_rgb_or_wc(x)
-  return gamma_encode(mired_rgb[:, RGB_BLUE] / mired_rgb[:, RGB_RED])
-p_blue_bc, _, p_blue_bc_err = remez(
+  mired_rgb = mired_to_rgb_or_wc(numpy.array(x, numpy.double))
+  return mpmath.matrix(
+    gamma_encode(mired_rgb[:, RGB_BLUE] / mired_rgb[:, RGB_RED])
+  )
+p_blue_bc, _, p_blue_bc_err = utils.remez.remez(
   f,
   b - FIT_EXTRA_DOMAIN,
   c + FIT_EXTRA_DOMAIN,
   ORDER_BLUE_BC,
   ERR_ORDER
 )
+p_blue_bc = numpy.array(p_blue_bc, numpy.double)
+p_blue_bc_err = float(p_blue_bc_err)
 print('p_blue_bc', p_blue_bc)
 print('p_blue_bc_err', p_blue_bc_err)
 p_blue_cd = numpy.array([0.], numpy.double)

@@ -25,10 +25,7 @@ import sys
 dirname = os.path.dirname(__file__)
 sys.path.append(os.path.join(dirname, '..'))
 
-import linalg
-import math
 import mpmath
-import numpy
 import utils.poly
 import utils.poly_fit
 
@@ -51,8 +48,11 @@ def remez(
 ):
   # put minimax nodes halfway between Chebyshev nodes on unit circle
   x = a + (b - a) * (
-    .5 + .5 * numpy.cos(
-      numpy.arange(order + 1, dtype = numpy.int32) * math.pi / order
+    .5 + .5 * mpmath.matrix(
+      [
+        mpmath.cos(i * mpmath.pi / order)
+        for i in range(order + 1)
+      ]
     )
   )
   print('x', x)
@@ -62,30 +62,20 @@ def remez(
     # let p be approximating polynomial, fitted to nodes with oscillation
     y = f(x)
     #print('y', y)
-    p = linalg.solve(
-      numpy.concatenate(
-        [
-          x[:, numpy.newaxis] ** numpy.arange(order, dtype = numpy.int32),
-          (
-            (-1.) ** numpy.arange(order + 1, dtype = numpy.int32) *
-              x ** err_rel
-          )[:, numpy.newaxis]
-        ],
-        1
-      ),
-      y
-    )
-    osc = p[-1]
+    A = mpmath.matrix(order + 1)
+    A[:, :order] = utils.poly_fit.vandermonde(x, order)
+    for i in range(order + 1):
+      A[i, order] = (1 - 2 * (i & 1)) * x[i] ** err_rel
+    #print('A', A)
+    p = mpmath.lu_solve(A, y)
+    osc = p[p.rows - 1]
     print('osc', osc)
     p = p[:-1]
     #print('p', p)
 
     # let q be the error function
     def g(x):
-      y = (
-        utils.poly.eval_multi(mpmath.matrix(p), x) -
-          mpmath.matrix(f(numpy.array(x, numpy.double)))
-      )
+      y = utils.poly.eval_multi(p, x) - f(x)
       return mpmath.matrix(
         [
           y[i] * x[i] ** -err_rel
@@ -94,21 +84,12 @@ def remez(
       )
     q = utils.poly_fit.any_f_to_poly(g, a, b, err_order)
     #print('q', q)
-    #print(
-    #  'q(x)',
-    #  numpy.array(
-    #    utils.poly.eval_multi(mpmath.matrix(q), mpmath.matrix(x)),
-    #    numpy.double
-    #  )
-    #)
+    print('q(x)', utils.poly.eval_multi(q, x))
 
     # partition domain into intervals where q is positive or negative
-    intervals = numpy.array(
-      utils.poly.real_roots(mpmath.matrix(q), a, b),
-      numpy.double
-    )
+    intervals = utils.poly.real_roots(q, a, b)
     print('intervals', intervals)
-    n_intervals = intervals.shape[0] - 1
+    n_intervals = intervals.rows - 1
     print('n_intervals', n_intervals)
     if n_intervals < order + 1:
       # there absolutely have to be at least order + 1 intervals,
@@ -121,24 +102,19 @@ def remez(
     # determine if q increasing or decreasing through each boundary
     # have n_intervals - 1 boundaries, must produce n_intervals signs,
     # then check that the intervals are actually alternating in sign
-    interval_pos = numpy.array(
-      utils.poly.eval_multi(
-        utils.poly.deriv(mpmath.matrix(q)),
-        mpmath.matrix(intervals[1:-1])
-      ),
-      numpy.double
-    ) >= 0.
+    interval_pos = utils.poly.eval_multi(
+      utils.poly.deriv(q),
+      intervals[1:-1]
+    )
+    interval_pos = [interval_pos[i] >= 0. for i in range(interval_pos.rows)]
     #print('interval_pos', interval_pos)
     interval_polarity = not interval_pos[0] # sign of first interval
     #print('interval_polarity', interval_polarity)
-    if numpy.any(
-      numpy.logical_xor(
-        interval_pos,
-        numpy.bitwise_and(
-          numpy.arange(n_intervals - 1, dtype = numpy.int32),
-          1
-        ).astype(numpy.bool)
-      ) == interval_polarity
+    if any(
+      [
+        interval_pos[i] ^ bool(i & 1) == interval_polarity
+        for i in range(len(interval_pos))
+      ]
     ):
       # see above
       #print('warning: intervals not alternating -- we say good enough')
@@ -146,26 +122,26 @@ def remez(
       assert False
 
     # within each interval, find the "global" maximum or minimum of q
-    interval_extrema = [
-      (numpy.array(i, numpy.double), numpy.array(j, numpy.double))
-      for i, j in utils.poly.interval_extrema(
-        mpmath.matrix(q),
-        mpmath.matrix(intervals)
-      )
-    ]
+    interval_extrema = utils.poly.interval_extrema(q, intervals)
     x = []
     y = []
     for i in range(n_intervals):
       extrema_x, extrema_y = interval_extrema[i]
       #print('i', i, 'extrema_x', extrema_x, 'extrema_y', extrema_y)
-      j = (
-        numpy.argmax if (i & 1) != interval_polarity else numpy.argmin
-      )(extrema_y)
+      j = 0
+      if (i & 1) == interval_polarity:
+        for k in range(1, extrema_y.rows):
+          if extrema_y[k] < extrema_y[j]:
+            j = k
+      else:
+        for k in range(1, extrema_y.rows):
+          if extrema_y[k] > extrema_y[j]:
+            j = k
       x.append(extrema_x[j])
       y.append(extrema_y[j])
-    x = numpy.array(x, numpy.double)
+    x = mpmath.matrix(x)
     print('x', x)
-    y = numpy.array(y, numpy.double)
+    y = mpmath.matrix(y)
     print('y', y)
 
     # trim off unwanted intervals, extra intervals can occur at either end
@@ -182,18 +158,12 @@ def remez(
       n_intervals -= 1
 
     # checking
-    err = numpy.array(
-      utils.poly.eval_multi(mpmath.matrix(q), mpmath.matrix(x)),
-      numpy.double
-    )
+    err = utils.poly.eval_multi(q, x)
     print('err', err)
 
   # final minimax error analysis
   def g(x):
-    y = (
-      utils.poly.eval_multi(mpmath.matrix(p), x) -
-        mpmath.matrix(f(numpy.array(x, numpy.double)))
-    )
+    y = utils.poly.eval_multi(p, x) - f(x)
     return mpmath.matrix(
       [
         y[i] * x[i] ** -err_rel
@@ -202,16 +172,9 @@ def remez(
     )
   q = utils.poly_fit.any_f_to_poly(g, a, b, err_order)
   #print('q', q)
-  #print(
-  #  'q(x)',
-  #  numpy.array(
-  #    utils.poly.eval_multi(mpmath.matrix(q), mpmath.matrix(x)),
-  #    numpy.double
-  #  )
-  #)
-  _, y = utils.poly.extrema(mpmath.matrix(q), a, b)
-  y = numpy.array(y, numpy.double)
-  err = numpy.max(numpy.abs(y))
+  #print('q(x)', utils.poly.eval_multi(q, x))
+  _, y = utils.poly.extrema(q, a, b)
+  err = max([abs(y[i]) for i in range(y.rows)])
   print('err', err)
 
   return p, x, err
@@ -227,7 +190,11 @@ def remez_even(
   iters = 10
 ):
   def g(x):
-    return f(numpy.sqrt(x))
+    return f(
+      mpmath.matrix(
+        [mpmath.sqrt(x[i]) for i in range(x.rows)]
+      )
+    )
   return remez(
     g,
     0.,
@@ -252,8 +219,13 @@ def remez_odd(
   epsilon = EPSILON
 ):
   def g(x):
-    x = numpy.sqrt(x)
-    return f(x) / x
+    x = mpmath.matrix(
+      [mpmath.sqrt(x[i]) for i in range(x.rows)]
+    )
+    y = f(x)
+    return mpmath.matrix(
+      [y[i] / x[i] for i in range(x.rows)]
+    )
   return remez(
     g,
     epsilon ** 2,

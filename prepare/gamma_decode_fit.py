@@ -29,8 +29,9 @@ sys.path.append(os.path.join(dirname, '..'))
 
 import numpy
 import math
+import mpmath
+import utils.remez
 import utils.yaml_io
-from remez import remez
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -38,6 +39,8 @@ EXIT_FAILURE = 1
 ORDER = 7
 ERR_ORDER = 21
 EPSILON = 1e-12
+
+mpmath.mp.prec = 212
 
 #numpy.set_printoptions(threshold = numpy.inf)
 
@@ -60,7 +63,9 @@ gamma_e = model['gamma_e']
 
 # function to be approximated
 def f(x):
-  return (x / gamma_d) ** gamma_e
+  return mpmath.matrix(
+    [(x[i] / gamma_d) ** gamma_e for i in range(x.rows)]
+  )
 a = gamma_a * gamma_b + gamma_c
 b = gamma_d
 
@@ -69,7 +74,9 @@ b = gamma_d
 #   return x / gamma_a if x < gamma_a * gamma_b else f(x + gamma_c)
 
 # find approximating polynomial (relative error criterion)
-p, _, err = remez(f, .5, 1., ORDER, ERR_ORDER, 1)
+p, _, err = utils.remez.remez(f, .5, 1., ORDER, ERR_ORDER, 1)
+p = numpy.array(p, numpy.double)
+err = float(err)
 
 # compute pre- and post-processing constants
 
@@ -89,7 +96,6 @@ post_factor = numpy.array(
 # checking
 if diag:
   import matplotlib.pyplot
-  import mpmath
   import utils.poly
 
   def g(x):
@@ -100,7 +106,10 @@ if diag:
     ) * post_factor[exp - exp0]
 
   x = numpy.linspace(a, b, 1000, numpy.double)
-  matplotlib.pyplot.plot(x, f(x))
+  matplotlib.pyplot.plot(
+    x,
+    numpy.array(f(mpmath.matrix(x)), numpy.double)
+  )
   matplotlib.pyplot.plot(x, g(x))
   matplotlib.pyplot.show()
 
