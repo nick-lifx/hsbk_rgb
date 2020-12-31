@@ -32,8 +32,8 @@ import math
 import mpmath
 import mired_to_uv
 import utils.poly
+import utils.poly_fit
 import utils.yaml_io
-from any_f_to_poly import any_f_to_poly
 from remez import remez
 
 EXIT_SUCCESS = 0
@@ -178,17 +178,15 @@ print('d', d)
 
 # find b, i.e. where red meets blue
 def f(x):
-  mired_rgb = mired_to_rgb(x)
-  return mired_rgb[:, RGB_RED] - mired_rgb[:, RGB_BLUE]
+  mired_rgb = mired_to_rgb(numpy.array(x, numpy.double))
+  return mpmath.matrix(mired_rgb[:, RGB_RED] - mired_rgb[:, RGB_BLUE])
 b = float(
   utils.poly.newton(
-    mpmath.matrix(
-      any_f_to_poly(
-        f,
-        b_estimate - INTERSECT_EXTRA_DOMAIN,
-        b_estimate + INTERSECT_EXTRA_DOMAIN,
-        ERR_ORDER
-      )
+    utils.poly_fit.any_f_to_poly(
+      f,
+      b_estimate - INTERSECT_EXTRA_DOMAIN,
+      b_estimate + INTERSECT_EXTRA_DOMAIN,
+      ERR_ORDER
     ),
     b_estimate
   )
@@ -197,18 +195,16 @@ print('b', b)
 
 # find c, d, i.e. where blue meets 0
 def f(x):
-  mired_rgb = mired_to_rgb(x)
-  return mired_rgb[:, RGB_BLUE]
+  mired_rgb = mired_to_rgb(numpy.array(x, numpy.double))
+  return mpmath.matrix(mired_rgb[:, RGB_BLUE])
 c = (
   float(
     utils.poly.newton(
-      mpmath.matrix(
-        any_f_to_poly(
-          f,
-          c_estimate - INTERSECT_EXTRA_DOMAIN,
-          c_estimate + INTERSECT_EXTRA_DOMAIN,
-          ERR_ORDER
-        )
+      utils.poly_fit.any_f_to_poly(
+        f,
+        c_estimate - INTERSECT_EXTRA_DOMAIN,
+        c_estimate + INTERSECT_EXTRA_DOMAIN,
+        ERR_ORDER
       ),
       c_estimate
     )

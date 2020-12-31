@@ -30,7 +30,7 @@ import math
 import mpmath
 import numpy
 import utils.poly
-from any_f_to_poly import any_f_to_poly
+import utils.poly_fit
 
 EPSILON = 1e-6
 
@@ -81,19 +81,18 @@ def remez(
     #print('p', p)
 
     # let q be the error function
-    q = any_f_to_poly(
-      lambda x: (
-        (
-          numpy.array(
-            utils.poly.eval_multi(mpmath.matrix(p), mpmath.matrix(x)),
-            numpy.double
-          ) - f(x)
-        ) * x ** -err_rel
-      ),
-      a,
-      b,
-      err_order
-    )
+    def g(x):
+      y = (
+        utils.poly.eval_multi(mpmath.matrix(p), x) -
+          mpmath.matrix(f(numpy.array(x, numpy.double)))
+      )
+      return mpmath.matrix(
+        [
+          y[i] * x[i] ** -err_rel
+          for i in range(y.rows)
+        ]
+      )
+    q = utils.poly_fit.any_f_to_poly(g, a, b, err_order)
     #print('q', q)
     #print(
     #  'q(x)',
@@ -190,19 +189,18 @@ def remez(
     print('err', err)
 
   # final minimax error analysis
-  q = any_f_to_poly(
-    lambda x: (
-      (
-        numpy.array(
-          utils.poly.eval_multi(mpmath.matrix(p), mpmath.matrix(x)),
-          numpy.double
-        ) - f(x)
-      ) * x ** -err_rel
-    ),
-    a,
-    b,
-    err_order
-  )
+  def g(x):
+    y = (
+      utils.poly.eval_multi(mpmath.matrix(p), x) -
+        mpmath.matrix(f(numpy.array(x, numpy.double)))
+    )
+    return mpmath.matrix(
+      [
+        y[i] * x[i] ** -err_rel
+        for i in range(y.rows)
+      ]
+    )
+  q = utils.poly_fit.any_f_to_poly(g, a, b, err_order)
   #print('q', q)
   #print(
   #  'q(x)',
