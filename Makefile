@@ -44,4 +44,5 @@ clean:
 	${MAKE} -C python clean
 	${MAKE} -C c_float clean
 	${MAKE} -C c_fixed clean
+	${MAKE} -C monitor clean
 	${MAKE} -C prepare clean
