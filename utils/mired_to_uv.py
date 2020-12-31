@@ -27,8 +27,8 @@ import sys
 dirname = os.path.dirname(__file__)
 sys.path.append(os.path.join(dirname, '..'))
 
-import blackbody_spectrum
 import numpy
+import utils.blackbody_spectrum
 import utils.yaml_io
 
 UVW_U = 0
@@ -55,7 +55,7 @@ standard_observer_2deg = utils.yaml_io._import(
 def mired_to_uv_multi(mired):
   UVW = numpy.einsum(
     'ij,jk,lk->il',
-    blackbody_spectrum.blackbody_spectrum_multi(1e6 / mired),
+    utils.blackbody_spectrum.blackbody_spectrum_multi(1e6 / mired),
     standard_observer_2deg,
     XYZ_to_UVW
   )
@@ -69,7 +69,7 @@ def mired_to_uv(mired):
 def mired_to_uv_deriv_multi(mired):
   UVW = numpy.einsum(
     'ij,jk,lk->il',
-    blackbody_spectrum.blackbody_spectrum_multi(1e6 / mired),
+    utils.blackbody_spectrum.blackbody_spectrum_multi(1e6 / mired),
     standard_observer_2deg,
     XYZ_to_UVW
   )
@@ -79,7 +79,7 @@ def mired_to_uv_deriv_multi(mired):
   # dy/dx = df/du du/dx = -1e6 f'(1 / x) / x^2
   UVW_deriv = -1e6 * numpy.einsum(
     'ij,jk,lk->il',
-    blackbody_spectrum.blackbody_spectrum_deriv_multi(1e6 / mired),
+    utils.blackbody_spectrum.blackbody_spectrum_deriv_multi(1e6 / mired),
     standard_observer_2deg,
     XYZ_to_UVW
   ) / (mired ** 2)[:, numpy.newaxis]
@@ -96,9 +96,10 @@ def mired_to_uv_deriv(mired):
   )[0, :]
 
 if __name__ == '__main__':
-  print(mired_to_uv(1e6 / 6504.))
+  uv = mired_to_uv(1e6 / 6504.)
+  print('uv', uv)
 
-  uv = mired_to_uv_deriv(1e6 / 6504.)
+  uv_deriv = mired_to_uv_deriv(1e6 / 6504.)
   uv0 = mired_to_uv(1e6 / 6504.)
   uv1 = mired_to_uv((1e6 / 6504.) + .001)
-  print('uv', uv, (uv1 - uv0) / .001)
+  print('uv_deriv', uv_deriv, (uv1 - uv0) / .001)

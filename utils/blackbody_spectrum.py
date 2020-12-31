@@ -74,9 +74,9 @@ if __name__ == '__main__':
 
   XYZ = blackbody_spectrum(6504.) @ standard_observer_2deg
   xy = XYZ[:2] / numpy.sum(XYZ)
-  print('xy', xy) # should be near (.31271, .32902)
+  print('xy', xy) # should be near (.3127, .3290)
 
-  XYZ = blackbody_spectrum_deriv(6504.) @ standard_observer_2deg
+  XYZ_deriv = blackbody_spectrum_deriv(6504.) @ standard_observer_2deg
   XYZ0 = blackbody_spectrum(6504.) @ standard_observer_2deg
   XYZ1 = blackbody_spectrum(6504.001) @ standard_observer_2deg
-  print('XYZ', XYZ, (XYZ1 - XYZ0) / .001)
+  print('XYZ_deriv', XYZ_deriv, (XYZ1 - XYZ0) / .001)

@@ -30,7 +30,7 @@ sys.path.append(os.path.join(dirname, '..'))
 import numpy
 import math
 import mpmath
-import mired_to_uv
+import utils.mired_to_uv
 import utils.poly
 import utils.poly_fit
 import utils.yaml_io
@@ -115,7 +115,7 @@ primaries_UVW = numpy.stack([u, v, 1. - u - v], 1) * L[:, numpy.newaxis]
 # note: below is transposed so use rgb @ UVW_to_rgb, not UVW_to_rgb @ rgb
 UVW_to_rgb = numpy.linalg.inv(primaries_UVW)
 def mired_to_rgb(mired):
-  mired_uv = mired_to_uv.mired_to_uv_multi(mired)
+  mired_uv = utils.mired_to_uv.mired_to_uv_multi(mired)
 
   u = mired_uv[:, UV_u]
   v = mired_uv[:, UV_v]
@@ -126,8 +126,8 @@ def mired_to_rgb(mired):
 # in cd part (when blue is < 0) use warm/cool algorithm to mix red and
 # green to produce the correct CCT
 def mired_to_wc(mired):
-  mired_uv = mired_to_uv.mired_to_uv_multi(mired)
-  mired_uv_deriv = mired_to_uv.mired_to_uv_deriv_multi(mired)
+  mired_uv = utils.mired_to_uv.mired_to_uv_multi(mired)
+  mired_uv_deriv = utils.mired_to_uv.mired_to_uv_deriv_multi(mired)
 
   wc = []
   for i in range(mired.shape[0]):
