@@ -22,7 +22,7 @@
 
 import math
 import numpy
-from poly_fixed import poly_fixed
+from utils.poly_fixed import poly_fixed
 
 EPSILON = 1e-6
 
@@ -35,28 +35,28 @@ KELV_MAX = 15000.
 UV_EXP = -30
 
 p_u_num, p_shr_u_num, p_exp_u_num = poly_fixed(
-  numpy.array([.860117757, 1.54118254e-4, 1.28641212e-7], numpy.double),
+  mpmath.matrix([.860117757, 1.54118254e-4, 1.28641212e-7])
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
   31
 )
 p_u_denom, p_shr_u_denom, p_exp_u_denom = poly_fixed(
-  numpy.array([1., 8.42420235e-4, 7.08145163e-7], numpy.double),
+  mpmath.matrix([1., 8.42420235e-4, 7.08145163e-7])
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
   31
 )
 p_v_num, p_shr_v_num, p_exp_v_num = poly_fixed(
-  numpy.array([.317398726, 4.22806245e-5, 4.20481691e-8], numpy.double),
+  mpmath.matrix([.317398726, 4.22806245e-5, 4.20481691e-8]),
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
   31
 )
 p_v_denom, p_shr_v_denom, p_exp_v_denom = poly_fixed(
-  numpy.array([1., -2.89741816e-5, 1.61456053e-7], numpy.double),
+  mpmath.matrix([1., -2.89741816e-5, 1.61456053e-7]),
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,

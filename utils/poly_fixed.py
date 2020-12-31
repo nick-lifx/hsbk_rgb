@@ -37,17 +37,25 @@ EPSILON = 1e-8
 # then calculate the exponent needed to represent that range (or the exponent
 # needed to prevent the next coefficient from overflowing, whichever larger)
 def intermediate_exp(p, a, b, epsilon = EPSILON):
-  _, exp = numpy.frexp(
-    numpy.array(
-      [
-        utils.poly._range(mpmath.matrix(p[i:]), a, b)
-        for i in range(p.shape[0])
-      ],
-      numpy.double
-    ) * (1. + epsilon)
+  exp = numpy.array(
+    [
+      max(
+        [
+          mpmath.frexp(j * (1 + epsilon))[1]
+          for j in utils.poly._range(p[i:], a, b)
+        ]
+      )
+      for i in range(p.rows)
+    ],
+    numpy.int32
   )
-  exp = numpy.max(exp, 1)
-  _, p_exp = numpy.frexp(p[:-1])
+  p_exp = numpy.array(
+    [
+      mpmath.frexp(p[i] * (1 + epsilon))[1]
+      for i in range(p.rows - 1)
+    ],
+    numpy.int32
+  )
   exp[1:] = numpy.maximum(exp[1:], p_exp)
   return exp
 
@@ -64,7 +72,13 @@ def align(p, a, b, x_exp, bits, y_exp = None, epsilon = EPSILON):
   #print('exp', exp)
   shr = exp[:-1] - exp[1:] - x_exp
   #print('shr', shr)
-  return numpy.ldexp(p, -exp), shr, exp[0]
+  return (
+    mpmath.matrix(
+      [mpmath.ldexp(p[i], int(-exp[i])) for i in range(p.rows)]
+    ),
+    shr,
+    exp[0]
+  )
 
 # if we round the coefficients to integer as-is, the algorithm would be
 #   y = c[-1]
@@ -89,9 +103,14 @@ def align(p, a, b, x_exp, bits, y_exp = None, epsilon = EPSILON):
 # then provided the shr is at least 1, the coefficients can be integer
 def quantize(c, shr, dtype = numpy.int64):
   assert numpy.all(shr >= 1)
-  c = numpy.copy(c)
-  c[:-1] = numpy.ldexp(c[:-1] + .5, shr)
-  return numpy.round(c).astype(dtype)
+  c = mpmath.matrix(
+    [mpmath.ldexp(c[i] + .5, int(shr[i])) for i in range(c.rows - 1)] +
+      [c[c.rows - 1]]
+  )
+  return numpy.array(
+    [int(mpmath.nint(c[i])) for i in range(c.rows)],
+    dtype
+  )
 
 def poly_fixed(
   p,

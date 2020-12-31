@@ -28,9 +28,10 @@ dirname = os.path.dirname(__file__)
 sys.path.append(os.path.join(dirname, '..'))
 
 import math
+import mpmath
 import numpy
 import utils.yaml_io
-from poly_fixed import poly_fixed
+from utils.poly_fixed import poly_fixed
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -60,7 +61,7 @@ err = gamma_encode_fit['err']
 exp0 = gamma_encode_fit['exp0']
 post_factor = gamma_encode_fit['post_factor']
 
-p, p_shr, p_exp = poly_fixed(p, a, b, -31, 31)
+p, p_shr, p_exp = poly_fixed(mpmath.matrix(p), a, b, -31, 31)
 
 _, exp = numpy.frexp(post_factor * (1. + EPSILON))
 post_factor_exp = numpy.max(exp) - 31
