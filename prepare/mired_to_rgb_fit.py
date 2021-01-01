@@ -58,13 +58,15 @@ UVW_V = 1
 UVW_W = 2
 N_UVW = 3
 
-ERR_ORDER = 17
-
 # approximation order can be set separately for each channel and interval
 ORDER_RED_AB = 4
 ORDER_GREEN_AB = 4
 ORDER_GREEN_BD = 6
 ORDER_BLUE_BC = 8
+EXTRA_ORDER_RED_AB = 8
+EXTRA_ORDER_GREEN_AB = 8
+EXTRA_ORDER_GREEN_BD = 12
+EXTRA_ORDER_BLUE_BC = 16
 
 # user has to provide an estimate of the red/blue and blue/zero intersection
 # we will search for the actual intersection at user's estimate +/- this value
@@ -78,7 +80,7 @@ FIT_EXTRA_DOMAIN = 5.
 MIRED_MIN = 1e6 / 15000.
 MIRED_MAX = 1e6 / 1000.
 
-mpmath.mp.prec = 212
+mpmath.mp.prec = 106
 
 #numpy.set_printoptions(threshold = numpy.inf)
 
@@ -188,7 +190,10 @@ b = float(
       f,
       b_estimate - INTERSECT_EXTRA_DOMAIN,
       b_estimate + INTERSECT_EXTRA_DOMAIN,
-      ERR_ORDER
+      max(
+        ORDER_RED_AB + EXTRA_ORDER_RED_AB,
+        ORDER_BLUE_BC + EXTRA_ORDER_BLUE_BC
+      )
     ),
     b_estimate
   )
@@ -206,7 +211,7 @@ c = (
         f,
         c_estimate - INTERSECT_EXTRA_DOMAIN,
         c_estimate + INTERSECT_EXTRA_DOMAIN,
-        ERR_ORDER
+        ORDER_BLUE_BC + EXTRA_ORDER_BLUE_BC
       ),
       c_estimate
     )
@@ -229,53 +234,53 @@ def mired_to_rgb_or_wc(x):
 
 # red channel
 def f(x):
-  mired_rgb = mired_to_rgb(numpy.array(x, numpy.double))
+  mired_rgb = mired_to_rgb_or_wc(numpy.array(x, numpy.double))
   return mpmath.matrix(
     gamma_encode(mired_rgb[:, RGB_RED] / mired_rgb[:, RGB_BLUE])
   )
-p_red_ab, _, p_red_ab_err = utils.remez.remez(
+p_red_ab, p_red_ab_err = utils.remez.remez_f(
   f,
   a - FIT_EXTRA_DOMAIN,
   b + FIT_EXTRA_DOMAIN,
   ORDER_RED_AB,
-  ERR_ORDER
+  extra_order = EXTRA_ORDER_RED_AB
 )
 p_red_ab_err = float(p_red_ab_err)
-print('p_red_ab', p_red_ab)
+#print('p_red_ab', p_red_ab)
 print('p_red_ab_err', p_red_ab_err)
 p_red_bd = mpmath.matrix([1.])
 p_red_bd_err = 0.
 
 # green channel
 def f(x):
-  mired_rgb = mired_to_rgb(numpy.array(x, numpy.double))
+  mired_rgb = mired_to_rgb_or_wc(numpy.array(x, numpy.double))
   return mpmath.matrix(
     gamma_encode(mired_rgb[:, RGB_GREEN] / mired_rgb[:, RGB_BLUE])
   )
-p_green_ab, _, p_green_ab_err = utils.remez.remez(
+p_green_ab, p_green_ab_err = utils.remez.remez_f(
   f,
   a - FIT_EXTRA_DOMAIN,
   b + FIT_EXTRA_DOMAIN,
   ORDER_GREEN_AB,
-  ERR_ORDER
+  extra_order = EXTRA_ORDER_GREEN_AB
 )
 p_green_ab_err = float(p_green_ab_err)
-print('p_green_ab', p_green_ab)
+#print('p_green_ab', p_green_ab)
 print('p_green_ab_err', p_green_ab_err)
 def f(x):
   mired_rgb = mired_to_rgb_or_wc(numpy.array(x, numpy.double))
   return mpmath.matrix(
     gamma_encode(mired_rgb[:, RGB_GREEN] / mired_rgb[:, RGB_RED])
   )
-p_green_bd, _, p_green_bd_err = utils.remez.remez(
+p_green_bd, p_green_bd_err = utils.remez.remez_f(
   f,
   b - FIT_EXTRA_DOMAIN,
   d + FIT_EXTRA_DOMAIN,
   ORDER_GREEN_BD,
-  ERR_ORDER
+  extra_order = EXTRA_ORDER_GREEN_BD
 )
 p_green_bd_err = float(p_green_bd_err)
-print('p_green_bd', p_green_bd)
+#print('p_green_bd', p_green_bd)
 print('p_green_bd_err', p_green_bd_err)
 
 # blue channel
@@ -286,15 +291,15 @@ def f(x):
   return mpmath.matrix(
     gamma_encode(mired_rgb[:, RGB_BLUE] / mired_rgb[:, RGB_RED])
   )
-p_blue_bc, _, p_blue_bc_err = utils.remez.remez(
+p_blue_bc, p_blue_bc_err = utils.remez.remez_f(
   f,
   b - FIT_EXTRA_DOMAIN,
   c + FIT_EXTRA_DOMAIN,
   ORDER_BLUE_BC,
-  ERR_ORDER
+  extra_order = EXTRA_ORDER_BLUE_BC
 )
 p_blue_bc_err = float(p_blue_bc_err)
-print('p_blue_bc', p_blue_bc)
+#print('p_blue_bc', p_blue_bc)
 print('p_blue_bc_err', p_blue_bc_err)
 p_blue_cd = mpmath.matrix([0.])
 p_blue_cd_err = 0.
@@ -342,10 +347,10 @@ if diag:
   x = numpy.concatenate([x_ab, x_bd], 0)
   for i in range(N_RGB):
     def f_ab(x):
-      mired_rgb = mired_to_rgb(x)
+      mired_rgb = mired_to_rgb_or_wc(x)
       return gamma_encode(mired_rgb[:, i] / mired_rgb[:, RGB_BLUE])
     def f_bd(x):
-      mired_rgb = mired_to_rgb(x)
+      mired_rgb = mired_to_rgb_or_wc(x)
       return gamma_encode(mired_rgb[:, i] / mired_rgb[:, RGB_RED])
     y = numpy.concatenate([f_ab(x_ab), f_bd(x_bd)], 0)
     matplotlib.pyplot.plot(x, y)

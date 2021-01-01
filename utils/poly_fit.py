@@ -54,8 +54,8 @@ def fit(x, y, order):
   )
 
   # checking
-  err = utils.poly.eval_multi(x) - y
-  print('err', err)
+  #err = utils.poly.eval_multi(x) - y
+  #print('err', err)
 
   return q
 
@@ -86,7 +86,8 @@ def any_f_to_poly(f, a, b, order):
   x = mpmath.matrix(
     [a + (b - a) * (.5 + .5 * p_x[i]) for i in range(order + 1)]
   )
-  err = utils.poly.eval_multi(q, x) - f(x)
-  print('err', err)
+  y = utils.poly.eval_multi(q, x) - f(x)
+  est_err = max([abs(y[i]) for i in range(y.rows)])
+  print('est_err', est_err)
 
   return q

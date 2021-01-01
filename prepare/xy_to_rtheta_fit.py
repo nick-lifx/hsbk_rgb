@@ -30,18 +30,18 @@ sys.path.append(os.path.join(dirname, '..'))
 import numpy
 import math
 import mpmath
+import utils.poly_fit
 import utils.remez
 import utils.yaml_io
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-ERR_ORDER = 24
+ORDER0 = 7
 ORDER1 = 7
-ORDER2 = 7
 EPSILON = 1e-4
 
-mpmath.mp.prec = 212
+mpmath.mp.prec = 106
 
 #numpy.set_printoptions(threshold = numpy.inf)
 
@@ -67,13 +67,14 @@ a = -1.
 b = 1.
 
 # find approximating polynomial
-p, _, p_err = utils.remez.remez_even(f, b, ORDER1, ERR_ORDER)
+p, p_err = utils.remez.remez_even_f(f, b, ORDER0)
 p_err = float(p_err)
-q, _, q_err = utils.remez.remez_odd(
+q, q_err = utils.remez.remez_odd_f(
   g,
   b,
-  ORDER2,
-  ERR_ORDER,
+  ORDER1,
+  n_iters = 20,
+  extra_order = 12,
   epsilon = EPSILON
 )
 q_err = float(q_err)

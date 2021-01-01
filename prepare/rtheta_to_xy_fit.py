@@ -36,12 +36,11 @@ import utils.yaml_io
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-ORDER1 = 4
-ORDER2 = 3
-ERR_ORDER = 16
+ORDER0 = 4
+ORDER1 = 3
 EPSILON = 1e-4
 
-mpmath.mp.prec = 212
+mpmath.mp.prec = 106
 
 #numpy.set_printoptions(threshold = numpy.inf)
 
@@ -67,13 +66,14 @@ a = -.25 * math.pi
 b = .25 * math.pi
 
 # find approximating polynomial
-p, _, p_err = utils.remez.remez_even(f, b, ORDER1, ERR_ORDER)
+p, p_err = utils.remez.remez_even_f(f, b, ORDER0)
 p_err = float(p_err)
-q, _, q_err = utils.remez.remez_odd(
+q, q_err = utils.remez.remez_odd_f(
   g,
   b,
-  ORDER2,
-  ERR_ORDER,
+  ORDER1,
+  n_iters = 20,
+  extra_order = 12,
   epsilon = EPSILON
 )
 q_err = float(q_err)

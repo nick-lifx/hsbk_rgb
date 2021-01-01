@@ -37,10 +37,9 @@ EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
 ORDER = 7
-ERR_ORDER = 21
 EPSILON = 1e-12
 
-mpmath.mp.prec = 212
+mpmath.mp.prec = 106
 
 #numpy.set_printoptions(threshold = numpy.inf)
 
@@ -74,7 +73,7 @@ b = gamma_d
 #   return x / gamma_a if x < gamma_a * gamma_b else f(x + gamma_c)
 
 # find approximating polynomial (relative error criterion)
-p, _, err = utils.remez.remez(f, .5, 1., ORDER, ERR_ORDER, 1)
+p, err = utils.remez.remez_f(f, .5, 1., ORDER, 1)
 err = float(err)
 
 # compute pre- and post-processing constants
