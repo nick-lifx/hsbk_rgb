@@ -75,7 +75,6 @@ b = 1.
 
 # find approximating polynomial (relative error criterion)
 p, _, err = utils.remez.remez(f, .5, 1., ORDER, ERR_ORDER, 1)
-p = numpy.array(p, numpy.double)
 err = float(err)
 
 # compute pre- and post-processing constants
@@ -101,7 +100,7 @@ if diag:
   def g(x):
     x, exp = numpy.frexp(x)
     return numpy.array(
-      utils.poly.eval_multi(mpmath.matrix(p), mpmath.matrix(x)),
+      utils.poly.eval_multi(p, mpmath.matrix(x)),
       numpy.double
     ) * post_factor[exp - exp0]
 

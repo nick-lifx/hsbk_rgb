@@ -240,11 +240,10 @@ p_red_ab, _, p_red_ab_err = utils.remez.remez(
   ORDER_RED_AB,
   ERR_ORDER
 )
-p_red_ab = numpy.array(p_red_ab, numpy.double)
 p_red_ab_err = float(p_red_ab_err)
 print('p_red_ab', p_red_ab)
 print('p_red_ab_err', p_red_ab_err)
-p_red_bd = numpy.array([1.], numpy.double)
+p_red_bd = mpmath.matrix([1.])
 p_red_bd_err = 0.
 
 # green channel
@@ -260,7 +259,6 @@ p_green_ab, _, p_green_ab_err = utils.remez.remez(
   ORDER_GREEN_AB,
   ERR_ORDER
 )
-p_green_ab = numpy.array(p_green_ab, numpy.double)
 p_green_ab_err = float(p_green_ab_err)
 print('p_green_ab', p_green_ab)
 print('p_green_ab_err', p_green_ab_err)
@@ -276,13 +274,12 @@ p_green_bd, _, p_green_bd_err = utils.remez.remez(
   ORDER_GREEN_BD,
   ERR_ORDER
 )
-p_green_bd = numpy.array(p_green_bd, numpy.double)
 p_green_bd_err = float(p_green_bd_err)
 print('p_green_bd', p_green_bd)
 print('p_green_bd_err', p_green_bd_err)
 
 # blue channel
-p_blue_ab = numpy.array([1.], numpy.double)
+p_blue_ab = mpmath.matrix([1.])
 p_blue_ab_err = 0.
 def f(x):
   mired_rgb = mired_to_rgb_or_wc(numpy.array(x, numpy.double))
@@ -296,31 +293,30 @@ p_blue_bc, _, p_blue_bc_err = utils.remez.remez(
   ORDER_BLUE_BC,
   ERR_ORDER
 )
-p_blue_bc = numpy.array(p_blue_bc, numpy.double)
 p_blue_bc_err = float(p_blue_bc_err)
 print('p_blue_bc', p_blue_bc)
 print('p_blue_bc_err', p_blue_bc_err)
-p_blue_cd = numpy.array([0.], numpy.double)
+p_blue_cd = mpmath.matrix([0.])
 p_blue_cd_err = 0.
 
 # fix discontinuities by setting b, c, d to exact intersections after fitting
 b_red = float(
   utils.poly.newton(
-    utils.poly.add(mpmath.matrix(p_red_ab), mpmath.matrix(-p_red_bd)),
+    utils.poly.add(p_red_ab, -p_red_bd),
     b
   )
 )
 print('b_red', b_red)
 b_green = float(
   utils.poly.newton(
-    utils.poly.add(mpmath.matrix(p_green_ab), mpmath.matrix(-p_green_bd)),
+    utils.poly.add(p_green_ab, -p_green_bd),
     b
   )
 )
 print('b_green', b_green)
 b_blue = float(
   utils.poly.newton(
-    utils.poly.add(mpmath.matrix(p_blue_ab), mpmath.matrix(-p_blue_bc)),
+    utils.poly.add(p_blue_ab, -p_blue_bc),
     b
   )
 )
@@ -328,7 +324,7 @@ print('b_blue', b_blue)
 c_blue = (
   float(
     utils.poly.newton(
-      utils.poly.add(mpmath.matrix(p_blue_bc), mpmath.matrix(-p_blue_cd)),
+      utils.poly.add(p_blue_bc, -p_blue_cd),
       c
     )
   )
@@ -361,11 +357,11 @@ if diag:
   y = numpy.concatenate(
     [
       numpy.array(
-        utils.poly.eval_multi(mpmath.matrix(p_red_ab), mpmath.matrix(x_ab)),
+        utils.poly.eval_multi(p_red_ab, mpmath.matrix(x_ab)),
         numpy.double
       ),
       numpy.array(
-        utils.poly.eval_multi(mpmath.matrix(p_red_bd), mpmath.matrix(x_bd)),
+        utils.poly.eval_multi(p_red_bd, mpmath.matrix(x_bd)),
         numpy.double
       )
     ],
@@ -380,11 +376,11 @@ if diag:
   y = numpy.concatenate(
     [
       numpy.array(
-        utils.poly.eval_multi(mpmath.matrix(p_green_ab), mpmath.matrix(x_ab)),
+        utils.poly.eval_multi(p_green_ab, mpmath.matrix(x_ab)),
         numpy.double
       ),
       numpy.array(
-        utils.poly.eval_multi(mpmath.matrix(p_green_bd), mpmath.matrix(x_bd)),
+        utils.poly.eval_multi(p_green_bd, mpmath.matrix(x_bd)),
         numpy.double
       )
     ],
@@ -400,15 +396,15 @@ if diag:
   y = numpy.concatenate(
     [
       numpy.array(
-        utils.poly.eval_multi(mpmath.matrix(p_blue_ab), mpmath.matrix(x_ab)),
+        utils.poly.eval_multi(p_blue_ab, mpmath.matrix(x_ab)),
         numpy.double
       ),
       numpy.array(
-        utils.poly.eval_multi(mpmath.matrix(p_blue_bc), mpmath.matrix(x_bc)),
+        utils.poly.eval_multi(p_blue_bc, mpmath.matrix(x_bc)),
         numpy.double
       ),
       numpy.array(
-        utils.poly.eval_multi(mpmath.matrix(p_blue_cd), mpmath.matrix(x_cd)),
+        utils.poly.eval_multi(p_blue_cd, mpmath.matrix(x_cd)),
         numpy.double
       )
     ],

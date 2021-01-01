@@ -42,6 +42,8 @@ MIRED_EXP = -16
 # results in 2:30 fixed point
 RGB_EXP = -30
 
+mpmath.mp.prec = 106
+
 #numpy.set_printoptions(threshold = numpy.inf)
 
 if len(sys.argv) < 3:
@@ -68,7 +70,7 @@ p_blue_bc = mired_to_rgb_fit['p_blue_bc']
 p_blue_cd = mired_to_rgb_fit['p_blue_cd']
 
 p_red_ab, p_shr_red_ab, _ = poly_fixed(
-  mpmath.matrix(p_red_ab),
+  p_red_ab,
   a,
   b_red,
   MIRED_EXP,
@@ -76,7 +78,7 @@ p_red_ab, p_shr_red_ab, _ = poly_fixed(
   RGB_EXP
 )
 p_red_bd, p_shr_red_bd, _ = poly_fixed(
-  mpmath.matrix(p_red_bd),
+  p_red_bd,
   b_red,
   d,
   MIRED_EXP,
@@ -85,7 +87,7 @@ p_red_bd, p_shr_red_bd, _ = poly_fixed(
 )
 
 p_green_ab, p_shr_green_ab, _ = poly_fixed(
-  mpmath.matrix(p_green_ab),
+  p_green_ab,
   a,
   b_green,
   MIRED_EXP,
@@ -93,7 +95,7 @@ p_green_ab, p_shr_green_ab, _ = poly_fixed(
   RGB_EXP
 )
 p_green_bd, p_shr_green_bd, _ = poly_fixed(
-  mpmath.matrix(p_green_bd),
+  p_green_bd,
   b_green,
   d,
   MIRED_EXP,
@@ -102,7 +104,7 @@ p_green_bd, p_shr_green_bd, _ = poly_fixed(
 )
 
 p_blue_ab, p_shr_blue_ab, _ = poly_fixed(
-  mpmath.matrix(p_blue_ab),
+  p_blue_ab,
   a,
   b_blue,
   MIRED_EXP,
@@ -110,7 +112,7 @@ p_blue_ab, p_shr_blue_ab, _ = poly_fixed(
   RGB_EXP
 )
 p_blue_bc, p_shr_blue_bc, _ = poly_fixed(
-  mpmath.matrix(p_blue_bc),
+  p_blue_bc,
   b_blue,
   c_blue,
   MIRED_EXP,
@@ -118,7 +120,7 @@ p_blue_bc, p_shr_blue_bc, _ = poly_fixed(
   RGB_EXP
 )
 p_blue_cd, p_shr_blue_cd, _ = poly_fixed(
-  mpmath.matrix(p_blue_cd),
+  p_blue_cd,
   c_blue,
   d,
   MIRED_EXP,

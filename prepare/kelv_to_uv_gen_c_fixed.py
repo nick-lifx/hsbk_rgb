@@ -21,10 +21,13 @@
 # SOFTWARE.
 
 import math
+import mpmath
 import numpy
 from utils.poly_fixed import poly_fixed
 
 EPSILON = 1e-6
+
+mpmath.mp.prec = 106
 
 # independent variable in 16:16 fixed point
 KELV_EXP = -16

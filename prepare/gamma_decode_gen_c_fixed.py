@@ -38,6 +38,8 @@ EXIT_FAILURE = 1
 
 EPSILON = 1e-8
 
+mpmath.mp.prec = 106
+
 #numpy.set_printoptions(threshold = numpy.inf)
 
 if len(sys.argv) < 3:
@@ -61,7 +63,7 @@ err = gamma_decode_fit['err']
 exp0 = gamma_decode_fit['exp0']
 post_factor = gamma_decode_fit['post_factor']
 
-p, p_shr, p_exp = poly_fixed(mpmath.matrix(p), a, b, -31, 31)
+p, p_shr, p_exp = poly_fixed(p, a, b, -31, 31)
 
 _, exp = numpy.frexp(post_factor * (1. + EPSILON))
 post_factor_exp = numpy.max(exp) - 31

@@ -27,11 +27,14 @@ import sys
 dirname = os.path.dirname(__file__)
 sys.path.append(os.path.join(dirname, '..'))
 
+import mpmath
 import numpy
 import utils.yaml_io
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
+
+mpmath.mp.prec = 106
 
 #numpy.set_printoptions(threshold = numpy.inf)
 
@@ -54,6 +57,8 @@ err = gamma_encode_fit['err']
 exp0 = gamma_encode_fit['exp0']
 exp1 = gamma_encode_fit['exp1']
 post_factor = gamma_encode_fit['post_factor']
+
+p = numpy.array(p, numpy.double)
 
 print(
   '''#!/usr/bin/env python3

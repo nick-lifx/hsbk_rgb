@@ -28,11 +28,14 @@ dirname = os.path.dirname(__file__)
 sys.path.append(os.path.join(dirname, '..'))
 
 import math
+import mpmath
 import numpy
 import utils.yaml_io
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
+
+mpmath.mp.prec = 106
 
 #numpy.set_printoptions(threshold = numpy.inf)
 
@@ -48,6 +51,9 @@ p = xy_to_rtheta_fit['p']
 p_err = xy_to_rtheta_fit['p_err']
 q = xy_to_rtheta_fit['q']
 q_err = xy_to_rtheta_fit['q_err']
+
+p = numpy.array(p, numpy.double)
+q = numpy.array(q, numpy.double)
 
 print(
   '''#!/usr/bin/env python3

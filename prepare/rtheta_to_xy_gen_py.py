@@ -36,6 +36,8 @@ import utils.yaml_io
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
+mpmath.mp.prec = 106
+
 #numpy.set_printoptions(threshold = numpy.inf)
 
 if len(sys.argv) < 2:
@@ -50,6 +52,9 @@ p = rtheta_to_xy_fit['p']
 p_err = rtheta_to_xy_fit['p_err']
 q = rtheta_to_xy_fit['q']
 q_err = rtheta_to_xy_fit['q_err']
+
+p = numpy.array(p, numpy.double)
+q = numpy.array(q, numpy.double)
 
 # rescale domain to compensate for range reduction code on entry
 theta_scale = 2. / math.pi

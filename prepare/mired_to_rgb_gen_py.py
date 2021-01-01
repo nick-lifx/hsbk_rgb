@@ -27,11 +27,14 @@ import sys
 dirname = os.path.dirname(__file__)
 sys.path.append(os.path.join(dirname, '..'))
 
+import mpmath
 import numpy
 import utils.yaml_io
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
+
+mpmath.mp.prec = 106
 
 #numpy.set_printoptions(threshold = numpy.inf)
 
@@ -57,6 +60,14 @@ p_green_bd = mired_to_rgb_fit['p_green_bd']
 p_blue_ab = mired_to_rgb_fit['p_blue_ab']
 p_blue_bc = mired_to_rgb_fit['p_blue_bc']
 p_blue_cd = mired_to_rgb_fit['p_blue_cd']
+
+p_red_ab = numpy.array(p_red_ab, numpy.double)
+p_red_bd = numpy.array(p_red_bd, numpy.double)
+p_green_ab = numpy.array(p_green_ab, numpy.double)
+p_green_bd = numpy.array(p_green_bd, numpy.double)
+p_blue_ab = numpy.array(p_blue_ab, numpy.double)
+p_blue_bc = numpy.array(p_blue_bc, numpy.double)
+p_blue_cd = numpy.array(p_blue_cd, numpy.double)
 
 print(
   '''#!/usr/bin/env python3

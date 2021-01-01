@@ -27,6 +27,7 @@ import sys
 dirname = os.path.dirname(__file__)
 sys.path.append(os.path.join(dirname, '..'))
 
+import mpmath
 import numpy
 import utils.yaml_io
 
@@ -46,6 +47,8 @@ UVL_V = 1
 UVL_v = 1
 UVL_L = 2
 N_UVL = 3
+
+mpmath.mp.prec = 106
 
 #numpy.set_printoptions(threshold = numpy.inf)
 

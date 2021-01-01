@@ -68,7 +68,6 @@ b = .25 * math.pi
 
 # find approximating polynomial
 p, _, p_err = utils.remez.remez_even(f, b, ORDER1, ERR_ORDER)
-p = numpy.array(p, numpy.double)
 p_err = float(p_err)
 q, _, q_err = utils.remez.remez_odd(
   g,
@@ -77,7 +76,6 @@ q, _, q_err = utils.remez.remez_odd(
   ERR_ORDER,
   epsilon = EPSILON
 )
-q = numpy.array(q, numpy.double)
 q_err = float(q_err)
 
 # checking
@@ -93,7 +91,7 @@ if diag:
   matplotlib.pyplot.plot(
     x,
     numpy.array(
-      utils.poly.eval_multi(mpmath.matrix(p), mpmath.matrix(x ** 2)),
+      utils.poly.eval_multi(p, mpmath.matrix(x ** 2)),
       numpy.double
     )
   )
@@ -104,7 +102,7 @@ if diag:
   matplotlib.pyplot.plot(
     x,
     numpy.array(
-      utils.poly.eval_multi(mpmath.matrix(q), mpmath.matrix(x ** 2)),
+      utils.poly.eval_multi(q, mpmath.matrix(x ** 2)),
       numpy.double
     ) * x
   )
