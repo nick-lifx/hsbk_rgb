@@ -23,18 +23,18 @@ import utils.poly
 
 EPSILON = 1e-12
 
-# return a matrix with one row per x-value, and n columns
-# each row consists of the powers 0, 1, ..., n - 1 of the given x-value
-def vandermonde(x, n):
-  A = mpmath.matrix(x.rows, n)
+# return a matrix with one row per x-value, and "order" columns
+# each row consists of the powers 0, 1, ..., order - 1 of the given x-value
+def vandermonde(x, order):
+  A = mpmath.matrix(x.rows, order)
   A[:, 0] = 1.
   for i in range(x.rows):
-    for j in range(1, n):
+    for j in range(1, order):
       A[i, j] = A[i, j - 1] * x[i]
   return A
 
-# return a polynomial p of order n, such that p(x) = y
-def fit(x, y, n):
+# return a polynomial p of order "order", such that p(x) = y
+def fit(x, y, order):
   a = min(x)
   b = max(x)
 
@@ -47,7 +47,7 @@ def fit(x, y, n):
   # fit polynomial to remapped x, then compose with mapping function
   q = utils.poly.compose(
     mpmath.lu_solve(
-      vandermonde(utils.poly.eval_multi(p, x), n),
+      vandermonde(utils.poly.eval_multi(p, x), order),
       y
     ),
     p
@@ -60,7 +60,7 @@ def fit(x, y, n):
   return q
 
 # return a polynomial p such that p(x) == f(x) at the Chebyshev points
-def any_f_to_poly(f, a, b, n):
+def any_f_to_poly(f, a, b, order):
   # remap [a, b] to [-1, 1] for better conditioning
   p = mpmath.lu_solve(
     vandermonde(mpmath.matrix([a, b]), 2),
@@ -69,22 +69,22 @@ def any_f_to_poly(f, a, b, n):
 
   # fit polynomial to [-1, 1], then compose with mapping function
   p_x = mpmath.matrix(
-    [mpmath.cos((i + .5) * mpmath.pi / n) for i in range(n)]
+    [mpmath.cos((i + .5) * mpmath.pi / order) for i in range(order)]
   )
   x = mpmath.matrix(
-    [a + (b - a) * (.5 + .5 * p_x[i]) for i in range(n)]
+    [a + (b - a) * (.5 + .5 * p_x[i]) for i in range(order)]
   )
   q = utils.poly.compose(
-    mpmath.lu_solve(vandermonde(p_x, n), f(x)),
+    mpmath.lu_solve(vandermonde(p_x, order), f(x)),
     p
   )
 
   # checking
   p_x = mpmath.matrix(
-    [mpmath.cos(i * mpmath.pi / n) for i in range(n + 1)]
+    [mpmath.cos(i * mpmath.pi / order) for i in range(order + 1)]
   )
   x = mpmath.matrix(
-    [a + (b - a) * (.5 + .5 * p_x[i]) for i in range(n + 1)]
+    [a + (b - a) * (.5 + .5 * p_x[i]) for i in range(order + 1)]
   )
   err = utils.poly.eval_multi(q, x) - f(x)
   print('err', err)

@@ -46,14 +46,18 @@ def remez(
   err_rel = 0,
   iters = 10
 ):
+  # remap [a, b] to [-1, 1] for better conditioning
+  p = mpmath.lu_solve(
+    utils.poly_fit.vandermonde(mpmath.matrix([a, b]), 2),
+    mpmath.matrix([-1., 1.])
+  )
+
   # put minimax nodes halfway between Chebyshev nodes on unit circle
-  x = a + (b - a) * (
-    .5 + .5 * mpmath.matrix(
-      [
-        mpmath.cos(i * mpmath.pi / order)
-        for i in range(order + 1)
-      ]
-    )
+  p_x = mpmath.matrix(
+    [mpmath.cos(i * mpmath.pi / order) for i in range(order + 1)]
+  )
+  x = mpmath.matrix(
+    [a + (b - a) * (.5 + .5 * p_x[i]) for i in range(order + 1)]
   )
   print('x', x)
   for i in range(iters):
@@ -63,47 +67,48 @@ def remez(
     y = f(x)
     #print('y', y)
     A = mpmath.matrix(order + 1)
-    A[:, :order] = utils.poly_fit.vandermonde(x, order)
+    p_x = utils.poly.eval_multi(p, x)
+    A[:, :order] = utils.poly_fit.vandermonde(p_x, order)
     for i in range(order + 1):
       A[i, order] = (1 - 2 * (i & 1)) * x[i] ** err_rel
     #print('A', A)
-    p = mpmath.lu_solve(A, y)
-    osc = p[p.rows - 1]
+    q = mpmath.lu_solve(A, y)
+    osc = q[q.rows - 1]
     print('osc', osc)
-    p = p[:-1]
-    #print('p', p)
+    q = utils.poly.compose(q[:-1], p)
+    #print('q', q)
 
-    # let q be the error function
+    # let r be the error function
     def g(x):
-      y = utils.poly.eval_multi(p, x) - f(x)
+      y = utils.poly.eval_multi(q, x) - f(x)
       return mpmath.matrix(
         [
           y[i] * x[i] ** -err_rel
           for i in range(y.rows)
         ]
       )
-    q = utils.poly_fit.any_f_to_poly(g, a, b, err_order)
-    #print('q', q)
-    print('q(x)', utils.poly.eval_multi(q, x))
+    r = utils.poly_fit.any_f_to_poly(g, a, b, err_order)
+    #print('r', r)
+    print('r(x)', utils.poly.eval_multi(r, x))
 
-    # partition domain into intervals where q is positive or negative
-    intervals = utils.poly.real_roots(q, a, b)
+    # partition domain into intervals where r is positive or negative
+    intervals = utils.poly.real_roots(r, a, b)
     print('intervals', intervals)
     n_intervals = intervals.rows - 1
     print('n_intervals', n_intervals)
     if n_intervals < order + 1:
       # there absolutely have to be at least order + 1 intervals,
-      # because the oscillating fit made q go positive and negative,
+      # because the oscillating fit made r go positive and negative,
       # if there isn't, it means osc is very tiny or precision error
       #print('warning: not enough intervals -- we say good enough')
       #break
       assert False
 
-    # determine if q increasing or decreasing through each boundary
+    # determine if r increasing or decreasing through each boundary
     # have n_intervals - 1 boundaries, must produce n_intervals signs,
     # then check that the intervals are actually alternating in sign
     interval_pos = utils.poly.eval_multi(
-      utils.poly.deriv(q),
+      utils.poly.deriv(r),
       intervals[1:-1]
     )
     interval_pos = [interval_pos[i] >= 0. for i in range(interval_pos.rows)]
@@ -121,8 +126,8 @@ def remez(
       #break
       assert False
 
-    # within each interval, find the "global" maximum or minimum of q
-    interval_extrema = utils.poly.interval_extrema(q, intervals)
+    # within each interval, find the "global" maximum or minimum of r
+    interval_extrema = utils.poly.interval_extrema(r, intervals)
     x = []
     y = []
     for i in range(n_intervals):
@@ -158,26 +163,26 @@ def remez(
       n_intervals -= 1
 
     # checking
-    err = utils.poly.eval_multi(q, x)
+    err = utils.poly.eval_multi(r, x)
     print('err', err)
 
   # final minimax error analysis
   def g(x):
-    y = utils.poly.eval_multi(p, x) - f(x)
+    y = utils.poly.eval_multi(q, x) - f(x)
     return mpmath.matrix(
       [
         y[i] * x[i] ** -err_rel
         for i in range(y.rows)
       ]
     )
-  q = utils.poly_fit.any_f_to_poly(g, a, b, err_order)
-  #print('q', q)
-  #print('q(x)', utils.poly.eval_multi(q, x))
-  _, y = utils.poly.extrema(q, a, b)
+  r = utils.poly_fit.any_f_to_poly(g, a, b, err_order)
+  #print('r', r)
+  #print('r(x)', utils.poly.eval_multi(r, x))
+  _, y = utils.poly.extrema(r, a, b)
   err = max([abs(y[i]) for i in range(y.rows)])
   print('err', err)
 
-  return p, x, err
+  return q, x, err
 
 # fit even polynomial in a domain symmetrical about 0
 # fits order * 2 polynomial, returns order even coefficients
