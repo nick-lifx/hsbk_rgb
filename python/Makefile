@@ -34,6 +34,7 @@ mired_to_rgb_display_p3.py \
 mired_to_rgb_rec2020.py \
 rtheta_to_xy.py \
 xy_to_rtheta.py \
+xy_to_r.py \
 rgb_to_hsbk_srgb.py \
 rgb_to_hsbk_display_p3.py \
 rgb_to_hsbk_rec2020.py
@@ -98,6 +99,10 @@ xy_to_rtheta.py: ../prepare/xy_to_rtheta_fit.yml
 	../prepare/xy_to_rtheta_gen_py.py $^ >$@
 	chmod a+x $@
 
+xy_to_r.py: ../prepare/xy_to_r_fit.yml
+	../prepare/xy_to_r_gen_py.py $^ >$@
+	chmod a+x $@
+
 # most generator scripts live in ../prepare, but this one is special,
 # as it needs to run the previously generated code in this directory
 # (it must link to code for all monitors so list all as dependencies)
@@ -137,6 +142,7 @@ rgb_to_uv_*.py \
 mired_to_rgb_*.py \
 rtheta_to_xy.py \
 xy_to_rtheta.py \
+xy_to_r.py \
 rgb_to_hsbk_srgb.py \
 rgb_to_hsbk_display_p3.py \
 rgb_to_hsbk_rec2020.py

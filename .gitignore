@@ -94,15 +94,7 @@
 /monitor/display_p3/model.yml
 /monitor/rec2020/model.yml
 /monitor/srgb/model.yml
-/prepare/gamma_decode_fit_rec2020.yml
-/prepare/gamma_decode_fit_srgb.yml
-/prepare/gamma_encode_fit_rec2020.yml
-/prepare/gamma_encode_fit_srgb.yml
-/prepare/mired_to_rgb_fit_display_p3.yml
-/prepare/mired_to_rgb_fit_rec2020.yml
-/prepare/mired_to_rgb_fit_srgb.yml
-/prepare/rtheta_to_xy_fit.yml
-/prepare/xy_to_rtheta_fit.yml
+/prepare/*.yml
 /python/gamma_decode_rec2020.py
 /python/gamma_decode_srgb.py
 /python/gamma_encode_rec2020.py
@@ -121,4 +113,5 @@
 /python/uv_to_rgb_rec2020.py
 /python/uv_to_rgb_srgb.py
 /python/xy_to_rtheta.py
+/python/xy_to_r.py
 __pycache__

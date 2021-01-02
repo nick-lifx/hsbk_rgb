@@ -99,13 +99,6 @@ print(
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# put utils into path
-# temporary until we have proper Python packaging
-import os.path
-import sys
-dirname = os.path.dirname(__file__)
-sys.path.append(os.path.join(dirname, '..'))
-
 import numpy
 from gamma_encode_{0:s} import gamma_encode_{1:s}
 

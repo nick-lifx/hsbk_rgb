@@ -27,7 +27,8 @@ mired_to_rgb_fit_srgb.yml \
 mired_to_rgb_fit_display_p3.yml \
 mired_to_rgb_fit_rec2020.yml \
 rtheta_to_xy_fit.yml \
-xy_to_rtheta_fit.yml
+xy_to_rtheta_fit.yml \
+xy_to_r_fit.yml
 
 gamma_decode_fit_srgb.yml: ../monitor/srgb/model.yml
 	./gamma_decode_fit.py $^ $@
@@ -51,10 +52,13 @@ mired_to_rgb_fit_rec2020.yml: ../monitor/rec2020/model.yml
 	./mired_to_rgb_fit.py $^ 150 950 $@
 
 rtheta_to_xy_fit.yml:
-	./rtheta_to_xy_fit.py $^ $@
+	./rtheta_to_xy_fit.py $@
 
 xy_to_rtheta_fit.yml:
-	./xy_to_rtheta_fit.py $^ $@
+	./xy_to_rtheta_fit.py $@
+
+xy_to_r_fit.yml:
+	./xy_to_r_fit.py $@
 
 clean:
 	rm -f \
@@ -62,4 +66,5 @@ gamma_decode_fit_*.yml \
 gamma_encode_fit_*.yml \
 mired_to_rgb_fit_*.yml \
 rtheta_to_xy_fit.yml \
-xy_to_rtheta_fit.yml
+xy_to_rtheta_fit.yml \
+xy_to_r_fit.yml
