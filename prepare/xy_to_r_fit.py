@@ -32,6 +32,7 @@ import numpy.linalg
 import math
 import mpmath
 import scipy.optimize
+import utils.poly
 import utils.poly_fit
 import utils.remez
 import utils.yaml_io
@@ -40,7 +41,7 @@ EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
 ORDER = 8
-EPSILON = 1e-8
+EPSILON = 1e-9
 NEWTON_ITERS = 1
 
 mpmath.mp.prec = 106
@@ -58,6 +59,25 @@ xy_to_r_fit_out = sys.argv[1]
 
 breaks = numpy.array([0., .25, .5, 1.], numpy.double)
 
+a = math.atan(breaks[0])
+b = math.atan(breaks[-1])
+p_cos = utils.poly_fit.any_f_to_poly(
+  lambda theta: mpmath.matrix(
+    [mpmath.cos(theta[i]) for i in range(theta.rows)]
+  ),
+  a,
+  b,
+  ORDER
+)
+p_sin = utils.poly_fit.any_f_to_poly(
+  lambda theta: mpmath.matrix(
+    [mpmath.sin(theta[i]) for i in range(theta.rows)]
+  ),
+  a,
+  b,
+  ORDER
+)
+
 p = []
 err = []
 for i in range(breaks.shape[0] - 1):
@@ -68,15 +88,14 @@ for i in range(breaks.shape[0] - 1):
   def f(x):
     # evaluate error of the given alpha-max-beta-min formula,
     # for max = cos(theta), min = sin(theta), a <= theta <= b
-    alpha = x[0]
-    beta = x[1]
+    alpha = mpmath.mpf(x[0])
+    beta = mpmath.mpf(x[1])
+    p_alpha_cos_beta_sin = alpha * p_cos + beta * p_sin
     def g(theta):
       # calculate output of alpha-max-beta-min for each theta-value
-      y = mpmath.matrix(
-        [
-          alpha * mpmath.cos(theta[i]) + beta * mpmath.sin(theta[i])
-          for i in range(theta.rows)
-        ]
+      y = utils.poly.eval_multi(
+        p_alpha_cos_beta_sin,
+        mpmath.matrix(theta)
       )
 
       # optionally apply some iterations of Newton-Raphson square root
