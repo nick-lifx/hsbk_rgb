@@ -37,24 +37,36 @@ EPSILON = 1e-8
 # then calculate the exponent needed to represent that range (or the exponent
 # needed to prevent the next coefficient from overflowing, whichever larger)
 def intermediate_exp(p, a, b, epsilon = EPSILON):
-  exp = numpy.array(
-    [
-      max(
+  exp = numpy.max(
+    numpy.array(
+      [
         [
-          mpmath.frexp(j * (1 + epsilon))[1]
-          for j in utils.poly._range(p[i:], a, b)
+          max(
+            [
+              mpmath.frexp(k * (1 + epsilon))[1]
+              for k in utils.poly._range(p[i, j:].transpose(), a[i], b[i])
+            ]
+          )
+          for j in range(p.cols)
         ]
-      )
-      for i in range(p.rows)
-    ],
-    numpy.int32
+        for i in range(p.rows)
+      ],
+      numpy.int32
+    ),
+    0
   )
-  p_exp = numpy.array(
-    [
-      mpmath.frexp(p[i] * (1 + epsilon))[1]
-      for i in range(p.rows - 1)
-    ],
-    numpy.int32
+  p_exp = numpy.max(
+    numpy.array(
+      [
+        [
+          mpmath.frexp(p[i, j] * (1 + epsilon))[1]
+          for j in range(p.cols - 1)
+        ]
+        for i in range(p.rows)
+      ],
+      numpy.int32
+    ),
+    0
   )
   exp[1:] = numpy.maximum(exp[1:], p_exp)
   return exp
@@ -74,7 +86,13 @@ def align(p, a, b, x_exp, bits, y_exp = None, epsilon = EPSILON):
   #print('shr', shr)
   return (
     mpmath.matrix(
-      [mpmath.ldexp(p[i], int(-exp[i])) for i in range(p.rows)]
+      [
+        [
+          mpmath.ldexp(p[i, j], int(-exp[j]))
+          for j in range(p.cols)
+        ]
+        for i in range(p.rows)
+      ]
     ),
     shr,
     exp[0]
@@ -104,15 +122,45 @@ def align(p, a, b, x_exp, bits, y_exp = None, epsilon = EPSILON):
 def quantize(c, shr, dtype = numpy.int64):
   assert numpy.all(shr >= 1)
   c = mpmath.matrix(
-    [mpmath.ldexp(c[i] + .5, int(shr[i])) for i in range(c.rows - 1)] +
-      [c[c.rows - 1]]
+    [
+      [
+        mpmath.ldexp(c[i, j] + .5, int(shr[j]))
+        for j in range(c.cols - 1)
+      ] +
+        [c[i, c.cols - 1]]
+      for i in range(c.rows)
+    ]
   )
   return numpy.array(
-    [int(mpmath.nint(c[i])) for i in range(c.rows)],
+    [
+      [
+        int(mpmath.nint(c[i, j]))
+        for j in range(c.cols)
+      ]
+      for i in range(c.rows)
+    ],
     dtype
   )
 
-def poly_fixed(
+# perform a range analysis of each polynomial on the interval [a, b] which
+# is given separately per polynomial; also analyze the intermediate products
+# when evaluated by Horner's rule, and figure out the fixed-point exponent
+# at each stage -- then resolve it to a set of 64-bit add-and-shift operations
+# inputs are in mpmath format:
+#   p is a matrix with one polynomial per row, a and b are column vectors
+# independent variable a <= x <= b is an integer interpreted as x 2^x_exp
+# dependent variable (result of evaluation) will be an integer interpreted as
+# y 2^y_exp, except if y_exp is None, in which case it will be determined
+# automatically based on its range in the same way as intermediate products
+# outputs are in numpy format:
+#   c is the same size as p and contains 64-bit integer coefficients, except
+#   the last which is a 32-bit coefficient (already rounded, as it's constant)
+#   shr is a vector with shr.shape[0] == c.shape[1] - 1 and gives the amount
+#   to shift in between each stage (c has added 0.5 offset to provide rounding)
+#   exp is a vector with exp.shape[0] == c.shape[1] and gives an exponent that
+#   allows to interpret the intermediate 32-bit integer product after >> by shr
+#   (exp[0] == y_exp if y_exp was provided, otherwise inspect it to find y_exp)
+def poly_fixed_multi(
   p,
   a,
   b,
@@ -125,3 +173,26 @@ def poly_fixed(
    c, shr, exp = align(p, a, b, x_exp, bits, y_exp, epsilon)
    c = quantize(c, shr, dtype)
    return c, shr, exp
+
+# same but p, c are vectors and a, b are scalars, only does one polynomial
+def poly_fixed(
+  p,
+  a,
+  b,
+  x_exp,
+  bits,
+  y_exp = None,
+  dtype = numpy.int64,
+  epsilon = EPSILON
+):
+  c, shr, exp = poly_fixed_multi(
+    p.transpose(),
+    mpmath.matrix([a]),
+    mpmath.matrix([b]),
+    x_exp,
+    bits,
+    y_exp,
+    dtype,
+    epsilon
+  )
+  return c[0, :], shr, exp
