@@ -60,7 +60,7 @@ for i in range(376):
   kelv = 1500. + 20. * i
   for j in range(361):
     hue = 1. * j
-    image[i, j, :] = hsbk_to_rgb(
+    image[i, j, :] = hsbk_to_rgb.convert(
       numpy.array([hue, sat, br, kelv], numpy.double)
     )
 

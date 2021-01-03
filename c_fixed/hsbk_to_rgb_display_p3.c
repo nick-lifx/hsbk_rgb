@@ -21,18 +21,18 @@
 #include "hsbk_to_rgb.h"
 #include "mired_to_rgb_display_p3.h"
 
-void hsbk_to_rgb_display_p3(const int32_t *hsbk, int32_t *rgb) {
-  hsbk_to_rgb(&mired_to_rgb_display_p3, hsbk, rgb);
-}
+const struct hsbk_to_rgb hsbk_to_rgb_display_p3 = {
+  &mired_to_rgb_display_p3
+};
 
 #ifdef STANDALONE
 int hsbk_to_rgb_standalone(
-  void (*_hsbk_to_rgb)(const int32_t *hsbk, int32_t *rgb),
+  const struct hsbk_to_rgb *hsbk_to_rgb,
   int argc,
   char **argv
 );
 
 int main(int argc, char **argv) {
-  return hsbk_to_rgb_standalone(hsbk_to_rgb_display_p3, argc, argv);
+  return hsbk_to_rgb_standalone(&hsbk_to_rgb_display_p3, argc, argv);
 }
 #endif

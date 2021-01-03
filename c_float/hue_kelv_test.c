@@ -65,13 +65,13 @@ int main(int argc, char **argv) {
   float br = atof(argv[2]);
   const char *image_out = argv[3];
 
-  void (*hsbk_to_rgb)(const float *hsbk, float *rgb);
+  const struct hsbk_to_rgb *hsbk_to_rgb;
   if (strcmp(device, "srgb") == 0)
-    hsbk_to_rgb = hsbk_to_rgb_srgb;
+    hsbk_to_rgb = &hsbk_to_rgb_srgb;
   else if (strcmp(device, "display_p3") == 0)
-    hsbk_to_rgb = hsbk_to_rgb_display_p3;
+    hsbk_to_rgb = &hsbk_to_rgb_display_p3;
   else if (strcmp(device, "rec2020") == 0)
-    hsbk_to_rgb = hsbk_to_rgb_rec2020;
+    hsbk_to_rgb = &hsbk_to_rgb_rec2020;
   else
     abort();
 
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     for (int j = 0; j < 361; ++j) {
       float hue = 1.f * j;
       float hsbk[N_HSBK] = {hue, sat, br, kelv};
-      hsbk_to_rgb(hsbk, image[i][j]);
+      hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, image[i][j]);
     }
   }
 

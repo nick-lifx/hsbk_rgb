@@ -63,18 +63,18 @@ int main(int argc, char **argv) {
   int count = atoi(argv[2]);
   float kelv = argc >= 4 ? atof(argv[3]) : 0.f;
 
-  void (*hsbk_to_rgb)(const float *hsbk, float *rgb);
+  const struct hsbk_to_rgb *hsbk_to_rgb;
   void (*rgb_to_hsbk)(const float *rgb, float kelv, float *hsbk);
   if (strcmp(device, "srgb") == 0) {
-    hsbk_to_rgb = hsbk_to_rgb_srgb;
+    hsbk_to_rgb = &hsbk_to_rgb_srgb;
     rgb_to_hsbk = rgb_to_hsbk_srgb;
   }
   else if (strcmp(device, "display_p3") == 0) {
-    hsbk_to_rgb = hsbk_to_rgb_display_p3;
+    hsbk_to_rgb = &hsbk_to_rgb_display_p3;
     rgb_to_hsbk = rgb_to_hsbk_display_p3;
   }
   else if (strcmp(device, "rec2020") == 0) {
-    hsbk_to_rgb = hsbk_to_rgb_rec2020;
+    hsbk_to_rgb = &hsbk_to_rgb_rec2020;
     rgb_to_hsbk = rgb_to_hsbk_rec2020;
   }
   else
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
     float hsbk[N_HSBK];
     rgb_to_hsbk(rgb, kelv, hsbk);
     float rgb1[N_RGB];
-    hsbk_to_rgb(hsbk, rgb1);
+    hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb1);
     for (int j = 0; j < N_RGB; ++j)
       assert(fabsf(rgb1[j] - rgb[j]) < EPSILON);
   }

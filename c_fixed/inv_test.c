@@ -64,18 +64,18 @@ int main(int argc, char **argv) {
   int32_t kelv =
     argc >= 4 ? (int32_t)roundf(ldexpf(atof(argv[3]), 16)) : (int32_t)0;
 
-  void (*hsbk_to_rgb)(const int32_t *hsbk, int32_t *rgb);
+  const struct hsbk_to_rgb *hsbk_to_rgb;
   void (*rgb_to_hsbk)(const int32_t *rgb, int32_t kelv, int32_t *hsbk);
   if (strcmp(device, "srgb") == 0) {
-    hsbk_to_rgb = hsbk_to_rgb_srgb;
+    hsbk_to_rgb = &hsbk_to_rgb_srgb;
     rgb_to_hsbk = rgb_to_hsbk_srgb;
   }
   else if (strcmp(device, "display_p3") == 0) {
-    hsbk_to_rgb = hsbk_to_rgb_display_p3;
+    hsbk_to_rgb = &hsbk_to_rgb_display_p3;
     rgb_to_hsbk = rgb_to_hsbk_display_p3;
   }
   else if (strcmp(device, "rec2020") == 0) {
-    hsbk_to_rgb = hsbk_to_rgb_rec2020;
+    hsbk_to_rgb = &hsbk_to_rgb_rec2020;
     rgb_to_hsbk = rgb_to_hsbk_rec2020;
   }
   else
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
     int32_t hsbk[N_HSBK];
     rgb_to_hsbk(rgb, kelv, hsbk);
     int32_t rgb1[N_RGB];
-    hsbk_to_rgb(hsbk, rgb1);
+    hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb1);
     for (int j = 0; j < N_RGB; ++j) {
       printf("%x %x %x -> %x %x %x\n", rgb1[0], rgb1[1], rgb1[2], rgb[0], rgb[1], rgb[2]);
       assert(abs(rgb1[j] - rgb[j]) < EPSILON);

@@ -64,14 +64,14 @@ int main(int argc, char **argv) {
   }
   const char *image_out = argv[1];
 
-  void (*hsbk_to_rgb)(const float *hsbk, float *rgb);
+  const struct hsbk_to_rgb *hsbk_to_rgb;
   void (*rgb_to_uv)(const float *rgb, float *uv);
   if (strcmp(device, "srgb") == 0) {
-    hsbk_to_rgb = hsbk_to_rgb_srgb;
+    hsbk_to_rgb = &hsbk_to_rgb_srgb;
     rgb_to_uv = rgb_to_uv_srgb;
   }
   else if (strcmp(device, "display_p3") == 0) {
-    hsbk_to_rgb = hsbk_to_rgb_display_p3;
+    hsbk_to_rgb = &hsbk_to_rgb_display_p3;
     rgb_to_uv = rgb_to_uv_display_p3;
   }
   else
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
   for (int i = 0; i < 361; ++i) {
     float hsbk[N_HSBK] = {1.f * i, 1.f, 1.f, 6504.f};
     float rgb[N_RGB];
-    hsbk_to_rgb(hsbk, rgb);
+    hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb);
     rgb_to_uv(rgb, hue_uv[i]);
   }
 
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   for (int i = 0; i < 376; ++i) {
     float hsbk[N_HSBK] = {0.f, 0.f, 1.f, 1500.f + 20.f * i};
     float rgb[N_RGB];
-    hsbk_to_rgb(hsbk, rgb);
+    hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb);
     rgb_to_uv(rgb, kelv_uv[i]);
   }
 
@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
       };
       float hsbk[N_HSBK] = {hue, .5f, 1.f, kelv};
       float rgb[N_RGB];
-      hsbk_to_rgb(hsbk, rgb);
+      hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb);
       float uv[N_UV];
       rgb_to_uv(rgb, uv);
       float w = (

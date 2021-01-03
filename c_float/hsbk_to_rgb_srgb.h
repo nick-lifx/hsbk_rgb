@@ -21,6 +21,8 @@
 #ifndef _HSBK_TO_RGB_SRGB_H
 #define _HSBK_TO_RGB_SRGB_H
 
-void hsbk_to_rgb_srgb(const float *hsbk, float *rgb);
+#include "hsbk_to_rgb.h"
+
+extern const struct hsbk_to_rgb hsbk_to_rgb_srgb;
 
 #endif

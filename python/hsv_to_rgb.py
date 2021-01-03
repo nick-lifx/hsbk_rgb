@@ -67,7 +67,7 @@ y_size, x_size, _ = image.shape
 for i in range(y_size):
   print(i, '/', y_size)
   for j in range(x_size):
-    image[i, j, :] = hsbk_to_rgb(
+    image[i, j, :] = hsbk_to_rgb.convert(
       numpy.concatenate(
         [image[i, j, :], numpy.array([kelv], numpy.double)],
         0

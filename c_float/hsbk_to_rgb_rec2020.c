@@ -21,18 +21,18 @@
 #include "hsbk_to_rgb.h"
 #include "mired_to_rgb_rec2020.h"
 
-void hsbk_to_rgb_rec2020(const float *hsbk, float *rgb) {
-  hsbk_to_rgb(&mired_to_rgb_rec2020, hsbk, rgb);
-}
+const struct hsbk_to_rgb hsbk_to_rgb_rec2020 = {
+  &mired_to_rgb_rec2020
+};
 
 #ifdef STANDALONE
 int hsbk_to_rgb_standalone(
-  void (*_hsbk_to_rgb)(const float *hsbk, float *rgb),
+  const struct hsbk_to_rgb *hsbk_to_rgb,
   int argc,
   char **argv
 );
 
 int main(int argc, char **argv) {
-  return hsbk_to_rgb_standalone(hsbk_to_rgb_rec2020, argc, argv);
+  return hsbk_to_rgb_standalone(&hsbk_to_rgb_rec2020, argc, argv);
 }
 #endif

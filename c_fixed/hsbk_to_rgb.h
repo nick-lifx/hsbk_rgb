@@ -21,10 +21,16 @@
 #ifndef _HSBK_TO_RGB_H
 #define _HSBK_TO_RGB_H
 
+#include <stdint.h>
+
 #include "mired_to_rgb.h"
 
-void hsbk_to_rgb(
-  const struct mired_to_rgb *mired_to_rgb,
+struct hsbk_to_rgb {
+  const struct mired_to_rgb *mired_to_rgb;
+};
+
+void hsbk_to_rgb_convert(
+  const struct hsbk_to_rgb *context,
   const int32_t *hsbk,
   int32_t *rgb
 );

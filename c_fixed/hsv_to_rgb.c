@@ -78,13 +78,13 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  void (*hsbk_to_rgb)(const int32_t *hsbk, int32_t *rgb);
+  const struct hsbk_to_rgb *hsbk_to_rgb;
   if (strcmp(device, "srgb") == 0)
-    hsbk_to_rgb = hsbk_to_rgb_srgb;
+    hsbk_to_rgb = &hsbk_to_rgb_srgb;
   else if (strcmp(device, "display_p3") == 0)
-    hsbk_to_rgb = hsbk_to_rgb_display_p3;
+    hsbk_to_rgb = &hsbk_to_rgb_display_p3;
   else if (strcmp(device, "rec2020") == 0)
-    hsbk_to_rgb = hsbk_to_rgb_rec2020;
+    hsbk_to_rgb = &hsbk_to_rgb_rec2020;
   else
     abort();
 
@@ -177,7 +177,11 @@ int main(int argc, char **argv) {
         image + (i * size_x + j) * N_RGB,
         N_HSV * sizeof(int32_t)
       );
-      hsbk_to_rgb(hsbk, image + (i * size_x + j) * N_RGB);
+      hsbk_to_rgb_convert(
+        hsbk_to_rgb,
+        hsbk,
+        image + (i * size_x + j) * N_RGB
+      );
     }
   }
 

@@ -21,6 +21,8 @@
 #ifndef _HSBK_TO_RGB_DISPLAY_P3_H
 #define _HSBK_TO_RGB_DISPLAY_P3_H
 
-void hsbk_to_rgb_display_p3(const float *hsbk, float *rgb);
+#include "hsbk_to_rgb.h"
+
+extern const struct hsbk_to_rgb hsbk_to_rgb_display_p3;
 
 #endif

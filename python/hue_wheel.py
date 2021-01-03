@@ -129,7 +129,7 @@ for i in range(240):
     if 60. <= r < 120.:
       hue = theta * 180. / math.pi
       sat = sat_decode((r - 60.) / 60.)
-      rgb = hsbk_to_rgb(numpy.array([hue, sat, br, kelv], numpy.double))
+      rgb = hsbk_to_rgb.convert(numpy.array([hue, sat, br, kelv], numpy.double))
       image[120 + j, 16 + i, :] = (
         blend(
           image[120 + j, 16 + i],
@@ -149,7 +149,7 @@ for i in range(240):
 # for the indicator dot
 hue = hsbk[HSBK_HUE]
 sat = hsbk[HSBK_SAT]
-rgb_inner = hsbk_to_rgb(hsbk)
+rgb_inner = hsbk_to_rgb.convert(hsbk)
 rgb_outer = numpy.array([1., 1., 1.], numpy.double)
 rgb_outline = numpy.array([0., 0., 0.], numpy.double)
 

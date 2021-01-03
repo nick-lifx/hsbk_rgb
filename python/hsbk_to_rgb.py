@@ -27,6 +27,9 @@ HSBK_BR = 2
 HSBK_KELV = 3
 N_HSBK = 4
 
+KELV_MIN = 1500
+KELV_MAX = 9000
+
 EPSILON = 1e-6
 
 # define hues as red->yellow->green->cyan->blue->magenta->red again
@@ -41,58 +44,64 @@ hue_sequence = numpy.array(
   numpy.double
 )
 
-def hsbk_to_rgb(mired_to_rgb, hsbk):
-  # validate inputs, allowing a little slack
-  # the hue does not matter as it will be normalized modulo 360
-  hue = hsbk[HSBK_HUE]
-  sat = hsbk[HSBK_SAT]
-  assert sat >= -EPSILON and sat < 1. + EPSILON
-  br = hsbk[HSBK_BR]
-  assert br >= -EPSILON and br < 1. + EPSILON
-  kelv = hsbk[HSBK_KELV]
-  assert kelv >= 1500. - EPSILON and kelv < 9000. + EPSILON
+EPSILON = 1e-6
 
-  # this section computes hue_rgb from hue
+class HSBKToRGB:
+  def __init__(self, mired_to_rgb):
+    self.mired_to_rgb = mired_to_rgb
 
-  # put it in the form hue = (i + j) * 60 where i is integer, j is fraction
-  hue /= 60.
-  i = math.floor(hue)
-  j = hue - i
-  i %= 6
+  def convert(self, hsbk):
+    # validate inputs, allowing a little slack
+    # the hue does not matter as it will be normalized modulo 360
+    hue = hsbk[HSBK_HUE]
+    sat = hsbk[HSBK_SAT]
+    assert sat >= -EPSILON and sat < 1. + EPSILON
+    br = hsbk[HSBK_BR]
+    assert br >= -EPSILON and br < 1. + EPSILON
+    kelv = hsbk[HSBK_KELV]
+    assert kelv >= KELV_MIN - EPSILON and kelv < KELV_MAX + EPSILON
 
-  # interpolate from the table
-  # interpolation is done in gamma-encoded space, as Photoshop HSV does it
-  # the result of this interpolation will have at least one of R, G, B = 1
-  hue_rgb = (
-    hue_sequence[:, i] +
-      j * (hue_sequence[:, i + 1] - hue_sequence[:, i])
-  )
+    # this section computes hue_rgb from hue
 
-  # this section computes kelv_rgb from kelv
+    # put it in the form hue = (i + j) * 60 where i is integer, j is fraction
+    hue /= 60.
+    i = math.floor(hue)
+    j = hue - i
+    i %= 6
 
-  kelv_rgb = mired_to_rgb.convert(1e6 / kelv)
+    # interpolate from the table
+    # interpolation is done in gamma-encoded space, as Photoshop HSV does it
+    # the result of this interpolation will have at least one of R, G, B = 1
+    hue_rgb = (
+      hue_sequence[:, i] +
+        j * (hue_sequence[:, i + 1] - hue_sequence[:, i])
+    )
 
-  # this section applies the saturation
+    # this section computes kelv_rgb from kelv
 
-  # do the mixing in gamma-encoded RGB space
-  # this is not very principled and can corrupt the chromaticities
-  rgb = kelv_rgb + sat * (hue_rgb - kelv_rgb)
+    kelv_rgb = self.mired_to_rgb.convert(1e6 / kelv)
 
-  # normalize the brightness again
-  # this is needed because SRGB produces the brightest colours near the white
-  # point, so if hue_rgb and kelv_rgb are on opposite sides of the white point,
-  # then rgb could land near the white point, but not be as bright as possible
-  rgb /= numpy.max(rgb)
+    # this section applies the saturation
 
-  # this section applies the brightness
+    # do the mixing in gamma-encoded RGB space
+    # this is not very principled and can corrupt the chromaticities
+    rgb = kelv_rgb + sat * (hue_rgb - kelv_rgb)
 
-  # do the scaling in gamma-encoded RGB space
-  # this is not very principled and can corrupt the chromaticities
-  rgb *= br
+    # normalize the brightness again
+    # this is needed because SRGB produces the brightest colours near the white
+    # point, so if hue_rgb and kelv_rgb are on opposite sides of the white point,
+    # then rgb could land near the white point, but not be as bright as possible
+    rgb /= numpy.max(rgb)
 
-  return rgb
+    # this section applies the brightness
 
-def standalone(_hsbk_to_rgb):
+    # do the scaling in gamma-encoded RGB space
+    # this is not very principled and can corrupt the chromaticities
+    rgb *= br
+
+    return rgb
+
+def standalone(hsbk_to_rgb):
   import sys
 
   EXIT_SUCCESS = 0
@@ -120,7 +129,7 @@ def standalone(_hsbk_to_rgb):
     numpy.double
   )
 
-  rgb = _hsbk_to_rgb(hsbk)
+  rgb = hsbk_to_rgb.convert(hsbk)
   print(
     f'HSBK ({hsbk[HSBK_HUE]:.3f}, {hsbk[HSBK_SAT]:.6f}, {hsbk[HSBK_BR]:.6f}, {hsbk[HSBK_KELV]:.3f}) -> RGB ({rgb[RGB_RED]:.6f}, {rgb[RGB_GREEN]:.6f}, {rgb[RGB_BLUE]:.6f})'
   )

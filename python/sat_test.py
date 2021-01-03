@@ -63,7 +63,7 @@ hsbk_to_rgb, rgb_to_uv = {
 hue_uv = numpy.stack(
   [
     rgb_to_uv(
-      hsbk_to_rgb(numpy.array([1. * i, 1., 1., 6504.], numpy.double))
+      hsbk_to_rgb.convert(numpy.array([1. * i, 1., 1., 6504.], numpy.double))
     )
     for i in range(361)
   ],
@@ -74,7 +74,7 @@ hue_uv = numpy.stack(
 kelv_uv = numpy.stack(
   [
     rgb_to_uv(
-      hsbk_to_rgb(numpy.array([0., 0., 1., 1500. + 20. * i], numpy.double))
+      hsbk_to_rgb.convert(numpy.array([0., 0., 1., 1500. + 20. * i], numpy.double))
     )
     for i in range(376)
   ],
@@ -92,7 +92,7 @@ for i in range(376):
     hue = 1. * j
     v1 = hue_uv[j, :] - v0
     uv = rgb_to_uv(
-      hsbk_to_rgb(numpy.array([hue, .5, 1., kelv], numpy.double))
+      hsbk_to_rgb.convert(numpy.array([hue, .5, 1., kelv], numpy.double))
     )
     w = ((uv - v0) @ v1) / (v1 @ v1)
     if w < 0.:

@@ -20,14 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from hsbk_to_rgb import hsbk_to_rgb
+from hsbk_to_rgb import HSBKToRGB
 from mired_to_rgb_rec2020 import mired_to_rgb_rec2020
 
-def hsbk_to_rgb_rec2020(hsbk):
-  return hsbk_to_rgb(mired_to_rgb_rec2020, hsbk)
+hsbk_to_rgb_rec2020 = HSBKToRGB(mired_to_rgb_rec2020)
 
 # standalone
 if __name__ == '__main__':
-  import hsbk_to_rgb as _hsbk_to_rgb
+  import hsbk_to_rgb
 
-  _hsbk_to_rgb.standalone(hsbk_to_rgb_rec2020)
+  hsbk_to_rgb.standalone(hsbk_to_rgb_rec2020)

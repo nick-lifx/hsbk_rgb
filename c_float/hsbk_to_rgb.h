@@ -23,8 +23,12 @@
 
 #include "mired_to_rgb.h"
 
-void hsbk_to_rgb(
-  const struct mired_to_rgb *mired_to_rgb,
+struct hsbk_to_rgb {
+  const struct mired_to_rgb *mired_to_rgb;
+};
+
+void hsbk_to_rgb_convert(
+  const struct hsbk_to_rgb *context,
   const float *hsbk,
   float *rgb
 );

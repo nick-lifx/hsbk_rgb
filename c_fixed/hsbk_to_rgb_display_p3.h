@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
-void hsbk_to_rgb_display_p3(const int32_t *hsbk, int32_t *rgb);
+#include "hsbk_to_rgb.h"
+
+extern const struct hsbk_to_rgb hsbk_to_rgb_display_p3;
 
 #endif

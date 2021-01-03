@@ -33,6 +33,9 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
+#define KELV_MIN 1500.f
+#define KELV_MAX 9000.f
+
 #define EPSILON 1e-6f
 
 // define hues as red->yellow->green->cyan->blue->magenta->red again
@@ -45,8 +48,8 @@ static float hue_sequence[N_RGB][N_HUE_SEQUENCE + 1] = {
   {0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f}
 };
 
-void hsbk_to_rgb(
-  const struct mired_to_rgb *mired_to_rgb,
+void hsbk_to_rgb_convert(
+  const struct hsbk_to_rgb *context,
   const float *hsbk,
   float *rgb
 ) {
@@ -58,7 +61,7 @@ void hsbk_to_rgb(
   float br = hsbk[HSBK_BR];
   assert(br >= -EPSILON && br < 1.f + EPSILON);
   float kelv = hsbk[HSBK_KELV];
-  assert(kelv >= 1500. * (1.f - EPSILON) && kelv < 9000. * (1.f + EPSILON));
+  assert(kelv >= KELV_MIN * (1.f - EPSILON) && kelv < KELV_MAX * (1.f + EPSILON));
 
   // this section computes hue_rgb from hue
 
@@ -82,7 +85,7 @@ void hsbk_to_rgb(
   // this section computes kelv_rgb from kelv
 
   float kelv_rgb[N_RGB];
-  mired_to_rgb_convert(mired_to_rgb, 1e6f / kelv, kelv_rgb);
+  mired_to_rgb_convert(context->mired_to_rgb, 1e6f / kelv, kelv_rgb);
 
   // this section applies the saturation
 
@@ -115,7 +118,7 @@ void hsbk_to_rgb(
 #include <stdio.h>
 
 int hsbk_to_rgb_standalone(
-  void (*_hsbk_to_rgb)(const float *hsbk, float *rgb),
+  const struct hsbk_to_rgb *hsbk_to_rgb,
   int argc,
   char **argv
 ) {
@@ -138,7 +141,7 @@ int hsbk_to_rgb_standalone(
   };
 
   float rgb[N_RGB];
-  _hsbk_to_rgb(hsbk, rgb);
+  hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb);
   printf(
     "HSBK (%.3f, %.6f, %.6f, %.3f) -> RGB (%.6f, %.6f, %.6f)\n",
     hsbk[HSBK_HUE],

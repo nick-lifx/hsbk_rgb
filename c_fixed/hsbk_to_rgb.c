@@ -33,6 +33,9 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
+#define KELV_MIN (1500 << 16)
+#define KELV_MAX (9000 << 16)
+
 #define EPSILON0 (1 << 10)
 #define EPSILON1 (1 << 6)
 
@@ -44,8 +47,8 @@
 // results in 2:30 fixed point
 // all are signed, so the hue is taken to be in [180, 180), but
 // if cast to unsigned then it would equivalently be in [0, 360)
-void hsbk_to_rgb(
-  const struct mired_to_rgb *mired_to_rgb,
+void hsbk_to_rgb_convert(
+  const struct hsbk_to_rgb *context,
   const int32_t *hsbk,
   int32_t *rgb
 ) {
@@ -57,7 +60,7 @@ void hsbk_to_rgb(
   int64_t br = hsbk[HSBK_BR];
   assert(br >= -EPSILON0 && br < (1 << 30) + EPSILON0);
   int32_t kelv = hsbk[HSBK_KELV];
-  assert(kelv >= (1500 << 16) - EPSILON1 && kelv < (9000 << 16) + EPSILON1);
+  assert(kelv >= KELV_MIN - EPSILON1 && kelv < KELV_MAX + EPSILON1);
 
   // this section computes hue_rgb from hue
 
@@ -107,7 +110,7 @@ void hsbk_to_rgb(
 
   int32_t kelv_rgb[N_RGB];
   mired_to_rgb_convert(
-    mired_to_rgb,
+    context->mired_to_rgb,
     (int32_t)(((1000000LL << 33) / kelv + 1) >> 1),
     kelv_rgb
   );
@@ -148,7 +151,7 @@ void hsbk_to_rgb(
 #include <stdio.h>
 
 int hsbk_to_rgb_standalone(
-  void (*_hsbk_to_rgb)(const int32_t *hsbk, int32_t *rgb),
+  const struct hsbk_to_rgb *hsbk_to_rgb,
   int argc,
   char **argv
 ) {
@@ -173,7 +176,7 @@ int hsbk_to_rgb_standalone(
   };
 
   int32_t rgb[N_RGB];
-  _hsbk_to_rgb(hsbk, rgb);
+  hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb);
   printf(
     "HSBK (%.3f, %.6f, %.6f, %.3f) -> RGB (%.6f, %.6f, %.6f)\n",
     (uint32_t)hsbk[HSBK_HUE] * (float)(360. / (1LL << 32)),

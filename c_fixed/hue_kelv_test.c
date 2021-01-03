@@ -65,13 +65,13 @@ int main(int argc, char **argv) {
   int32_t br = (int32_t)roundf(ldexpf(atof(argv[2]), 30));
   const char *image_out = argv[3];
 
-  void (*hsbk_to_rgb)(const int32_t *hsbk, int32_t *rgb);
+  const struct hsbk_to_rgb *hsbk_to_rgb;
   if (strcmp(device, "srgb") == 0)
-    hsbk_to_rgb = hsbk_to_rgb_srgb;
+    hsbk_to_rgb = &hsbk_to_rgb_srgb;
   else if (strcmp(device, "display_p3") == 0)
-    hsbk_to_rgb = hsbk_to_rgb_display_p3;
+    hsbk_to_rgb = &hsbk_to_rgb_display_p3;
   else if (strcmp(device, "rec2020") == 0)
-    hsbk_to_rgb = hsbk_to_rgb_rec2020;
+    hsbk_to_rgb = &hsbk_to_rgb_rec2020;
   else
     abort();
 
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     for (int j = 0; j < 361; ++j) {
       int32_t hue = (int32_t)((((int64_t)j << 33) / 360 + 1) >> 1);
       int32_t hsbk[N_HSBK] = {hue, sat, br, kelv};
-      hsbk_to_rgb(hsbk, image[i][j]);
+      hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, image[i][j]);
     }
   }
 

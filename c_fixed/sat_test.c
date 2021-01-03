@@ -64,14 +64,14 @@ int main(int argc, char **argv) {
   }
   const char *image_out = argv[1];
 
-  void (*hsbk_to_rgb)(const int32_t *hsbk, int32_t *rgb);
+  const struct hsbk_to_rgb *hsbk_to_rgb;
   void (*rgb_to_uv)(const int32_t *rgb, int32_t *uv);
   if (strcmp(device, "srgb") == 0) {
-    hsbk_to_rgb = hsbk_to_rgb_srgb;
+    hsbk_to_rgb = &hsbk_to_rgb_srgb;
     rgb_to_uv = rgb_to_uv_srgb;
   }
   else if (strcmp(device, "display_p3") == 0) {
-    hsbk_to_rgb = hsbk_to_rgb_display_p3;
+    hsbk_to_rgb = &hsbk_to_rgb_display_p3;
     rgb_to_uv = rgb_to_uv_display_p3;
   }
   else
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
       6504 << 16
     };
     int32_t rgb[N_RGB];
-    hsbk_to_rgb(hsbk, rgb);
+    hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb);
     rgb_to_uv(rgb, hue_uv[i]);
   }
 
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
       (1500 << 16) + (20 << 16) * i
     };
     int32_t rgb[N_RGB];
-    hsbk_to_rgb(hsbk, rgb);
+    hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb);
     rgb_to_uv(rgb, kelv_uv[i]);
   }
 
@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
       };
       int32_t hsbk[N_HSBK] = {hue, 1 << 29, 1 << 30, kelv};
       int32_t rgb[N_RGB];
-      hsbk_to_rgb(hsbk, rgb);
+      hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb);
       int32_t uv[N_UV];
       rgb_to_uv(rgb, uv);
       int32_t w_num = (int32_t)(
