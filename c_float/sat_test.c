@@ -25,8 +25,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "hsbk_to_rgb_rec2020.h"
 #include "hsbk_to_rgb_display_p3.h"
 #include "hsbk_to_rgb_srgb.h"
+#include "rgb_to_uv_rec2020.h"
 #include "rgb_to_uv_display_p3.h"
 #include "rgb_to_uv_srgb.h"
 
@@ -55,7 +57,7 @@ int main(int argc, char **argv) {
   if (argc < 2) {
     printf(
       "usage: %s [--device device] image_out\n"
-        "device in {srgb, display_p3}, default srgb\n"
+        "device in {srgb, display_p3, rec2020}, default srgb\n"
         "image_out = name of PNG file to create (will be overwritten)\n"
         "creates 361 x 376 image with 0..360 degrees by 1, 1500..9000 Kelvin by 20\n",
       argv[0]
@@ -65,14 +67,18 @@ int main(int argc, char **argv) {
   const char *image_out = argv[1];
 
   const struct hsbk_to_rgb *hsbk_to_rgb;
-  void (*rgb_to_uv)(const float *rgb, float *uv);
+  const struct rgb_to_uv *rgb_to_uv;
   if (strcmp(device, "srgb") == 0) {
     hsbk_to_rgb = &hsbk_to_rgb_srgb;
-    rgb_to_uv = rgb_to_uv_srgb;
+    rgb_to_uv = &rgb_to_uv_srgb;
   }
   else if (strcmp(device, "display_p3") == 0) {
     hsbk_to_rgb = &hsbk_to_rgb_display_p3;
-    rgb_to_uv = rgb_to_uv_display_p3;
+    rgb_to_uv = &rgb_to_uv_display_p3;
+  }
+  else if (strcmp(device, "rec2020") == 0) {
+    hsbk_to_rgb = &hsbk_to_rgb_rec2020;
+    rgb_to_uv = &rgb_to_uv_rec2020;
   }
   else
     abort();
@@ -83,7 +89,7 @@ int main(int argc, char **argv) {
     float hsbk[N_HSBK] = {1.f * i, 1.f, 1.f, 6504.f};
     float rgb[N_RGB];
     hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb);
-    rgb_to_uv(rgb, hue_uv[i]);
+    rgb_to_uv_convert(rgb_to_uv, rgb, hue_uv[i]);
   }
 
   // find chromaticities of the Kelvin space by 20 degree increments
@@ -92,7 +98,7 @@ int main(int argc, char **argv) {
     float hsbk[N_HSBK] = {0.f, 0.f, 1.f, 1500.f + 20.f * i};
     float rgb[N_RGB];
     hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb);
-    rgb_to_uv(rgb, kelv_uv[i]);
+    rgb_to_uv_convert(rgb_to_uv, rgb, kelv_uv[i]);
   }
 
   // find chromaticities of the hue x Kelvin space @ saturation .5, then
@@ -115,7 +121,7 @@ int main(int argc, char **argv) {
       float rgb[N_RGB];
       hsbk_to_rgb_convert(hsbk_to_rgb, hsbk, rgb);
       float uv[N_UV];
-      rgb_to_uv(rgb, uv);
+      rgb_to_uv_convert(rgb_to_uv, rgb, uv);
       float w = (
         (uv[UV_u] - v0[UV_u]) * v1[UV_u] +
           (uv[UV_v] - v0[UV_v]) * v1[UV_v]

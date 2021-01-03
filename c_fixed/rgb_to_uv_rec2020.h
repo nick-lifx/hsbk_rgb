@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
-void rgb_to_uv_rec2020(const int32_t *rgb, int32_t *uv);
+#include "rgb_to_uv.h"
+
+extern const struct rgb_to_uv rgb_to_uv_rec2020;
 
 #endif

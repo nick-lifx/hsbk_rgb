@@ -18,11 +18,23 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#ifndef _RGB_TO_UV_DISPLAY_P3_H
-#define _RGB_TO_UV_DISPLAY_P3_H
+#ifndef _UV_TO_RGB_H
+#define _UV_TO_RGB_H
 
-#include "rgb_to_uv.h"
+#include <stdint.h>
 
-extern const struct rgb_to_uv rgb_to_uv_display_p3;
+#define UV_TO_RGB_N_RGB 3
+#define UV_TO_RGB_N_UVL 3
+
+struct uv_to_rgb {
+  int32_t UVL_to_rgb[UV_TO_RGB_N_RGB][UV_TO_RGB_N_UVL];
+  int32_t (*gamma_encode)(int32_t x);
+};
+
+void uv_to_rgb_convert(
+  const struct uv_to_rgb *context,
+  const int32_t *uv,
+  int32_t *rgb
+);
 
 #endif

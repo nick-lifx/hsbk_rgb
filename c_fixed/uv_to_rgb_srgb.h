@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
-void uv_to_rgb_srgb(const int32_t *uv, int32_t *rgb);
+#include "uv_to_rgb.h"
+
+extern const struct uv_to_rgb uv_to_rgb_srgb;
 
 #endif

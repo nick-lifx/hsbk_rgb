@@ -21,6 +21,8 @@
 #ifndef _RGB_TO_UV_SRGB_H
 #define _RGB_TO_UV_SRGB_H
 
-void rgb_to_uv_srgb(const float *rgb, float *uv);
+#include "rgb_to_uv.h"
+
+extern const struct rgb_to_uv rgb_to_uv_srgb;
 
 #endif

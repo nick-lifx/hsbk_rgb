@@ -21,6 +21,8 @@
 #ifndef _UV_TO_RGB_DISPLAY_P3_H
 #define _UV_TO_RGB_DISPLAY_P3_H
 
-void uv_to_rgb_display_p3(const float *uv, float *rgb);
+#include "uv_to_rgb.h"
+
+extern const struct uv_to_rgb uv_to_rgb_display_p3;
 
 #endif

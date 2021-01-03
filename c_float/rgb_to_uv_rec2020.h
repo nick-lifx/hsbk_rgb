@@ -21,6 +21,8 @@
 #ifndef _RGB_TO_UV_REC2020_H
 #define _RGB_TO_UV_REC2020_H
 
-void rgb_to_uv_rec2020(const float *rgb, float *uv);
+#include "rgb_to_uv.h"
+
+extern const struct rgb_to_uv rgb_to_uv_rec2020;
 
 #endif

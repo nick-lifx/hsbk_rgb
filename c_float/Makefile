@@ -130,37 +130,55 @@ gamma_encode_rec2020: gamma_encode_rec2020_standalone.o
 gamma_encode_rec2020.c: ../prepare/gamma_encode_fit_rec2020.yml
 	../prepare/gamma_encode_gen_c_float.py $^ rec2020 >$@
 
-uv_to_rgb_srgb: uv_to_rgb_srgb_standalone.o gamma_encode_srgb.o
+uv_to_rgb_srgb: \
+uv_to_rgb_standalone.o \
+uv_to_rgb_srgb_standalone.o \
+gamma_encode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 uv_to_rgb_srgb.c: ../monitor/srgb/model.yml
 	../prepare/uv_to_rgb_gen_c_float.py $^ srgb srgb >$@
 
-uv_to_rgb_display_p3: uv_to_rgb_display_p3_standalone.o gamma_encode_srgb.o
+uv_to_rgb_display_p3: \
+uv_to_rgb_standalone.o \
+uv_to_rgb_display_p3_standalone.o \
+gamma_encode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 uv_to_rgb_display_p3.c: ../monitor/display_p3/model.yml
 	../prepare/uv_to_rgb_gen_c_float.py $^ srgb display_p3 >$@
 
-uv_to_rgb_rec2020: uv_to_rgb_rec2020_standalone.o gamma_encode_rec2020.o
+uv_to_rgb_rec2020: \
+uv_to_rgb_standalone.o \
+uv_to_rgb_rec2020_standalone.o \
+gamma_encode_rec2020.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 uv_to_rgb_rec2020.c: ../monitor/rec2020/model.yml
 	../prepare/uv_to_rgb_gen_c_float.py $^ rec2020 rec2020 >$@
 
-rgb_to_uv_srgb: rgb_to_uv_srgb_standalone.o gamma_decode_srgb.o
+rgb_to_uv_srgb: \
+rgb_to_uv_standalone.o \
+rgb_to_uv_srgb_standalone.o \
+gamma_decode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 rgb_to_uv_srgb.c: ../monitor/srgb/model.yml
 	../prepare/rgb_to_uv_gen_c_float.py $^ srgb srgb  >$@
 
-rgb_to_uv_display_p3: rgb_to_uv_display_p3_standalone.o gamma_decode_srgb.o
+rgb_to_uv_display_p3: \
+rgb_to_uv_standalone.o \
+rgb_to_uv_display_p3_standalone.o \
+gamma_decode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 rgb_to_uv_display_p3.c: ../monitor/display_p3/model.yml
 	../prepare/rgb_to_uv_gen_c_float.py $^ srgb display_p3 >$@
 
-rgb_to_uv_rec2020: rgb_to_uv_rec2020_standalone.o gamma_decode_rec2020.o
+rgb_to_uv_rec2020: \
+rgb_to_uv_standalone.o \
+rgb_to_uv_rec2020_standalone.o \
+gamma_decode_rec2020.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 rgb_to_uv_rec2020.c: ../monitor/rec2020/model.yml
@@ -261,6 +279,7 @@ mired_to_rgb.o \
 mired_to_rgb_srgb.o \
 mired_to_rgb_display_p3.o \
 mired_to_rgb_rec2020.o \
+rgb_to_uv.o \
 rgb_to_uv_srgb.o \
 rgb_to_uv_display_p3.o \
 rgb_to_uv_rec2020.o \
