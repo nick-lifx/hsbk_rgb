@@ -21,6 +21,8 @@
 #ifndef _MIRED_TO_RGB_SRGB_H
 #define _MIRED_TO_RGB_SRGB_H
 
-void mired_to_rgb_srgb(float mired, float *rgb);
+#include "mired_to_rgb.h"
+
+extern const struct mired_to_rgb mired_to_rgb_srgb;
 
 #endif

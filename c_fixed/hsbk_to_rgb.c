@@ -45,7 +45,7 @@
 // all are signed, so the hue is taken to be in [180, 180), but
 // if cast to unsigned then it would equivalently be in [0, 360)
 void hsbk_to_rgb(
-  void (*mired_to_rgb)(int32_t mired, int32_t *rgb),
+  const struct mired_to_rgb *mired_to_rgb,
   const int32_t *hsbk,
   int32_t *rgb
 ) {
@@ -106,7 +106,8 @@ void hsbk_to_rgb(
   // this section computes kelv_rgb from kelv
 
   int32_t kelv_rgb[N_RGB];
-  mired_to_rgb(
+  mired_to_rgb_convert(
+    mired_to_rgb,
     (int32_t)(((1000000LL << 33) / kelv + 1) >> 1),
     kelv_rgb
   );

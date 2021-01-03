@@ -58,24 +58,28 @@ sat_test
 hsbk_to_rgb_srgb: \
 hsbk_to_rgb_srgb_standalone.o \
 hsbk_to_rgb_standalone.o \
+mired_to_rgb.o \
 mired_to_rgb_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 hsbk_to_rgb_display_p3: \
 hsbk_to_rgb_display_p3_standalone.o \
 hsbk_to_rgb_standalone.o \
+mired_to_rgb.o \
 mired_to_rgb_display_p3.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 hsbk_to_rgb_rec2020: \
 hsbk_to_rgb_rec2020_standalone.o \
 hsbk_to_rgb_standalone.o \
+mired_to_rgb.o \
 mired_to_rgb_rec2020.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 rgb_to_hsbk_srgb: \
 rgb_to_hsbk_srgb_standalone.o \
 rgb_to_hsbk_standalone.o \
+mired_to_rgb.o \
 mired_to_rgb_srgb.o
 	${CC} ${CFLAGS} -o $@ $^
 
@@ -85,6 +89,7 @@ rgb_to_hsbk_srgb.c: rgb_to_hsbk_gen
 rgb_to_hsbk_display_p3: \
 rgb_to_hsbk_display_p3_standalone.o \
 rgb_to_hsbk_standalone.o \
+mired_to_rgb.o \
 mired_to_rgb_display_p3.o
 	${CC} ${CFLAGS} -o $@ $^
 
@@ -94,6 +99,7 @@ rgb_to_hsbk_display_p3.c: rgb_to_hsbk_gen
 rgb_to_hsbk_rec2020: \
 rgb_to_hsbk_rec2020_standalone.o \
 rgb_to_hsbk_standalone.o \
+mired_to_rgb.o \
 mired_to_rgb_rec2020.o
 	${CC} ${CFLAGS} -o $@ $^
 
@@ -160,19 +166,25 @@ rgb_to_uv_rec2020: rgb_to_uv_rec2020_standalone.o gamma_decode_rec2020.o
 rgb_to_uv_rec2020.c: ../monitor/rec2020/model.yml
 	../prepare/rgb_to_uv_gen_c_float.py $^ rec2020 rec2020  >$@
 
-mired_to_rgb_srgb: mired_to_rgb_srgb_standalone.o
+mired_to_rgb_srgb: \
+mired_to_rgb_standalone.o \
+mired_to_rgb_srgb_standalone.o
 	${CC} ${CFLAGS} -o $@ $^
 
 mired_to_rgb_srgb.c: ../prepare/mired_to_rgb_fit_srgb.yml
 	../prepare/mired_to_rgb_gen_c_float.py $^ srgb >$@
 
-mired_to_rgb_display_p3: mired_to_rgb_display_p3_standalone.o
+mired_to_rgb_display_p3: \
+mired_to_rgb_standalone.o \
+mired_to_rgb_display_p3_standalone.o
 	${CC} ${CFLAGS} -o $@ $^
 
 mired_to_rgb_display_p3.c: ../prepare/mired_to_rgb_fit_display_p3.yml
 	../prepare/mired_to_rgb_gen_c_float.py $^ display_p3 >$@
 
-mired_to_rgb_rec2020: mired_to_rgb_rec2020_standalone.o
+mired_to_rgb_rec2020: \
+mired_to_rgb_standalone.o \
+mired_to_rgb_rec2020_standalone.o
 	${CC} ${CFLAGS} -o $@ $^
 
 mired_to_rgb_rec2020.c: ../prepare/mired_to_rgb_fit_rec2020.yml
@@ -193,6 +205,7 @@ hsbk_to_rgb_srgb.o \
 hsbk_to_rgb_display_p3.o \
 hsbk_to_rgb_rec2020.o \
 hsbk_to_rgb.o \
+mired_to_rgb.o \
 mired_to_rgb_srgb.o \
 mired_to_rgb_display_p3.o \
 mired_to_rgb_rec2020.o
@@ -204,6 +217,7 @@ rgb_to_hsbk_srgb.o \
 rgb_to_hsbk_display_p3.o \
 rgb_to_hsbk_rec2020.o \
 rgb_to_hsbk.o \
+mired_to_rgb.o \
 mired_to_rgb_srgb.o \
 mired_to_rgb_display_p3.o \
 mired_to_rgb_rec2020.o
@@ -215,6 +229,7 @@ hsbk_to_rgb_srgb.o \
 hsbk_to_rgb_display_p3.o \
 hsbk_to_rgb_rec2020.o \
 hsbk_to_rgb.o \
+mired_to_rgb.o \
 mired_to_rgb_srgb.o \
 mired_to_rgb_display_p3.o \
 mired_to_rgb_rec2020.o
@@ -230,6 +245,7 @@ rgb_to_hsbk_srgb.o \
 rgb_to_hsbk_display_p3.o \
 rgb_to_hsbk_rec2020.o \
 rgb_to_hsbk.o \
+mired_to_rgb.o \
 mired_to_rgb_srgb.o \
 mired_to_rgb_display_p3.o \
 mired_to_rgb_rec2020.o
@@ -241,6 +257,7 @@ hsbk_to_rgb_srgb.o \
 hsbk_to_rgb_display_p3.o \
 hsbk_to_rgb_rec2020.o \
 hsbk_to_rgb.o \
+mired_to_rgb.o \
 mired_to_rgb_srgb.o \
 mired_to_rgb_display_p3.o \
 mired_to_rgb_rec2020.o \
@@ -256,6 +273,7 @@ gamma_decode_rec2020.o
 # (it must link to both srgb and display_p3 so list both dependencies)
 rgb_to_hsbk_gen: \
 rgb_to_hsbk_gen.o \
+mired_to_rgb.o \
 mired_to_rgb_srgb.o \
 mired_to_rgb_display_p3.o \
 mired_to_rgb_rec2020.o

@@ -22,7 +22,7 @@
 #include "mired_to_rgb_rec2020.h"
 
 void hsbk_to_rgb_rec2020(const float *hsbk, float *rgb) {
-  hsbk_to_rgb(mired_to_rgb_rec2020, hsbk, rgb);
+  hsbk_to_rgb(&mired_to_rgb_rec2020, hsbk, rgb);
 }
 
 #ifdef STANDALONE

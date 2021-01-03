@@ -46,7 +46,7 @@ static float hue_sequence[N_RGB][N_HUE_SEQUENCE + 1] = {
 };
 
 void hsbk_to_rgb(
-  void (*mired_to_rgb)(float mired, float *rgb),
+  const struct mired_to_rgb *mired_to_rgb,
   const float *hsbk,
   float *rgb
 ) {
@@ -82,7 +82,7 @@ void hsbk_to_rgb(
   // this section computes kelv_rgb from kelv
 
   float kelv_rgb[N_RGB];
-  mired_to_rgb(1e6f / kelv, kelv_rgb);
+  mired_to_rgb_convert(mired_to_rgb, 1e6f / kelv, kelv_rgb);
 
   // this section applies the saturation
 

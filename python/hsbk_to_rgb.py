@@ -70,7 +70,7 @@ def hsbk_to_rgb(mired_to_rgb, hsbk):
 
   # this section computes kelv_rgb from kelv
 
-  kelv_rgb = mired_to_rgb(1e6 / kelv)
+  kelv_rgb = mired_to_rgb.convert(1e6 / kelv)
 
   # this section applies the saturation
 

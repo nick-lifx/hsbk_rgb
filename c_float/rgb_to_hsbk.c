@@ -64,7 +64,7 @@ static struct hue_table {
 
 void rgb_to_hsbk(
   const float *kelv_rgb_6504K,
-  void (*mired_to_rgb)(float mired, float *rgb),
+  const struct mired_to_rgb *mired_to_rgb,
   const float *rgb,
   float kelv,
   float *hsbk
@@ -82,7 +82,7 @@ void rgb_to_hsbk(
   }
   else {
     hsbk[HSBK_KELV] = kelv;
-    mired_to_rgb(1e6f / kelv, kelv_rgb);
+    mired_to_rgb_convert(mired_to_rgb, 1e6f / kelv, kelv_rgb);
   }
 
   float br = rgb[RGB_RED];

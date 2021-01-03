@@ -45,7 +45,7 @@
 // if cast to unsigned then it would equivalently be in [0, 360)
 void rgb_to_hsbk(
   const int32_t *kelv_rgb_6504K,
-  void (*mired_to_rgb)(int32_t mired, int32_t *rgb),
+  const struct mired_to_rgb *mired_to_rgb,
   const int32_t *rgb,
   int32_t kelv,
   int32_t *hsbk
@@ -65,7 +65,8 @@ void rgb_to_hsbk(
   }
   else {
     hsbk[HSBK_KELV] = kelv;
-    mired_to_rgb(
+    mired_to_rgb_convert(
+      mired_to_rgb,
       (int32_t)(((1000000LL << 33) / kelv + 1) >> 1),
       kelv_rgb
     );

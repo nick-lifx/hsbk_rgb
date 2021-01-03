@@ -18,21 +18,35 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#include "hsbk_to_rgb.h"
-#include "mired_to_rgb_display_p3.h"
+#ifndef _MIRED_TO_RGB_H
+#define _MIRED_TO_RGB_H
 
-void hsbk_to_rgb_display_p3(const float *hsbk, float *rgb) {
-  hsbk_to_rgb(&mired_to_rgb_display_p3, hsbk, rgb);
-}
+#include <stdint.h>
 
-#ifdef STANDALONE
-int hsbk_to_rgb_standalone(
-  void (*_hsbk_to_rgb)(const float *hsbk, float *rgb),
-  int argc,
-  char **argv
+#define MIRED_TO_RGB_ORDER_RED_AB 4
+#define MIRED_TO_RGB_ORDER_GREEN_AB 4
+#define MIRED_TO_RGB_ORDER_GREEN_BD 6
+#define MIRED_TO_RGB_ORDER_BLUE_BC 8
+
+struct mired_to_rgb {
+  int32_t b_red;
+  int32_t b_green;
+  int32_t b_blue;
+  int32_t c_blue;
+  int64_t p_red_ab[MIRED_TO_RGB_ORDER_RED_AB];
+  int64_t p_green_ab[MIRED_TO_RGB_ORDER_GREEN_AB];
+  int64_t p_green_bd[MIRED_TO_RGB_ORDER_GREEN_BD];
+  int64_t p_blue_bc[MIRED_TO_RGB_ORDER_BLUE_BC];
+  uint8_t p_red_ab_shr[MIRED_TO_RGB_ORDER_RED_AB - 1];
+  uint8_t p_green_ab_shr[MIRED_TO_RGB_ORDER_GREEN_AB - 1];
+  uint8_t p_green_bd_shr[MIRED_TO_RGB_ORDER_GREEN_BD - 1];
+  uint8_t p_blue_bc_shr[MIRED_TO_RGB_ORDER_BLUE_BC - 1];
+};
+
+void mired_to_rgb_convert(
+  const struct mired_to_rgb *context,
+  int32_t mired,
+  int32_t *rgb
 );
 
-int main(int argc, char **argv) {
-  return hsbk_to_rgb_standalone(hsbk_to_rgb_display_p3, argc, argv);
-}
 #endif

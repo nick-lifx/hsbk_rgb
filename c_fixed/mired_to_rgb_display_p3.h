@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
-void mired_to_rgb_display_p3(int32_t mired, int32_t *rgb);
+#include "mired_to_rgb.h"
+
+extern const struct mired_to_rgb mired_to_rgb_display_p3;
 
 #endif

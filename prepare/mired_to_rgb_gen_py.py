@@ -47,27 +47,24 @@ device = sys.argv[2]
 mired_to_rgb_fit = utils.yaml_io._import(
   utils.yaml_io.read_file(mired_to_rgb_fit_in)
 )
-a = mired_to_rgb_fit['a']
+#a = mired_to_rgb_fit['a']
 b_red = mired_to_rgb_fit['b_red']
 b_green = mired_to_rgb_fit['b_green']
 b_blue = mired_to_rgb_fit['b_blue']
 c_blue = mired_to_rgb_fit['c_blue']
-d = mired_to_rgb_fit['d']
+#d = mired_to_rgb_fit['d']
 p_red_ab = mired_to_rgb_fit['p_red_ab']
-p_red_bd = mired_to_rgb_fit['p_red_bd']
+#p_red_bd = mired_to_rgb_fit['p_red_bd']
 p_green_ab = mired_to_rgb_fit['p_green_ab']
 p_green_bd = mired_to_rgb_fit['p_green_bd']
-p_blue_ab = mired_to_rgb_fit['p_blue_ab']
+#p_blue_ab = mired_to_rgb_fit['p_blue_ab']
 p_blue_bc = mired_to_rgb_fit['p_blue_bc']
-p_blue_cd = mired_to_rgb_fit['p_blue_cd']
+#p_blue_cd = mired_to_rgb_fit['p_blue_cd']
 
 p_red_ab = numpy.array(p_red_ab, numpy.double)
-p_red_bd = numpy.array(p_red_bd, numpy.double)
 p_green_ab = numpy.array(p_green_ab, numpy.double)
 p_green_bd = numpy.array(p_green_bd, numpy.double)
-p_blue_ab = numpy.array(p_blue_ab, numpy.double)
 p_blue_bc = numpy.array(p_blue_bc, numpy.double)
-p_blue_cd = numpy.array(p_blue_cd, numpy.double)
 
 print(
   '''#!/usr/bin/env python3
@@ -94,112 +91,33 @@ print(
 # SOFTWARE.
 
 import numpy
+from mired_to_rgb import MiredToRGB
 
-EPSILON = 1e-6
+mired_to_rgb_{0:s} = MiredToRGB(
+  {1:.16e},
+  {2:.16e},
+  {3:.16e},
+  {4:.16e},
+  numpy.array([{5:s}]),
+  numpy.array([{6:s}]),
+  numpy.array([{7:s}]),
+  numpy.array([{8:s}])
+)
 
-def mired_to_rgb_{0:s}(mired):
-  # validate inputs, allowing a little slack
-  assert mired >= {1:.16e} - EPSILON and mired < {2:.16e} + EPSILON
-
-  # calculate red channel
-  if mired < {3:.16e}:
-    r = {4:.16e}
-{5:s}  else:
-    r = {6:.16e}
-{7:s}
-  # calculate green channel
-  if mired < {8:.16e}:
-    g = {9:.16e}
-{10:s}  else:
-    g = {11:.16e}
-{12:s}
-  # calculate blue channel
-  if mired < {13:.16e}:
-    b = {14:.16e}
-{15:s}  elif mired < {16:.16e}:
-    b = {17:.16e}
-{18:s}  else:
-    b = {19:.16e}
-{20:s}
-  return numpy.array([r, g, b], numpy.double)
-
+# standalone
 if __name__ == '__main__':
-  import sys
+  import mired_to_rgb
 
-  EXIT_SUCCESS = 0
-  EXIT_FAILURE = 1
-
-  RGB_RED = 0
-  RGB_GREEN = 1
-  RGB_BLUE = 2
-  N_RGB = 3
-
-  if len(sys.argv) < 2:
-    print(f'usage: {{sys.argv[0]:s}} mired')
-    print('mired = colour temperature in micro reciprocal degrees Kelvin')
-    sys.exit(EXIT_FAILURE)
-  mired = float(sys.argv[1])
-
-  rgb = mired_to_rgb_{21:s}(mired)
-  print(
-    f'mired {{mired:.3f}} -> RGB ({{rgb[RGB_RED]:.6f}}, {{rgb[RGB_GREEN]:.6f}}, {{rgb[RGB_BLUE]:.6f}})'
-  )'''.format(
+  mired_to_rgb.standalone(mired_to_rgb_{9:s})'''.format(
     device,
-    a,
-    d,
     b_red,
-    p_red_ab[-1],
-    ''.join(
-      [
-        '    r = r * mired + {0:.16e}\n'.format(p_red_ab[i])
-        for i in range(p_red_ab.shape[0] - 2, -1, -1)
-      ]
-    ),
-    p_red_bd[-1],
-    ''.join(
-      [
-        '    r = r * mired + {0:.16e}\n'.format(p_red_bd[i])
-        for i in range(p_red_bd.shape[0] - 2, -1, -1)
-      ]
-    ),
     b_green,
-    p_green_ab[-1],
-    ''.join(
-      [
-        '    g = g * mired + {0:.16e}\n'.format(p_green_ab[i])
-        for i in range(p_green_ab.shape[0] - 2, -1, -1)
-      ]
-    ),
-    p_green_bd[-1],
-    ''.join(
-      [
-        '    g = g * mired + {0:.16e}\n'.format(p_green_bd[i])
-        for i in range(p_green_bd.shape[0] - 2, -1, -1)
-      ]
-    ),
     b_blue,
-    p_blue_ab[-1],
-    ''.join(
-      [
-        '    b = b * mired + {0:.16e}\n'.format(p_blue_ab[i])
-        for i in range(p_blue_ab.shape[0] - 2, -1, -1)
-      ]
-    ),
     c_blue,
-    p_blue_bc[-1],
-    ''.join(
-      [
-        '    b = b * mired + {0:.16e}\n'.format(p_blue_bc[i])
-        for i in range(p_blue_bc.shape[0] - 2, -1, -1)
-      ]
-    ),
-    p_blue_cd[-1],
-    ''.join(
-      [
-        '    b = b * mired + {0:.16e}\n'.format(p_blue_cd[i])
-        for i in range(p_blue_cd.shape[0] - 2, -1, -1)
-      ]
-    ),
+    ', '.join([f'{p_red_ab[i]:.16e}' for i in range(p_red_ab.shape[0])]),
+    ', '.join([f'{p_green_ab[i]:.16e}' for i in range(p_green_ab.shape[0])]),
+    ', '.join([f'{p_green_bd[i]:.16e}' for i in range(p_green_bd.shape[0])]),
+    ', '.join([f'{p_blue_bc[i]:.16e}' for i in range(p_blue_bc.shape[0])]),
     device
   )
 )

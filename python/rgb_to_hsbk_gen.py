@@ -48,7 +48,7 @@ rgb = {
   'srgb': mired_to_rgb_srgb,
   'display_p3': mired_to_rgb_display_p3,
   'rec2020': mired_to_rgb_rec2020
-}[device](1e6 / 6504.)
+}[device].convert(1e6 / 6504.)
 
 print(
   '''#!/usr/bin/env python3

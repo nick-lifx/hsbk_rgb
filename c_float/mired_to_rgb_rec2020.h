@@ -21,6 +21,8 @@
 #ifndef _MIRED_TO_RGB_REC2020_H
 #define _MIRED_TO_RGB_REC2020_H
 
-void mired_to_rgb_rec2020(float mired, float *rgb);
+#include "mired_to_rgb.h"
+
+extern const struct mired_to_rgb mired_to_rgb_rec2020;
 
 #endif

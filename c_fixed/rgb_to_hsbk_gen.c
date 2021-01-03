@@ -48,18 +48,19 @@ int main(int argc, char **argv) {
   }
   const char *device = argv[1];
 
-  void (*mired_to_rgb)(int32_t mired, int32_t *rgb);
+  const struct mired_to_rgb *mired_to_rgb;
   if (strcmp(device, "srgb") == 0)
-    mired_to_rgb = mired_to_rgb_srgb;
+    mired_to_rgb = &mired_to_rgb_srgb;
   else if (strcmp(device, "display_p3") == 0)
-    mired_to_rgb = mired_to_rgb_display_p3;
+    mired_to_rgb = &mired_to_rgb_display_p3;
   else if (strcmp(device, "rec2020") == 0)
-    mired_to_rgb = mired_to_rgb_rec2020;
+    mired_to_rgb = &mired_to_rgb_rec2020;
   else
     abort();
 
   int32_t rgb[N_RGB];
-  mired_to_rgb(
+  mired_to_rgb_convert(
+    mired_to_rgb,
     (int32_t)(((1000000LL << 17) / 6504 + 1) >> 1),
     rgb
   );
@@ -94,14 +95,10 @@ int main(int argc, char **argv) {
       "#define RGB_BLUE 2\n"
       "#define N_RGB 3\n"
       "\n"
-      "static int32_t kelv_rgb_6504K[N_RGB] = {\n"
-      "  0x%x,\n\n"
-      "  0x%x,\n\n"
-      "  0x%x\n\n"
-      "};\n"
+      "static int32_t kelv_rgb_6504K[N_RGB] = {0x%x, 0x%x, 0x%x};\n"
       "\n"
       "void rgb_to_hsbk_%s(const int32_t *rgb, int32_t kelv, int32_t *hsbk) {\n"
-      "  rgb_to_hsbk(kelv_rgb_6504K, mired_to_rgb_%s, rgb, kelv, hsbk);\n"
+      "  rgb_to_hsbk(kelv_rgb_6504K, &mired_to_rgb_%s, rgb, kelv, hsbk);\n"
       "}\n"
       "\n"
       "#ifdef STANDALONE\n"

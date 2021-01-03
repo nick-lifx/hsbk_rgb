@@ -140,6 +140,8 @@ int main(int argc, char **argv) {
             (1 << 29)
         ) >> 30
       );
+      if (w_denom == 0)
+        w_denom = 1; // there seems to be a loss of precision (revisit later)
       int32_t w = (int32_t)((((int64_t)w_num << 31) / w_denom + 1) >> 1);
       if (w < 0)
         w = 0;

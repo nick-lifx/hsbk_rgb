@@ -64,7 +64,7 @@ def rgb_to_hsbk(kelv_rgb_6504K, mired_to_rgb, rgb, kelv = None):
     kelv_rgb = kelv_rgb_6504K
   else:
     hsbk[HSBK_KELV] = kelv
-    kelv_rgb = mired_to_rgb(1e6 / kelv)
+    kelv_rgb = mired_to_rgb.convert(1e6 / kelv)
 
   br = numpy.max(rgb)
   if br >= EPSILON:

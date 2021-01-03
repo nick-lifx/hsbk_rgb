@@ -22,7 +22,7 @@
 #include "mired_to_rgb_srgb.h"
 
 void hsbk_to_rgb_srgb(const int32_t *hsbk, int32_t *rgb) {
-  hsbk_to_rgb(mired_to_rgb_srgb, hsbk, rgb);
+  hsbk_to_rgb(&mired_to_rgb_srgb, hsbk, rgb);
 }
 
 #ifdef STANDALONE

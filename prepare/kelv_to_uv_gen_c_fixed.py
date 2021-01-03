@@ -37,28 +37,28 @@ KELV_MAX = 15000.
 # results in 2:30 fixed point
 UV_EXP = -30
 
-p_u_num, p_shr_u_num, p_exp_u_num = poly_fixed(
+p_u_num, p_u_num_shr, p_exp_u_num = poly_fixed(
   mpmath.matrix([.860117757, 1.54118254e-4, 1.28641212e-7])
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
   31
 )
-p_u_denom, p_shr_u_denom, p_exp_u_denom = poly_fixed(
+p_u_denom, p_u_denom_shr, p_exp_u_denom = poly_fixed(
   mpmath.matrix([1., 8.42420235e-4, 7.08145163e-7])
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
   31
 )
-p_v_num, p_shr_v_num, p_exp_v_num = poly_fixed(
+p_v_num, p_v_num_shr, p_exp_v_num = poly_fixed(
   mpmath.matrix([.317398726, 4.22806245e-5, 4.20481691e-8]),
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
   31
 )
-p_v_denom, p_shr_v_denom, p_exp_v_denom = poly_fixed(
+p_v_denom, p_v_denom_shr, p_exp_v_denom = poly_fixed(
   mpmath.matrix([1., -2.89741816e-5, 1.61456053e-7]),
   KELV_MIN,
   KELV_MAX,
@@ -160,25 +160,25 @@ int main(int argc, char **argv) {{
     int(round(math.ldexp(KELV_MAX * (1. + EPSILON), -KELV_EXP))),
     p_u_num[2],
     p_u_num[1],
-    p_shr_u_num[1],
+    p_u_num_shr[1],
     p_u_num[0],
-    p_shr_u_num[0],
+    p_u_num_shr[0],
     p_u_denom[2],
     p_u_denom[1],
-    p_shr_u_denom[1],
+    p_u_denom_shr[1],
     p_u_denom[0],
-    p_shr_u_denom[0],
+    p_u_denom_shr[0],
     div_shl_u + 1,
     p_v_num[2],
     p_v_num[1],
-    p_shr_v_num[1],
+    p_v_num_shr[1],
     p_v_num[0],
-    p_shr_v_num[0],
+    p_v_num_shr[0],
     p_v_denom[2],
     -p_v_denom[1],
-    p_shr_v_denom[1],
+    p_v_denom_shr[1],
     p_v_denom[0],
-    p_shr_v_denom[0],
+    p_v_denom_shr[0],
     div_shl_v + 1
   )
 )

@@ -21,9 +21,11 @@
 #ifndef _RGB_TO_HSBK_H
 #define _RGB_TO_HSBK_H
 
+#include "mired_to_rgb.h"
+
 void rgb_to_hsbk(
   const float *kelv_rgb_6504K,
-  void (*mired_to_rgb)(float mired, float *rgb),
+  const struct mired_to_rgb *mired_to_rgb,
   const float *rgb,
   float kelv,
   float *hsbk

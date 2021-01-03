@@ -62,14 +62,14 @@ b_blue = mired_to_rgb_fit['b_blue']
 c_blue = mired_to_rgb_fit['c_blue']
 d = mired_to_rgb_fit['d']
 p_red_ab = mired_to_rgb_fit['p_red_ab']
-p_red_bd = mired_to_rgb_fit['p_red_bd']
+#p_red_bd = mired_to_rgb_fit['p_red_bd']
 p_green_ab = mired_to_rgb_fit['p_green_ab']
 p_green_bd = mired_to_rgb_fit['p_green_bd']
-p_blue_ab = mired_to_rgb_fit['p_blue_ab']
+#p_blue_ab = mired_to_rgb_fit['p_blue_ab']
 p_blue_bc = mired_to_rgb_fit['p_blue_bc']
-p_blue_cd = mired_to_rgb_fit['p_blue_cd']
+#p_blue_cd = mired_to_rgb_fit['p_blue_cd']
 
-p_red_ab, p_shr_red_ab, _ = poly_fixed(
+p_red_ab, p_red_ab_shr, _ = poly_fixed(
   p_red_ab,
   a,
   b_red,
@@ -77,16 +77,7 @@ p_red_ab, p_shr_red_ab, _ = poly_fixed(
   31,
   RGB_EXP
 )
-p_red_bd, p_shr_red_bd, _ = poly_fixed(
-  p_red_bd,
-  b_red,
-  d,
-  MIRED_EXP,
-  31,
-  RGB_EXP
-)
-
-p_green_ab, p_shr_green_ab, _ = poly_fixed(
+p_green_ab, p_green_ab_shr, _ = poly_fixed(
   p_green_ab,
   a,
   b_green,
@@ -94,7 +85,7 @@ p_green_ab, p_shr_green_ab, _ = poly_fixed(
   31,
   RGB_EXP
 )
-p_green_bd, p_shr_green_bd, _ = poly_fixed(
+p_green_bd, p_green_bd_shr, _ = poly_fixed(
   p_green_bd,
   b_green,
   d,
@@ -102,27 +93,10 @@ p_green_bd, p_shr_green_bd, _ = poly_fixed(
   31,
   RGB_EXP
 )
-
-p_blue_ab, p_shr_blue_ab, _ = poly_fixed(
-  p_blue_ab,
-  a,
-  b_blue,
-  MIRED_EXP,
-  31,
-  RGB_EXP
-)
-p_blue_bc, p_shr_blue_bc, _ = poly_fixed(
+p_blue_bc, p_blue_bc_shr, _ = poly_fixed(
   p_blue_bc,
   b_blue,
   c_blue,
-  MIRED_EXP,
-  31,
-  RGB_EXP
-)
-p_blue_cd, p_shr_blue_cd, _ = poly_fixed(
-  p_blue_cd,
-  c_blue,
-  d,
   MIRED_EXP,
   31,
   RGB_EXP
@@ -153,168 +127,48 @@ print(
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#include <assert.h>
 #include "mired_to_rgb_{0:s}.h"
 
-#define RGB_RED 0
-#define RGB_GREEN 1
-#define RGB_BLUE 2
-#define N_RGB 3
-
-#define EPSILON (1 << 6)
-
-void mired_to_rgb_{1:s}(int32_t mired, int32_t *rgb) {{
-  // validate inputs, allowing a little slack
-  assert(mired >= {2:s} - EPSILON && mired < {3:s} + EPSILON);
-
-  // calculate red channel
-  int32_t r;
-  if (mired < {4:s}) {{
-    r = {5:s};
-{6:s}  }}
-  else {{
-    r = {7:s};
-{8:s}  }}
-  rgb[RGB_RED] = r;
-
-  // calculate green channel
-  int32_t g;
-  if (mired < {9:s}) {{
-    g = {10:s};
-{11:s}  }}
-  else {{
-    g = {12:s};
-{13:s}  }}
-  rgb[RGB_GREEN] = g;
-
-  // calculate blue channel
-  int32_t b;
-  if (mired < {14:s}) {{
-    b = {15:s};
-{16:s}  }}
-  else if (mired < {17:s}) {{
-    b = {18:s};
-{19:s}  }}
-  else {{
-    b = {20:s};
-{21:s}  }}
-  rgb[RGB_BLUE] = b;
-}}
+const struct mired_to_rgb mired_to_rgb_{1:s} = {{
+  {2:s},
+  {3:s},
+  {4:s},
+  {5:s},
+  {{{6:s}}},
+  {{{7:s}}},
+  {{{8:s}}},
+  {{{9:s}}},
+  {{{10:s}}},
+  {{{11:s}}},
+  {{{12:s}}},
+  {{{13:s}}}
+}};
 
 #ifdef STANDALONE
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-
+int mired_to_rgb_standalone(
+  const struct mired_to_rgb *context,
+  int argc,
+  char **argv
+);
+ 
 int main(int argc, char **argv) {{
-  if (argc < 2) {{
-    printf(
-      "usage: %s mired\\n"
-        "mired = colour temperature in micro reciprocal degrees Kelvin\\n",
-      argv[0]
-    );
-    exit(EXIT_FAILURE);
-  }}
-  int32_t mired = (int32_t)roundf(ldexpf(atof(argv[1]), 16));
-
-  int32_t rgb[N_RGB];
-  mired_to_rgb_{22:s}(mired, rgb);
-  printf(
-    "mired %.3f -> RGB (%.6f, %.6f, %.6f)\\n",
-    ldexpf(mired, -16),
-    ldexpf(rgb[RGB_RED], -30),
-    ldexpf(rgb[RGB_GREEN], -30),
-    ldexpf(rgb[RGB_BLUE], -30)
-  );
-
-  return EXIT_SUCCESS;
+  return mired_to_rgb_standalone(&mired_to_rgb_{14:s}, argc, argv);
 }}
 #endif'''.format(
     device,
     device,
-    to_hex(int(round(math.ldexp(a, -MIRED_EXP)))),
-    to_hex(int(round(math.ldexp(d, -MIRED_EXP)))),
     to_hex(int(round(math.ldexp(b_red, -MIRED_EXP)))),
-    to_hex(p_red_ab[-1]),
-    ''.join(
-      [
-        '    r = (int32_t)(((int64_t)r * mired {0:s} 0x{1:x}LL) >> {2:d});\n'.format(
-          '-' if p_red_ab[i] < 0. else '+',
-          abs(p_red_ab[i]),
-          p_shr_red_ab[i]
-        )
-        for i in range(p_red_ab.shape[0] - 2, -1, -1)
-      ]
-    ),
-    to_hex(p_red_bd[-1]),
-    ''.join(
-      [
-        '    r = (int32_t)(((int64_t)r * mired {0:s} 0x{1:x}LL) >> {2:d});\n'.format(
-          '-' if p_red_bd[i] < 0. else '+',
-          abs(p_red_bd[i]),
-          p_shr_red_bd[i]
-        )
-        for i in range(p_red_bd.shape[0] - 2, -1, -1)
-      ]
-    ),
     to_hex(int(round(math.ldexp(b_green, -MIRED_EXP)))),
-    to_hex(p_green_ab[-1]),
-    ''.join(
-      [
-        '    g = (int32_t)(((int64_t)g * mired {0:s} 0x{1:x}LL) >> {2:d});\n'.format(
-          '-' if p_green_ab[i] < 0. else '+',
-          abs(p_green_ab[i]),
-          p_shr_green_ab[i]
-        )
-        for i in range(p_green_ab.shape[0] - 2, -1, -1)
-      ]
-    ),
-    to_hex(p_green_bd[-1]),
-    ''.join(
-      [
-        '    g = (int32_t)(((int64_t)g * mired {0:s} 0x{1:x}LL) >> {2:d});\n'.format(
-          '-' if p_green_bd[i] < 0. else '+',
-          abs(p_green_bd[i]),
-          p_shr_green_bd[i]
-        )
-        for i in range(p_green_bd.shape[0] - 2, -1, -1)
-      ]
-    ),
     to_hex(int(round(math.ldexp(b_blue, -MIRED_EXP)))),
-    to_hex(p_blue_ab[-1]),
-    ''.join(
-      [
-        '    b = (int32_t)(((int64_t)b * mired {0:s} 0x{1:x}LL) >> {2:d});\n'.format(
-          '-' if p_blue_ab[i] < 0. else '+',
-          abs(p_blue_ab[i]),
-          p_shr_blue_ab[i]
-        )
-        for i in range(p_blue_ab.shape[0] - 2, -1, -1)
-      ]
-    ),
     to_hex(int(round(math.ldexp(c_blue, -MIRED_EXP)))),
-    to_hex(p_blue_bc[-1]),
-    ''.join(
-      [
-        '    b = (int32_t)(((int64_t)b * mired {0:s} 0x{1:x}LL) >> {2:d});\n'.format(
-          '-' if p_blue_bc[i] < 0. else '+',
-          abs(p_blue_bc[i]),
-          p_shr_blue_bc[i]
-        )
-        for i in range(p_blue_bc.shape[0] - 2, -1, -1)
-      ]
-    ),
-    to_hex(p_blue_cd[-1]),
-    ''.join(
-      [
-        '    b = (int32_t)(((int64_t)b * mired {0:s} 0x{1:x}LL) >> {2:d});\n'.format(
-          '-' if p_blue_cd[i] < 0. else '+',
-          abs(p_blue_cd[i]),
-          p_shr_blue_cd[i]
-        )
-        for i in range(p_blue_cd.shape[0] - 2, -1, -1)
-      ]
-    ),
+    ', '.join([to_hex(p_red_ab[i]) for i in range(p_red_ab.shape[0])]),
+    ', '.join([to_hex(p_green_ab[i]) for i in range(p_green_ab.shape[0])]),
+    ', '.join([to_hex(p_green_bd[i]) for i in range(p_green_bd.shape[0])]),
+    ', '.join([to_hex(p_blue_bc[i]) for i in range(p_blue_bc.shape[0])]),
+    ', '.join([str(p_red_ab_shr[i]) for i in range(p_red_ab_shr.shape[0])]),
+    ', '.join([str(p_green_ab_shr[i]) for i in range(p_green_ab_shr.shape[0])]),
+    ', '.join([str(p_green_bd_shr[i]) for i in range(p_green_bd_shr.shape[0])]),
+    ', '.join([str(p_blue_bc_shr[i]) for i in range(p_blue_bc_shr.shape[0])]),
     device
   )
 )
