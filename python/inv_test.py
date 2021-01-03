@@ -66,6 +66,6 @@ hsbk_to_rgb, rgb_to_hsbk = {
 numpy.random.seed(seed)
 for i in range(count):
   rgb = numpy.random.random(3)
-  hsbk = rgb_to_hsbk(rgb, kelv)
+  hsbk = rgb_to_hsbk.convert(rgb, kelv)
   rgb1 = hsbk_to_rgb.convert(hsbk)
   assert numpy.all(numpy.abs(rgb1 - rgb) < EPSILON)

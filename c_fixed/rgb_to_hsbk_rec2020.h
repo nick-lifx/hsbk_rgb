@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
-void rgb_to_hsbk_rec2020(const int32_t *rgb, int32_t kelv, int32_t *hsbk);
+#include "rgb_to_hsbk.h"
+
+extern const struct rgb_to_hsbk rgb_to_hsbk_rec2020;
 
 #endif

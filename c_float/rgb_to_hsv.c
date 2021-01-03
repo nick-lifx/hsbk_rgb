@@ -75,13 +75,13 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  void (*rgb_to_hsbk)(const float *rgb, float kelv, float *hsbk);
+  const struct rgb_to_hsbk *rgb_to_hsbk;
   if (strcmp(device, "srgb") == 0)
-    rgb_to_hsbk = rgb_to_hsbk_srgb;
+    rgb_to_hsbk = &rgb_to_hsbk_srgb;
   else if (strcmp(device, "display_p3") == 0)
-    rgb_to_hsbk = rgb_to_hsbk_display_p3;
+    rgb_to_hsbk = &rgb_to_hsbk_display_p3;
   else if (strcmp(device, "rec2020") == 0)
-    rgb_to_hsbk = rgb_to_hsbk_rec2020;
+    rgb_to_hsbk = &rgb_to_hsbk_rec2020;
   else
     abort();
 
@@ -155,7 +155,12 @@ int main(int argc, char **argv) {
     //printf("%d / %d\n", i, size_y);
     for (int j = 0; j < size_x; ++j) {
       float hsbk[N_HSBK];
-      rgb_to_hsbk(image + (i * size_x + j) * N_RGB, kelv, hsbk);
+      rgb_to_hsbk_convert(
+        rgb_to_hsbk,
+        image + (i * size_x + j) * N_RGB,
+        kelv,
+        hsbk
+      );
       memcpy(
         image + (i * size_x + j) * N_RGB,
         hsbk,

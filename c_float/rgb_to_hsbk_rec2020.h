@@ -21,6 +21,8 @@
 #ifndef _RGB_TO_HSBK_REC2020_H
 #define _RGB_TO_HSBK_REC2020_H
 
-void rgb_to_hsbk_rec2020(const float *rgb, float kelv, float *hsbk);
+#include "rgb_to_hsbk.h"
+
+extern const struct rgb_to_hsbk rgb_to_hsbk_rec2020;
 
 #endif

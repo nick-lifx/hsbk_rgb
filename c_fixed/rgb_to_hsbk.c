@@ -33,7 +33,11 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
-#define EPSILON (1 << 10)
+#define KELV_MIN (1500 << 16)
+#define KELV_MAX (9000 << 16)
+
+#define EPSILON0 (1 << 10)
+#define EPSILON1 (1 << 6)
 
 // arguments in 2:30 fixed point
 // results as follows:
@@ -43,17 +47,17 @@
 //   Kelvin in 16:16 fixed point
 // all are signed, so the hue is taken to be in [180, 180), but
 // if cast to unsigned then it would equivalently be in [0, 360)
-void rgb_to_hsbk(
-  const int32_t *kelv_rgb_6504K,
-  const struct mired_to_rgb *mired_to_rgb,
+void rgb_to_hsbk_convert(
+  const struct rgb_to_hsbk *context,
   const int32_t *rgb,
   int32_t kelv,
   int32_t *hsbk
 ) {
   // validate inputs, allowing a little slack
-  assert(rgb[RGB_RED] >= -EPSILON && rgb[RGB_RED] < (1 << 30) + EPSILON);
-  assert(rgb[RGB_GREEN] >= -EPSILON && rgb[RGB_GREEN] < (1 << 30) + EPSILON);
-  assert(rgb[RGB_BLUE] >= -EPSILON && rgb[RGB_BLUE] < (1 << 30) + EPSILON);
+  assert(rgb[RGB_RED] >= -EPSILON0 && rgb[RGB_RED] < (1 << 30) + EPSILON0);
+  assert(rgb[RGB_GREEN] >= -EPSILON0 && rgb[RGB_GREEN] < (1 << 30) + EPSILON0);
+  assert(rgb[RGB_BLUE] >= -EPSILON0 && rgb[RGB_BLUE] < (1 << 30) + EPSILON0);
+  assert(kelv == 0 || (kelv >= KELV_MIN - EPSILON1 && kelv < KELV_MAX + EPSILON1));
 
   // the Kelvin is always constant with this simplified algorithm
   // we will set the other values if we are able to calculate them
@@ -61,12 +65,12 @@ void rgb_to_hsbk(
   int32_t kelv_rgb[3];
   if (kelv == 0) {
     hsbk[HSBK_KELV] = 6504 << 16;
-    memcpy(kelv_rgb, kelv_rgb_6504K, N_RGB * sizeof(int32_t));
+    memcpy(kelv_rgb, context->kelv_rgb_6504K, N_RGB * sizeof(int32_t));
   }
   else {
     hsbk[HSBK_KELV] = kelv;
     mired_to_rgb_convert(
-      mired_to_rgb,
+      context->mired_to_rgb,
       (int32_t)(((1000000LL << 33) / kelv + 1) >> 1),
       kelv_rgb
     );
@@ -77,7 +81,7 @@ void rgb_to_hsbk(
     br = rgb[RGB_GREEN];
   if (rgb[RGB_BLUE] > br)
     br = rgb[RGB_BLUE];
-  if (br >= EPSILON) {
+  if (br >= EPSILON0) {
     // it is not fully black, so we can calculate saturation
     // note: do not corrupt the caller's value by doing rgb /= br
     hsbk[HSBK_BR] = br;
@@ -117,7 +121,7 @@ void rgb_to_hsbk(
       hue_rgb[j] = rgb1[j] - (int32_t)(
         ((int64_t)kelv_factor * kelv_rgb[j] + (1 << 29)) >> 30
       );
-    assert(hue_rgb[i] < EPSILON);
+    assert(hue_rgb[i] < EPSILON0);
 
     // at this point we can regenerate the original rgb by
     //   rgb = hue_rgb + kelv_factor * kelv_rgb
@@ -133,9 +137,9 @@ void rgb_to_hsbk(
       hue_factor = hue_rgb[RGB_BLUE];
       j = RGB_BLUE;
     }
-    if (hue_factor >= EPSILON) {
+    if (hue_factor >= EPSILON0) {
       // it is not fully white, so we can calculate hue
-      assert(j != i); // we know hue_rgb[i] < EPSILON, hue_rgb[j] >= EPSILON
+      assert(j != i); // we know hue_rgb[i] < EPSILON0, hue_rgb[j] >= EPSILON0
       for (int k = 0; k < N_RGB; ++k)
         hue_rgb[k] = (int32_t)(
           (((int64_t)hue_rgb[k] << 31) / hue_factor + 1) >> 1
@@ -193,7 +197,7 @@ void rgb_to_hsbk(
 #include <stdio.h>
 
 int rgb_to_hsbk_standalone(
-  void (*_rgb_to_hsbk)(const int32_t *rgb, int32_t kelv, int32_t *hsbk),
+  const struct rgb_to_hsbk *rgb_to_hsbk,
   int argc,
   char **argv
 ) {
@@ -217,7 +221,7 @@ int rgb_to_hsbk_standalone(
     argc >= 5 ? (int32_t)roundf(ldexpf(atof(argv[4]), 16)) : (int32_t)0;
 
   int32_t hsbk[N_HSBK];
-  _rgb_to_hsbk(rgb, kelv, hsbk);
+  rgb_to_hsbk_convert(rgb_to_hsbk, rgb, kelv, hsbk);
   printf(
     "RGB (%.6f, %.6f, %.6f) -> HSBK (%.3f, %.6f, %.6f, %.3f)\n",
     ldexpf(rgb[RGB_RED], -30),

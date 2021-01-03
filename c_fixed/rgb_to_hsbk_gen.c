@@ -87,37 +87,30 @@ int main(int argc, char **argv) {
       "// IN THE SOFTWARE.\n"
       "\n"
       "#include \"mired_to_rgb_%s.h\"\n"
-      "#include \"rgb_to_hsbk.h\"\n"
       "#include \"rgb_to_hsbk_%s.h\"\n"
       "\n"
-      "#define RGB_RED 0\n"
-      "#define RGB_GREEN 1\n"
-      "#define RGB_BLUE 2\n"
-      "#define N_RGB 3\n"
-      "\n"
-      "static int32_t kelv_rgb_6504K[N_RGB] = {0x%x, 0x%x, 0x%x};\n"
-      "\n"
-      "void rgb_to_hsbk_%s(const int32_t *rgb, int32_t kelv, int32_t *hsbk) {\n"
-      "  rgb_to_hsbk(kelv_rgb_6504K, &mired_to_rgb_%s, rgb, kelv, hsbk);\n"
-      "}\n"
+      "const struct rgb_to_hsbk rgb_to_hsbk_%s = {\n"
+      "  {0x%x, 0x%x, 0x%x},\n"
+      "  &mired_to_rgb_%s\n"
+      "};\n"
       "\n"
       "#ifdef STANDALONE\n"
       "int rgb_to_hsbk_standalone(\n"
-      "  void (*_rgb_to_hsbk)(const int32_t *rgb, int32_t kelv, int32_t *hsbk),\n"
+      "  const struct rgb_to_hsbk *rgb_to_hsbk,\n"
       "  int argc,\n"
       "  char **argv\n"
       ");\n"
       "\n"
       "int main(int argc, char **argv) {\n"
-      "  return rgb_to_hsbk_standalone(rgb_to_hsbk_%s, argc, argv);\n"
+      "  return rgb_to_hsbk_standalone(&rgb_to_hsbk_%s, argc, argv);\n"
       "}\n"
       "#endif\n",
+    device,
     device,
     device,
     rgb[RGB_RED],
     rgb[RGB_GREEN],
     rgb[RGB_BLUE],
-    device,
     device,
     device
   );

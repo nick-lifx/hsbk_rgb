@@ -63,7 +63,7 @@ y_size, x_size, _ = image.shape
 for i in range(y_size):
   print(i, '/', y_size)
   for j in range(x_size):
-    image[i, j, :] = rgb_to_hsbk(image[i, j, :], kelv)[:HSBK_KELV]
+    image[i, j, :] = rgb_to_hsbk.convert(image[i, j, :], kelv)[:HSBK_KELV]
 
 imageio.imwrite(
   image_out,

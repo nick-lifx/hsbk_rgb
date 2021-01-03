@@ -33,6 +33,9 @@ HSBK_BR = 2
 HSBK_KELV = 3
 N_HSBK = 4
 
+KELV_MIN = 1500
+KELV_MAX = 9000
+
 EPSILON = 1e-6
 
 # table for looking up hues when rgb[i] == 0 and rgb[j] == 1
@@ -54,75 +57,76 @@ hue_table = [
   }
 ]
 
-def rgb_to_hsbk(kelv_rgb_6504K, mired_to_rgb, rgb, kelv = None):
-  # validate inputs, allowing a little slack
-  assert numpy.all(rgb >= -EPSILON) and numpy.all(rgb < 1. + EPSILON)
+class RGBToHSBK:
+  def __init__(self, kelv_rgb_6504K, mired_to_rgb):
+    self.kelv_rgb_6504K = kelv_rgb_6504K
+    self.mired_to_rgb = mired_to_rgb
 
-  hsbk = numpy.array([0., 0., 0., 0.], numpy.double)
-  if kelv is None:
-    hsbk[HSBK_KELV] = 6504.
-    kelv_rgb = kelv_rgb_6504K
-  else:
-    hsbk[HSBK_KELV] = kelv
-    kelv_rgb = mired_to_rgb.convert(1e6 / kelv)
+  def convert(self, rgb, kelv = None):
+    # validate inputs, allowing a little slack
+    assert numpy.all(rgb >= -EPSILON) and numpy.all(rgb < 1. + EPSILON)
+    assert kelv is None or (kelv >= KELV_MIN - EPSILON and kelv < KELV_MAX + EPSILON)
 
-  br = numpy.max(rgb)
-  if br >= EPSILON:
-    # it is not fully black, so we can calculate saturation
-    # note: do not corrupt the caller's value by doing rgb /= br
-    hsbk[HSBK_BR] = br
-    rgb = rgb / br
+    hsbk = numpy.zeros((N_HSBK,), numpy.double)
+    if kelv is None:
+      hsbk[HSBK_KELV] = 6504.
+      kelv_rgb = self.kelv_rgb_6504K
+    else:
+      hsbk[HSBK_KELV] = kelv
+      kelv_rgb = self.mired_to_rgb.convert(1e6 / kelv)
 
-    # subtract as much of kelv_rgb as we are able to without going negative
-    # this will result in at least one of R, G, B = 0 (i.e. a limiting one)
-    # we rely on the fact that kelv_rgb[RGB_RED] cannot go below about .7
-    kelv_factor = rgb[RGB_RED] / kelv_rgb[RGB_RED]
-    i = RGB_RED
-    if rgb[RGB_GREEN] < kelv_factor * kelv_rgb[RGB_GREEN]:
-      kelv_factor = rgb[RGB_GREEN] / kelv_rgb[RGB_GREEN]
-      i = RGB_GREEN
-    if rgb[RGB_BLUE] < kelv_factor * kelv_rgb[RGB_BLUE]:
-      kelv_factor = rgb[RGB_BLUE] / kelv_rgb[RGB_BLUE]
-      i = RGB_BLUE
-    hue_rgb = rgb - kelv_factor * kelv_rgb
-    assert hue_rgb[i] < EPSILON
+    br = numpy.max(rgb)
+    if br >= EPSILON:
+      # it is not fully black, so we can calculate saturation
+      # note: do not corrupt the caller's value by doing rgb /= br
+      hsbk[HSBK_BR] = br
+      rgb = rgb / br
 
-    # at this point we can regenerate the original rgb by
-    #   rgb = hue_rgb + kelv_factor * kelv_rgb
-    # we will now scale up hue_rgb so that at least one of R, G, B = 1,
-    # and record hue_factor to scale it down again to maintain the above
-    j = numpy.argmax(hue_rgb)
-    hue_factor = hue_rgb[j]
-    if hue_factor >= EPSILON:
-      # it is not fully white, so we can calculate hue
-      assert j != i # we know hue_rgb[i] < EPSILON, hue_rgb[j] >= EPSILON
-      hue_rgb /= hue_factor
+      # subtract as much of kelv_rgb as we are able to without going negative
+      # this will result in at least one of R, G, B = 0 (i.e. a limiting one)
+      # we rely on the fact that kelv_rgb[RGB_RED] cannot go below about .7
+      kelv_factor = rgb[RGB_RED] / kelv_rgb[RGB_RED]
+      i = RGB_RED
+      if rgb[RGB_GREEN] < kelv_factor * kelv_rgb[RGB_GREEN]:
+        kelv_factor = rgb[RGB_GREEN] / kelv_rgb[RGB_GREEN]
+        i = RGB_GREEN
+      if rgb[RGB_BLUE] < kelv_factor * kelv_rgb[RGB_BLUE]:
+        kelv_factor = rgb[RGB_BLUE] / kelv_rgb[RGB_BLUE]
+        i = RGB_BLUE
+      hue_rgb = rgb - kelv_factor * kelv_rgb
+      assert hue_rgb[i] < EPSILON
 
       # at this point we can regenerate the original rgb by
-      #   rgb = hue_factor * hue_rgb + kelv_factor * kelv_rgb
-      # if we now re-scale it so that hue_factor + kelv_factor == 1, then
-      # hue_factor will be the saturation (sum will be approximately 1, it may
-      # be larger, if hue_rgb and kelv_rgb are either side of the white point)
-      hsbk[HSBK_SAT] = hue_factor / (hue_factor + kelv_factor)
+      #   rgb = hue_rgb + kelv_factor * kelv_rgb
+      # we will now scale up hue_rgb so that at least one of R, G, B = 1,
+      # and record hue_factor to scale it down again to maintain the above
+      j = numpy.argmax(hue_rgb)
+      hue_factor = hue_rgb[j]
+      if hue_factor >= EPSILON:
+        # it is not fully white, so we can calculate hue
+        assert j != i # we know hue_rgb[i] < EPSILON, hue_rgb[j] >= EPSILON
+        hue_rgb /= hue_factor
 
-      # at this point hue_rgb[i] == 0 and hue_rgb[j] == 1 and i != j
-      # using the (i, j) we can resolve the hue down to a 60 degree segment,
-      # then rgb[k] such that k != i and k != j tells us where in the segment
-      hue_base, hue_delta, channel = hue_table[i][j]
-      hsbk[HSBK_HUE] = hue_base + hue_delta * hue_rgb[channel]
+        # at this point we can regenerate the original rgb by
+        #   rgb = hue_factor * hue_rgb + kelv_factor * kelv_rgb
+        # if we now re-scale it so that hue_factor + kelv_factor == 1, then
+        # hue_factor will be the saturation (sum will be approximately 1, it may
+        # be larger, if hue_rgb and kelv_rgb are either side of the white point)
+        hsbk[HSBK_SAT] = hue_factor / (hue_factor + kelv_factor)
 
-  return hsbk
+        # at this point hue_rgb[i] == 0 and hue_rgb[j] == 1 and i != j
+        # using the (i, j) we can resolve the hue down to a 60 degree segment,
+        # then rgb[k] such that k != i and k != j tells us where in the segment
+        hue_base, hue_delta, channel = hue_table[i][j]
+        hsbk[HSBK_HUE] = hue_base + hue_delta * hue_rgb[channel]
 
-def standalone(_rgb_to_hsbk):
+    return hsbk
+
+def standalone(rgb_to_hsbk):
   import sys
 
   EXIT_SUCCESS = 0
   EXIT_FAILURE = 1
-
-  RGB_RED = 0
-  RGB_GREEN = 1
-  RGB_BLUE = 2
-  N_RGB = 3
 
   if len(sys.argv) < 4:
     print(f'usage: {sys.argv[0]:s} R G B [kelv]')
@@ -134,7 +138,7 @@ def standalone(_rgb_to_hsbk):
   rgb = numpy.array([float(i) for i in sys.argv[1:4]], numpy.double)
   kelv = float(sys.argv[4]) if len(sys.argv) >= 5 else None
 
-  hsbk = _rgb_to_hsbk(rgb, kelv)
+  hsbk = rgb_to_hsbk.convert(rgb, kelv)
   print(
     f'RGB ({rgb[RGB_RED]:.6f}, {rgb[RGB_GREEN]:.6f}, {rgb[RGB_BLUE]:.6f}) -> HSBK ({hsbk[HSBK_HUE]:.3f}, {hsbk[HSBK_SAT]:.6f}, {hsbk[HSBK_BR]:.6f}, {hsbk[HSBK_KELV]:.3f})'
   )

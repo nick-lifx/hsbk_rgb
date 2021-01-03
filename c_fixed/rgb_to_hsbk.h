@@ -25,9 +25,15 @@
 
 #include "mired_to_rgb.h"
 
-void rgb_to_hsbk(
-  const int32_t *kelv_rgb_6504K,
-  const struct mired_to_rgb *mired_to_rgb,
+#define RGB_TO_HSBK_N_RGB 3
+
+struct rgb_to_hsbk {
+  int32_t kelv_rgb_6504K[RGB_TO_HSBK_N_RGB];
+  const struct mired_to_rgb *mired_to_rgb;
+};
+
+void rgb_to_hsbk_convert(
+  const struct rgb_to_hsbk *context,
   const int32_t *rgb,
   int32_t kelv,
   int32_t *hsbk

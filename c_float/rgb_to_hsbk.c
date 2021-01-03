@@ -34,6 +34,9 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
+#define KELV_MIN 1500.f
+#define KELV_MAX 9000.f
+
 #define EPSILON 1e-6f
 
 // table for looking up hues when rgb[i] == 0 and rgb[j] == 1
@@ -62,9 +65,8 @@ static struct hue_table {
   }
 };
 
-void rgb_to_hsbk(
-  const float *kelv_rgb_6504K,
-  const struct mired_to_rgb *mired_to_rgb,
+void rgb_to_hsbk_convert(
+  const struct rgb_to_hsbk *context,
   const float *rgb,
   float kelv,
   float *hsbk
@@ -73,16 +75,17 @@ void rgb_to_hsbk(
   assert(rgb[RGB_RED] >= -EPSILON && rgb[RGB_RED] < 1.f + EPSILON);
   assert(rgb[RGB_GREEN] >= -EPSILON && rgb[RGB_GREEN] < 1.f + EPSILON);
   assert(rgb[RGB_BLUE] >= -EPSILON && rgb[RGB_BLUE] < 1.f + EPSILON);
+  assert(kelv == 0.f || (kelv >= KELV_MIN * (1.f - EPSILON) && kelv < KELV_MAX * (1.f + EPSILON)));
 
   memset(hsbk, 0, N_HSBK * sizeof(float));
   float kelv_rgb[3];
-  if (kelv == 0) {
+  if (kelv == 0.f) {
     hsbk[HSBK_KELV] = 6504.f;
-    memcpy(kelv_rgb, kelv_rgb_6504K, N_RGB * sizeof(float));
+    memcpy(kelv_rgb, context->kelv_rgb_6504K, N_RGB * sizeof(float));
   }
   else {
     hsbk[HSBK_KELV] = kelv;
-    mired_to_rgb_convert(mired_to_rgb, 1e6f / kelv, kelv_rgb);
+    mired_to_rgb_convert(context->mired_to_rgb, 1e6f / kelv, kelv_rgb);
   }
 
   float br = rgb[RGB_RED];
@@ -157,7 +160,7 @@ void rgb_to_hsbk(
 #include <stdio.h>
 
 int rgb_to_hsbk_standalone(
-  void (*_rgb_to_hsbk)(const float *rgb, float kelv, float *hsbk),
+  const struct rgb_to_hsbk *rgb_to_hsbk,
   int argc,
   char **argv
 ) {
@@ -173,10 +176,10 @@ int rgb_to_hsbk_standalone(
     exit(EXIT_FAILURE);
   }
   float rgb[N_RGB] = {atof(argv[1]), atof(argv[2]), atof(argv[3])};
-  float kelv = argc >= 5 ? atof(argv[4]) : 6504.f;
+  float kelv = argc >= 5 ? atof(argv[4]) : 0.f;
 
   float hsbk[N_HSBK];
-  _rgb_to_hsbk(rgb, kelv, hsbk);
+  rgb_to_hsbk_convert(rgb_to_hsbk, rgb, kelv, hsbk);
   printf(
     "RGB (%.6f, %.6f, %.6f) -> HSBK (%.3f, %.6f, %.6f, %.3f)\n",
     rgb[RGB_RED],
