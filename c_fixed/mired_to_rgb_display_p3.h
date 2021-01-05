@@ -21,8 +21,6 @@
 #ifndef _MIRED_TO_RGB_DISPLAY_P3_H
 #define _MIRED_TO_RGB_DISPLAY_P3_H
 
-#include <stdint.h>
-
 #include "mired_to_rgb.h"
 
 extern const struct mired_to_rgb mired_to_rgb_display_p3;

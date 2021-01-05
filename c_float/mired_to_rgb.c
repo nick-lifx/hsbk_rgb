@@ -19,7 +19,7 @@
 // IN THE SOFTWARE.
 
 #include <assert.h>
-#include "mired_to_rgb_srgb.h"
+#include "mired_to_rgb.h"
 
 #define RGB_RED 0
 #define RGB_GREEN 1

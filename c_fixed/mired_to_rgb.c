@@ -19,7 +19,7 @@
 // IN THE SOFTWARE.
 
 #include <assert.h>
-#include "mired_to_rgb_srgb.h"
+#include "mired_to_rgb.h"
 
 #define RGB_RED 0
 #define RGB_GREEN 1
@@ -59,7 +59,7 @@ void mired_to_rgb_convert(
     );
   }
   else
-    r = 0x40000000;
+    r = 1 << 30;
   rgb[RGB_RED] = r;
 
   // calculate green channel
@@ -109,7 +109,7 @@ void mired_to_rgb_convert(
   // calculate blue channel
   int32_t b;
   if (mired < context->b_blue)
-    b = 0x40000000;
+    b = 1 << 30;
   else if (mired < context->c_blue) {
     // below assumes ORDER_BLUE_BC == 8
     b = (int32_t)context->p_blue_bc[7];

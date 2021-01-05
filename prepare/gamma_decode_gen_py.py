@@ -106,6 +106,7 @@ def gamma_decode_{10:s}(x):
   y = {15:.16e}
 {16:s}  return y * post_factor[exp + {17:d}]
 
+# standalone
 if __name__ == '__main__':
   import sys
 

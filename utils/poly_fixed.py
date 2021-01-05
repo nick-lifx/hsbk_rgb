@@ -95,7 +95,7 @@ def align(p, a, b, x_exp, bits, y_exp = None, epsilon = EPSILON):
       ]
     ),
     shr,
-    exp[0]
+    exp
   )
 
 # if we round the coefficients to integer as-is, the algorithm would be

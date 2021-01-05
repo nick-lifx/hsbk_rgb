@@ -30,8 +30,6 @@ from hsbk_to_rgb_srgb import hsbk_to_rgb_srgb
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-EPSILON = 1e-6
-
 device = 'srgb'
 if len(sys.argv) >= 3 and sys.argv[1] == '--device':
   device = sys.argv[2]

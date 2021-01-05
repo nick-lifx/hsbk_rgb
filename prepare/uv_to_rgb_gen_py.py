@@ -115,6 +115,7 @@ uv_to_rgb_{device:s} = UVToRGB(
   gamma_encode_{gamma_curve:s}
 )
 
+# standalone
 if __name__ == '__main__':
   import uv_to_rgb
 

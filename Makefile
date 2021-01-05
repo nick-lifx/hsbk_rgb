@@ -33,7 +33,7 @@ c_fixed: prepare
 	${MAKE} -C $@
 
 .PHONY: monitor
-monitor: prepare
+monitor:
 	${MAKE} -C $@
 
 .PHONY: prepare
@@ -46,3 +46,4 @@ clean:
 	${MAKE} -C c_fixed clean
 	${MAKE} -C monitor clean
 	${MAKE} -C prepare clean
+	${MAKE} -C monitor clean

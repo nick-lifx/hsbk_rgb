@@ -35,8 +35,6 @@ HSBK_BR = 2
 HSBK_KELV = 3
 N_HSBK = 4
 
-EPSILON = 1e-6
-
 device = 'srgb'
 if len(sys.argv) >= 3 and sys.argv[1] == '--device':
   device = sys.argv[2]

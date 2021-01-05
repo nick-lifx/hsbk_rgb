@@ -122,6 +122,7 @@ def xy_to_rtheta(xy):
 
   return numpy.array([x * r, theta + s], numpy.double)
 
+# standalone
 if __name__ == '__main__':
   import sys
 

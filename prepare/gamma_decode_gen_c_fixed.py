@@ -71,9 +71,9 @@ post_factor = (
   numpy.round(numpy.ldexp(post_factor, -post_factor_exp)).astype(numpy.int32)
 )
 
-# final int64_t result will have exponent p_exp + post_factor_exp
+# final int64_t result will have exponent p_exp[0] + post_factor_exp
 # we want it to be -30, hence we will shift right by the difference
-y_shr = -30 - p_exp - post_factor_exp
+y_shr = -30 - p_exp[0] - post_factor_exp
 
 def to_hex(x):
   return '{0:s}0x{1:x}'.format('' if x >= 0 else '-', abs(x))

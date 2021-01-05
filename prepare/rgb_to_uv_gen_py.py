@@ -114,6 +114,7 @@ rgb_to_uv_{device:s} = RGBToUV(
   )
 )
 
+# standalone
 if __name__ == '__main__':
   import rgb_to_uv
 

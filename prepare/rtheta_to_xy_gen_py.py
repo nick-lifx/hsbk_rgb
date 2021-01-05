@@ -128,6 +128,7 @@ def rtheta_to_xy(rtheta):
 
   return r * numpy.array([x, y], numpy.double)
 
+# standalone
 if __name__ == '__main__':
   import sys
 

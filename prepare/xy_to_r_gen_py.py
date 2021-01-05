@@ -106,6 +106,7 @@ def xy_to_r(xy):
 
   return r
 
+# standalone
 if __name__ == '__main__':
   import numpy
   import sys

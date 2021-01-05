@@ -68,9 +68,9 @@ p_v_denom, p_v_denom_shr, p_exp_v_denom = poly_fixed(
 
 # make sure we can divide u_num by u_denom and v_num by v_denom
 # maximum we can shift by is 32, but allow one less for rounding
-div_shl_u = p_exp_u_num - p_exp_u_denom - UV_EXP
+div_shl_u = p_exp_u_num[0] - p_exp_u_denom[0] - UV_EXP
 assert div_shl_u >= 0 and div_shl_u < 32
-div_shl_v = p_exp_v_num - p_exp_v_denom - UV_EXP
+div_shl_v = p_exp_v_num[0] - p_exp_v_denom[0] - UV_EXP
 assert div_shl_v >= 0 and div_shl_v < 32
 
 print(

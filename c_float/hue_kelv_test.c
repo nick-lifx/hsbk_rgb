@@ -40,8 +40,6 @@
 #define HSBK_KELV 3
 #define N_HSBK 4
 
-#define EPSILON 1e-6f
-
 int main(int argc, char **argv) {
   const char *device = "srgb";
   if (argc >= 3 && strcmp(argv[1], "--device") == 0) {

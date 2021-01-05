@@ -106,6 +106,7 @@ def gamma_encode_{7:s}(x):
   y = {11:.16e}
 {12:s}  return y * post_factor[exp + {13:d}] - {14:.16e}
 
+# standalone
 if __name__ == '__main__':
   import sys
 

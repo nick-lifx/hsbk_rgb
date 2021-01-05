@@ -164,7 +164,7 @@ gamma_decode_srgb.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 rgb_to_uv_srgb.c: ../monitor/srgb/model.yml
-	../prepare/rgb_to_uv_gen_c_float.py $^ srgb srgb  >$@
+	../prepare/rgb_to_uv_gen_c_float.py $^ srgb srgb >$@
 
 rgb_to_uv_display_p3: \
 rgb_to_uv_standalone.o \
@@ -182,7 +182,7 @@ gamma_decode_rec2020.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
 rgb_to_uv_rec2020.c: ../monitor/rec2020/model.yml
-	../prepare/rgb_to_uv_gen_c_float.py $^ rec2020 rec2020  >$@
+	../prepare/rgb_to_uv_gen_c_float.py $^ rec2020 rec2020 >$@
 
 mired_to_rgb_srgb: \
 mired_to_rgb_standalone.o \
@@ -310,31 +310,25 @@ rgb_to_hsbk_display_p3.c \
 rgb_to_hsbk_rec2020 \
 rgb_to_hsbk_rec2020.c \
 gamma_decode_srgb \
-gamma_decode_srgb.c \
 gamma_decode_rec2020 \
-gamma_decode_rec2020.c \
+gamma_decode_*.c \
 gamma_encode_srgb \
-gamma_encode_srgb.c \
 gamma_encode_rec2020 \
-gamma_encode_rec2020.c \
+gamma_encode_*.c \
 uv_to_rgb_srgb \
-uv_to_rgb_srgb.c \
 uv_to_rgb_display_p3 \
-uv_to_rgb_display_p3.c \
 uv_to_rgb_rec2020 \
-uv_to_rgb_rec2020.c \
+uv_to_rgb_*.c \
 rgb_to_uv_srgb \
-rgb_to_uv_srgb.c \
 rgb_to_uv_display_p3 \
-rgb_to_uv_display_p3.c \
 rgb_to_uv_rec2020 \
-rgb_to_uv_rec2020.c \
+rgb_to_uv_*.c \
 mired_to_rgb_srgb \
-mired_to_rgb_srgb.c \
 mired_to_rgb_display_p3 \
-mired_to_rgb_display_p3.c \
 mired_to_rgb_rec2020 \
-mired_to_rgb_rec2020.c \
+mired_to_rgb_*.c \
+mired_to_wc_krypton \
+mired_to_wc_*.c \
 kelv_to_uv \
 kelv_to_uv_deriv \
 uv_to_kelv \
