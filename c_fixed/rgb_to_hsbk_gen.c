@@ -95,6 +95,8 @@ int main(int argc, char **argv) {
       "};\n"
       "\n"
       "#ifdef STANDALONE\n"
+      "#include <stdlib.h>\n"
+      "\n"
       "int rgb_to_hsbk_standalone(\n"
       "  const struct rgb_to_hsbk *rgb_to_hsbk,\n"
       "  int argc,\n"
@@ -102,7 +104,9 @@ int main(int argc, char **argv) {
       ");\n"
       "\n"
       "int main(int argc, char **argv) {\n"
-      "  return rgb_to_hsbk_standalone(&rgb_to_hsbk_%s, argc, argv);\n"
+      "  rgb_to_hsbk_standalone(&rgb_to_hsbk_%s, argc, argv);\n"
+      "\n"
+      "  return EXIT_SUCCESS;\n"
       "}\n"
       "#endif\n",
     device,

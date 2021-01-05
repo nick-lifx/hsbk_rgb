@@ -85,7 +85,7 @@ void uv_to_rgb_convert(
 #include <stdlib.h>
 #include <stdio.h>
 
-int uv_to_rgb_standalone(
+void uv_to_rgb_standalone(
   const struct uv_to_rgb *uv_to_rgb,
   int argc,
   char **argv
@@ -115,7 +115,5 @@ int uv_to_rgb_standalone(
     ldexpf(rgb[RGB_GREEN], -30),
     ldexpf(rgb[RGB_BLUE], -30)
   );
-
-  return EXIT_SUCCESS;
 }
 #endif

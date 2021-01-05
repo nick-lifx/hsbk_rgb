@@ -159,7 +159,7 @@ void rgb_to_hsbk_convert(
 #include <stdlib.h>
 #include <stdio.h>
 
-int rgb_to_hsbk_standalone(
+void rgb_to_hsbk_standalone(
   const struct rgb_to_hsbk *rgb_to_hsbk,
   int argc,
   char **argv
@@ -190,7 +190,5 @@ int rgb_to_hsbk_standalone(
     hsbk[HSBK_BR],
     hsbk[HSBK_KELV]
   );
-
-  return EXIT_SUCCESS;
 }
 #endif

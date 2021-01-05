@@ -111,14 +111,18 @@ const struct uv_to_rgb uv_to_rgb_{device:s} = {{
 }};
 
 #ifdef STANDALONE
-int uv_to_rgb_standalone(
+#include <stdlib.h>
+
+void uv_to_rgb_standalone(
   const struct uv_to_rgb *uv_to_rgb,
   int argc,
   char **argv
 );
  
 int main(int argc, char **argv) {{
-  return uv_to_rgb_standalone(&uv_to_rgb_{device:s}, argc, argv);
+  uv_to_rgb_standalone(&uv_to_rgb_{device:s}, argc, argv);
+
+  return EXIT_SUCCESS;
 }}
 #endif'''
 )

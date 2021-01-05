@@ -69,7 +69,7 @@ void rgb_to_uv_convert(
 #include <stdlib.h>
 #include <stdio.h>
 
-int rgb_to_uv_standalone(
+void rgb_to_uv_standalone(
   const struct rgb_to_uv *rgb_to_uv,
   int argc,
   char **argv
@@ -101,7 +101,5 @@ int rgb_to_uv_standalone(
     ldexpf(uv[UV_u], -30),
     ldexpf(uv[UV_v], -30)
   );
-
-  return EXIT_SUCCESS;
 }
 #endif

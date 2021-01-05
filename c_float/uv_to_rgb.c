@@ -81,7 +81,7 @@ void uv_to_rgb_convert(
 #include <stdlib.h>
 #include <stdio.h>
 
-int uv_to_rgb_standalone(
+void uv_to_rgb_standalone(
   const struct uv_to_rgb *uv_to_rgb,
   int argc,
   char **argv
@@ -108,7 +108,5 @@ int uv_to_rgb_standalone(
     rgb[RGB_GREEN],
     rgb[RGB_BLUE]
   );
-
-  return EXIT_SUCCESS;
 }
 #endif

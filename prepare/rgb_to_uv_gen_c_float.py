@@ -110,14 +110,18 @@ const struct rgb_to_uv rgb_to_uv_{device:s} = {{
 }};
 
 #ifdef STANDALONE
-int rgb_to_uv_standalone(
+#include <stdlib.h>
+
+void rgb_to_uv_standalone(
   const struct rgb_to_uv *rgb_to_uv,
   int argc,
   char **argv
 );
  
 int main(int argc, char **argv) {{
-  return rgb_to_uv_standalone(&rgb_to_uv_{device:s}, argc, argv);
+  rgb_to_uv_standalone(&rgb_to_uv_{device:s}, argc, argv);
+
+  return EXIT_SUCCESS;
 }}
 #endif'''
 )

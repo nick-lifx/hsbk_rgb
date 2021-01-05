@@ -145,14 +145,18 @@ const struct mired_to_rgb mired_to_rgb_{1:s} = {{
 }};
 
 #ifdef STANDALONE
-int mired_to_rgb_standalone(
+#include <stdlib.h>
+
+void mired_to_rgb_standalone(
   const struct mired_to_rgb *context,
   int argc,
   char **argv
 );
  
 int main(int argc, char **argv) {{
-  return mired_to_rgb_standalone(&mired_to_rgb_{14:s}, argc, argv);
+  mired_to_rgb_standalone(&mired_to_rgb_{14:s}, argc, argv);
+
+  return EXIT_SUCCESS;
 }}
 #endif'''.format(
     device,

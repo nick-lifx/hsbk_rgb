@@ -152,7 +152,7 @@ void mired_to_rgb_convert(
 #include <stdlib.h>
 #include <stdio.h>
 
-int mired_to_rgb_standalone(
+void mired_to_rgb_standalone(
   const struct mired_to_rgb *context,
   int argc,
   char **argv
@@ -176,7 +176,5 @@ int mired_to_rgb_standalone(
     ldexpf(rgb[RGB_GREEN], -30),
     ldexpf(rgb[RGB_BLUE], -30)
   );
-
-  return EXIT_SUCCESS;
 }
 #endif

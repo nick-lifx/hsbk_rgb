@@ -96,7 +96,7 @@ void mired_to_rgb_convert(
 #include <stdlib.h>
 #include <stdio.h>
 
-int mired_to_rgb_standalone(
+void mired_to_rgb_standalone(
   const struct mired_to_rgb *context,
   int argc,
   char **argv
@@ -120,7 +120,5 @@ int mired_to_rgb_standalone(
     rgb[RGB_GREEN],
     rgb[RGB_BLUE]
   );
-
-  return EXIT_SUCCESS;
 }
 #endif

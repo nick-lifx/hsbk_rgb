@@ -26,13 +26,17 @@ const struct hsbk_to_rgb hsbk_to_rgb_rec2020 = {
 };
 
 #ifdef STANDALONE
-int hsbk_to_rgb_standalone(
+#include <stdlib.h>
+
+void hsbk_to_rgb_standalone(
   const struct hsbk_to_rgb *hsbk_to_rgb,
   int argc,
   char **argv
 );
 
 int main(int argc, char **argv) {
-  return hsbk_to_rgb_standalone(&hsbk_to_rgb_rec2020, argc, argv);
+  hsbk_to_rgb_standalone(&hsbk_to_rgb_rec2020, argc, argv);
+
+  return EXIT_SUCCESS;
 }
 #endif

@@ -117,7 +117,7 @@ void hsbk_to_rgb_convert(
 #include <stdlib.h>
 #include <stdio.h>
 
-int hsbk_to_rgb_standalone(
+void hsbk_to_rgb_standalone(
   const struct hsbk_to_rgb *hsbk_to_rgb,
   int argc,
   char **argv
@@ -152,7 +152,5 @@ int hsbk_to_rgb_standalone(
     rgb[RGB_GREEN],
     rgb[RGB_BLUE]
   );
-
-  return EXIT_SUCCESS;
 }
 #endif
