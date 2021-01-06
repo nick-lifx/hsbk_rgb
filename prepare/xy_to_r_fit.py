@@ -116,7 +116,7 @@ for i in range(breaks.shape[0] - 1):
       b
     )
     return float(max([abs(y[i]) for i in range(y.rows)]))
- 
+
   # initial estimate, fit to endpoints and midpoint
   c = .5 * (a + b)
   x0, _, _, _ = numpy.linalg.lstsq(

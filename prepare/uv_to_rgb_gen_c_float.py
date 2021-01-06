@@ -118,7 +118,7 @@ void uv_to_rgb_standalone(
   int argc,
   char **argv
 );
- 
+
 int main(int argc, char **argv) {{
   uv_to_rgb_standalone(&uv_to_rgb_{device:s}, argc, argv);
 

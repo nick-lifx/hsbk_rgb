@@ -110,7 +110,7 @@ void mired_to_rgb_standalone(
   int argc,
   char **argv
 );
- 
+
 int main(int argc, char **argv) {{
   mired_to_rgb_standalone(&mired_to_rgb_{10:s}, argc, argv);
 

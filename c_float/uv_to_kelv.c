@@ -37,7 +37,7 @@
 // kelv_uv and/or duv can be NULL
 float uv_to_kelv(const float *uv, float *kelv_uv, float *duv) {
   // validate inputs, allowing a little slack
-  assert(uv[UV_u] >= -EPSILON && uv[UV_v] >= -EPSILON && uv[UV_u] + uv[UV_v] < 1.f + EPSILON); 
+  assert(uv[UV_u] >= -EPSILON && uv[UV_v] >= -EPSILON && uv[UV_u] + uv[UV_v] < 1.f + EPSILON);
 
   // convert to xy for McCamy's approximation
   // see https://en.wikipedia.org/wiki/CIE_1960_color_space#Relation_to_CIE_XYZ
@@ -98,7 +98,7 @@ float uv_to_kelv(const float *uv, float *kelv_uv, float *duv) {
     y_normal[UV_u] /= denom;
     y_normal[UV_v] /= denom;
     *duv = y_to_uv[UV_u] * y_normal[UV_u] + y_to_uv[UV_v] * y_normal[UV_v];
-  } 
+  }
   return x;
 }
 

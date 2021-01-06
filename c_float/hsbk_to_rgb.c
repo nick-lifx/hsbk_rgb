@@ -78,7 +78,7 @@ void hsbk_to_rgb_convert(
   // the result of this interpolation will have at least one of R, G, B = 1
   float hue_rgb[N_RGB];
   for (int k = 0; k < N_RGB; ++k)
-    hue_rgb[k] = 
+    hue_rgb[k] =
       hue_sequence[k][i] +
         j * (hue_sequence[k][i + 1] - hue_sequence[k][i]);
 

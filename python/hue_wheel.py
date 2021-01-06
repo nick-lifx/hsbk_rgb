@@ -135,7 +135,7 @@ for i in range(240):
           image[120 + j, 16 + i],
           rgb,
           r - 60
-        ) 
+        )
       if r < 61. else
         rgb
       if r < 119. else
@@ -143,7 +143,7 @@ for i in range(240):
           rgb,
           image[120 + j, 16 + i],
           r - 119.
-        ) 
+        )
       )
 
 # for the indicator dot

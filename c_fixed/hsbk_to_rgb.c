@@ -57,7 +57,7 @@ void hsbk_to_rgb_convert(
   int64_t hue = hsbk[HSBK_HUE];
   int32_t sat = hsbk[HSBK_SAT];
   assert(sat >= -EPSILON0 && sat < (1 << 30) + EPSILON0);
-  int64_t br = hsbk[HSBK_BR];
+  int32_t br = hsbk[HSBK_BR];
   assert(br >= -EPSILON0 && br < (1 << 30) + EPSILON0);
   int32_t kelv = hsbk[HSBK_KELV];
   assert(kelv >= KELV_MIN - EPSILON1 && kelv < KELV_MAX + EPSILON1);
@@ -135,15 +135,15 @@ void hsbk_to_rgb_convert(
     max_channel = rgb[RGB_BLUE];
 
   // the minimum max_channel would be .5 and is reached when saturation is .5,
-  // this would leave br = 2 + epsilon, hence we declared br as int64_t above
-  br = (((br << 31) / max_channel) + 1) >> 1;
+  // this would leave t = 2 + epsilon, hence we need t to be an int64_t below
+  int64_t t = ((((int64_t)br << 31) / max_channel) + 1) >> 1;
 
   // this section applies the brightness
 
   // do the scaling in gamma-encoded RGB space
   // this is not very principled and can corrupt the chromaticities
   for (int k = 0; k < N_RGB; ++k)
-    rgb[k] = (int32_t)((rgb[k] * br + (1 << 29)) >> 30);
+    rgb[k] = (int32_t)((rgb[k] * t + (1 << 29)) >> 30);
 }
 
 #ifdef STANDALONE

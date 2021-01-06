@@ -46,14 +46,14 @@ def kelv_to_uv_deriv(kelv):
 
   u_denom_deriv = 7.08145163e-7 * 2.
   u_denom_deriv = u_denom_deriv * kelv + 8.42420235e-4
- 
+
   v_num = 4.20481691e-8
   v_num = v_num * kelv + 4.22806245e-5
   v_num = v_num * kelv + .317398726
 
   v_num_deriv = 4.20481691e-8 * 2.
   v_num_deriv = v_num_deriv * kelv + 4.22806245e-5
- 
+
   v_denom = 1.61456053e-7
   v_denom = v_denom * kelv - 2.89741816e-5
   v_denom = v_denom * kelv + 1.

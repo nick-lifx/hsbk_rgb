@@ -115,7 +115,7 @@ u = primaries_uvL[:, UVL_u]
 v = primaries_uvL[:, UVL_v]
 L = primaries_uvL[:, UVL_L]
 primaries_UVW = numpy.stack([u, v, 1. - u - v], 1) * L[:, numpy.newaxis]
- 
+
 # note: below is transposed so use rgb @ UVW_to_rgb, not UVW_to_rgb @ rgb
 UVW_to_rgb = numpy.linalg.inv(primaries_UVW)
 def mired_to_rgb(mired):
