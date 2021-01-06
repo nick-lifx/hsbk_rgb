@@ -43,13 +43,13 @@ gamma_encode_fit_rec2020.yml: ../monitor/rec2020/model.yml
 	./gamma_encode_fit.py $^ $@
 
 mired_to_rgb_fit_srgb.yml: ../monitor/srgb/model.yml
-	./mired_to_rgb_fit.py $^ 150 500 $@
+	./mired_to_rgb_fit.py $^ $@
 
 mired_to_rgb_fit_display_p3.yml: ../monitor/display_p3/model.yml
-	./mired_to_rgb_fit.py $^ 150 950 $@
+	./mired_to_rgb_fit.py $^ $@
 
 mired_to_rgb_fit_rec2020.yml: ../monitor/rec2020/model.yml
-	./mired_to_rgb_fit.py $^ 150 950 $@
+	./mired_to_rgb_fit.py $^ $@
 
 rtheta_to_xy_fit.yml:
 	./rtheta_to_xy_fit.py $@

@@ -68,9 +68,10 @@ EXTRA_ORDER_GREEN_AB = 8
 EXTRA_ORDER_GREEN_BD = 12
 EXTRA_ORDER_BLUE_BC = 16
 
-# user has to provide an estimate of the red/blue and blue/zero intersection
-# we will search for the actual intersection at user's estimate +/- this value
-INTERSECT_EXTRA_DOMAIN = 100.
+# we will coarsely determine intersections using this many points in the
+# mired scale, then use Newton's method to refine position between points
+N_COARSE = 100
+NEWTON_ORDER = 8
 
 # we can fit a small extra region around the needed one
 # tries to place a zero near each end of the region, allowing better joining
@@ -80,6 +81,8 @@ FIT_EXTRA_DOMAIN = 5.
 MIRED_MIN = 1e6 / 15000.
 MIRED_MAX = 1e6 / 1000.
 
+EPSILON = 1e-6
+
 mpmath.mp.prec = 106
 
 #numpy.set_printoptions(threshold = numpy.inf)
@@ -88,13 +91,11 @@ diag = False
 if len(sys.argv) >= 2 and sys.argv[1] == '--diag':
   diag = True
   del sys.argv[1]
-if len(sys.argv) < 5:
-  print(f'usage: {sys.argv[0]:s} [--diag] model_in.yml b_estimate c_estimate mired_to_rgb_fit_out.yml')
+if len(sys.argv) < 3:
+  print(f'usage: {sys.argv[0]:s} [--diag] model_in.yml mired_to_rgb_fit_out.yml')
   sys.exit(EXIT_FAILURE)
 model_in = sys.argv[1]
-b_estimate = float(sys.argv[2])
-c_estimate = float(sys.argv[3])
-mired_to_rgb_fit_out = sys.argv[4]
+mired_to_rgb_fit_out = sys.argv[2]
 
 model = utils.yaml_io._import(utils.yaml_io.read_file(model_in))
 gamma_a = model['gamma_a']
@@ -180,22 +181,26 @@ print('a', a)
 d = MIRED_MAX
 print('d', d)
 
+x_coarse = mpmath.matrix(numpy.linspace(a, d, N_COARSE, numpy.double))
+
 # find b, i.e. where red meets blue
 def f(x):
   mired_rgb = mired_to_rgb(numpy.array(x, numpy.double))
   return mpmath.matrix(mired_rgb[:, RGB_RED] - mired_rgb[:, RGB_BLUE])
+y_coarse = f(x_coarse)
+sign_coarse = [y_coarse[i] < 0. for i in range(y_coarse.rows)]
+i = sum(sign_coarse)
+assert i >= 2 and i < N_COARSE - 1
+assert sign_coarse == [True] * i + [False] * (N_COARSE - i)
 b = float(
   utils.poly.newton(
     utils.poly_fit.any_f_to_poly(
       f,
-      b_estimate - INTERSECT_EXTRA_DOMAIN,
-      b_estimate + INTERSECT_EXTRA_DOMAIN,
-      max(
-        ORDER_RED_AB + EXTRA_ORDER_RED_AB,
-        ORDER_BLUE_BC + EXTRA_ORDER_BLUE_BC
-      )
+      x_coarse[i - 2],
+      x_coarse[i + 1],
+      NEWTON_ORDER
     ),
-    b_estimate
+    .5 * (x_coarse[i - 1] + x_coarse[i])
   )
 )
 print('b', b)
@@ -204,20 +209,21 @@ print('b', b)
 def f(x):
   mired_rgb = mired_to_rgb(numpy.array(x, numpy.double))
   return mpmath.matrix(mired_rgb[:, RGB_BLUE])
-c = (
-  float(
-    utils.poly.newton(
-      utils.poly_fit.any_f_to_poly(
-        f,
-        c_estimate - INTERSECT_EXTRA_DOMAIN,
-        c_estimate + INTERSECT_EXTRA_DOMAIN,
-        ORDER_BLUE_BC + EXTRA_ORDER_BLUE_BC
-      ),
-      c_estimate
-    )
+y_coarse = f(x_coarse)
+sign_coarse = [y_coarse[i] >= 0. for i in range(y_coarse.rows)]
+i = sum(sign_coarse)
+assert i >= 2 and i < N_COARSE - 1
+assert sign_coarse == [True] * i + [False] * (N_COARSE - i)
+c = float(
+  utils.poly.newton(
+    utils.poly_fit.any_f_to_poly(
+      f,
+      x_coarse[i - 2],
+      x_coarse[i + 1],
+      NEWTON_ORDER
+    ),
+    .5 * (x_coarse[i - 1] + x_coarse[i])
   )
-if c_estimate < MIRED_MAX else
-  MIRED_MAX
 )
 print('c', c)
 
@@ -236,7 +242,10 @@ def mired_to_rgb_or_wc(x):
 def f(x):
   mired_rgb = mired_to_rgb_or_wc(numpy.array(x, numpy.double))
   return mpmath.matrix(
-    gamma_encode(mired_rgb[:, RGB_RED] / mired_rgb[:, RGB_BLUE])
+    gamma_encode(
+      mired_rgb[:, RGB_RED] /
+        numpy.maximum(mired_rgb[:, RGB_BLUE], EPSILON)
+    )
   )
 p_red_ab, p_red_ab_err = utils.remez.remez_f(
   f,
@@ -255,7 +264,10 @@ p_red_bd_err = 0.
 def f(x):
   mired_rgb = mired_to_rgb_or_wc(numpy.array(x, numpy.double))
   return mpmath.matrix(
-    gamma_encode(mired_rgb[:, RGB_GREEN] / mired_rgb[:, RGB_BLUE])
+    gamma_encode(
+      mired_rgb[:, RGB_GREEN] /
+        numpy.maximum(mired_rgb[:, RGB_BLUE], EPSILON)
+    )
   )
 p_green_ab, p_green_ab_err = utils.remez.remez_f(
   f,
@@ -270,7 +282,10 @@ print('p_green_ab_err', p_green_ab_err)
 def f(x):
   mired_rgb = mired_to_rgb_or_wc(numpy.array(x, numpy.double))
   return mpmath.matrix(
-    gamma_encode(mired_rgb[:, RGB_GREEN] / mired_rgb[:, RGB_RED])
+    gamma_encode(
+      mired_rgb[:, RGB_GREEN] /
+        numpy.maximum(mired_rgb[:, RGB_RED], EPSILON)
+    )
   )
 p_green_bd, p_green_bd_err = utils.remez.remez_f(
   f,
@@ -289,7 +304,10 @@ p_blue_ab_err = 0.
 def f(x):
   mired_rgb = mired_to_rgb_or_wc(numpy.array(x, numpy.double))
   return mpmath.matrix(
-    gamma_encode(mired_rgb[:, RGB_BLUE] / mired_rgb[:, RGB_RED])
+    gamma_encode(
+      mired_rgb[:, RGB_BLUE] /
+        numpy.maximum(mired_rgb[:, RGB_RED], EPSILON)
+    )
   )
 p_blue_bc, p_blue_bc_err = utils.remez.remez_f(
   f,
@@ -326,15 +344,11 @@ b_blue = float(
   )
 )
 print('b_blue', b_blue)
-c_blue = (
-  float(
-    utils.poly.newton(
-      utils.poly.add(p_blue_bc, -p_blue_cd),
-      c
-    )
+c_blue = float(
+  utils.poly.newton(
+    utils.poly.add(p_blue_bc, -p_blue_cd),
+    c
   )
-if c < MIRED_MAX else
-  MIRED_MAX
 )
 print('c_blue', c_blue)
 
@@ -348,10 +362,16 @@ if diag:
   for i in range(N_RGB):
     def f_ab(x):
       mired_rgb = mired_to_rgb_or_wc(x)
-      return gamma_encode(mired_rgb[:, i] / mired_rgb[:, RGB_BLUE])
+      return gamma_encode(
+        mired_rgb[:, i] /
+          numpy.maximum(mired_rgb[:, RGB_BLUE], EPSILON)
+      )
     def f_bd(x):
       mired_rgb = mired_to_rgb_or_wc(x)
-      return gamma_encode(mired_rgb[:, i] / mired_rgb[:, RGB_RED])
+      return gamma_encode(
+        mired_rgb[:, i] /
+          numpy.maximum(mired_rgb[:, RGB_RED], EPSILON)
+      )
     y = numpy.concatenate([f_ab(x_ab), f_bd(x_bd)], 0)
     matplotlib.pyplot.plot(x, y)
 
