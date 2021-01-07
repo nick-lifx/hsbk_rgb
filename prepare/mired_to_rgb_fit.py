@@ -73,10 +73,6 @@ EXTRA_ORDER_BLUE_BC = 16
 N_COARSE = 100
 NEWTON_ORDER = 8
 
-# we can fit a small extra region around the needed one
-# tries to place a zero near each end of the region, allowing better joining
-FIT_EXTRA_DOMAIN = 5.
-
 # fit will be valid in this range
 MIRED_MIN = 1e6 / 15000.
 MIRED_MAX = 1e6 / 1000.
@@ -205,7 +201,7 @@ b = float(
 )
 print('b', b)
 
-# find c, d, i.e. where blue meets 0
+# find c, i.e. where blue meets 0
 def f(x):
   mired_rgb = mired_to_rgb(numpy.array(x, numpy.double))
   return mpmath.matrix(mired_rgb[:, RGB_BLUE])
@@ -249,8 +245,8 @@ def f(x):
   )
 p_red_ab, p_red_ab_err = utils.remez.remez_f(
   f,
-  a - FIT_EXTRA_DOMAIN,
-  b + FIT_EXTRA_DOMAIN,
+  a,
+  b,
   ORDER_RED_AB,
   extra_order = EXTRA_ORDER_RED_AB
 )
@@ -271,8 +267,8 @@ def f(x):
   )
 p_green_ab, p_green_ab_err = utils.remez.remez_f(
   f,
-  a - FIT_EXTRA_DOMAIN,
-  b + FIT_EXTRA_DOMAIN,
+  a,
+  b,
   ORDER_GREEN_AB,
   extra_order = EXTRA_ORDER_GREEN_AB
 )
@@ -289,8 +285,8 @@ def f(x):
   )
 p_green_bd, p_green_bd_err = utils.remez.remez_f(
   f,
-  b - FIT_EXTRA_DOMAIN,
-  d + FIT_EXTRA_DOMAIN,
+  b,
+  d,
   ORDER_GREEN_BD,
   extra_order = EXTRA_ORDER_GREEN_BD
 )
@@ -311,8 +307,8 @@ def f(x):
   )
 p_blue_bc, p_blue_bc_err = utils.remez.remez_f(
   f,
-  b - FIT_EXTRA_DOMAIN,
-  c + FIT_EXTRA_DOMAIN,
+  b,
+  c,
   ORDER_BLUE_BC,
   extra_order = EXTRA_ORDER_BLUE_BC
 )
@@ -322,7 +318,7 @@ print('p_blue_bc_err', p_blue_bc_err)
 p_blue_cd = mpmath.matrix([0.])
 p_blue_cd_err = 0.
 
-# fix discontinuities by setting b, c, d to exact intersections after fitting
+# fix discontinuities by setting b, c to exact intersections after fitting
 b_red = float(
   utils.poly.newton(
     utils.poly.add(p_red_ab, -p_red_bd),
