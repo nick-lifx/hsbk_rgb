@@ -88,4 +88,5 @@
 /python/uv_to_rgb_*.py
 /python/xy_to_rtheta.py
 /python/xy_to_r.py
+/test/out_*.txt
 __pycache__
