@@ -100,9 +100,9 @@ sys.stdout.write(
     p_last = to_hex(p[-1]),
     p = ''.join(
       [
-        '  y = (int32_t)(((int64_t)y * x {0:s} 0x{1:x}LL) >> {2:d});\n'.format(
+        '  y = (int32_t)(((int64_t)y * x {0:s} {1:s}LL) >> {2:d});\n'.format(
           '-' if p[i] < 0. else '+',
-          abs(p[i]),
+          to_hex(abs(p[i])),
           p_shr[i]
         )
         for i in range(p.shape[0] - 2, -1, -1)

@@ -31,6 +31,8 @@ import math
 import mpmath
 import numpy
 from utils.poly_fixed import poly_fixed
+from utils.to_fixed import to_fixed
+from utils.to_hex import to_hex
 
 EPSILON = 1e-6
 
@@ -82,28 +84,28 @@ assert div_shl_v >= 0 and div_shl_v < 32
 
 sys.stdout.write(
   sys.stdin.read().format(
-    kelv_min = int(round(math.ldexp(KELV_MIN * (1. - EPSILON), -KELV_EXP))),
-    kelv_max = int(round(math.ldexp(KELV_MAX * (1. + EPSILON), -KELV_EXP))),
-    p_u_num2 = p_u_num[2],
-    p_u_num1 = p_u_num[1],
+    kelv_min = to_fixed(KELV_MIN * (1. - EPSILON), KELV_EXP),
+    kelv_max = to_fixed(KELV_MAX * (1. + EPSILON), KELV_EXP),
+    p_u_num2 = to_hex(p_u_num[2]),
+    p_u_num1 = to_hex(p_u_num[1]),
     p_u_num_shr1 = p_u_num_shr[1],
-    p_u_num0 = p_u_num[0],
+    p_u_num0 = to_hex(p_u_num[0]),
     p_u_num_shr0 = p_u_num_shr[0],
-    p_u_denom2 = p_u_denom[2],
-    p_u_denom1 = p_u_denom[1],
+    p_u_denom2 = to_hex(p_u_denom[2]),
+    p_u_denom1 = to_hex(p_u_denom[1]),
     p_u_denom_shr1 = p_u_denom_shr[1],
-    p_u_denom0 = p_u_denom[0],
+    p_u_denom0 = to_hex(p_u_denom[0]),
     p_u_denom_shr0 = p_u_denom_shr[0],
     div_shl_u_plus_one = div_shl_u + 1,
-    p_v_num2 = p_v_num[2],
-    p_v_num1 = p_v_num[1],
+    p_v_num2 = to_hex(p_v_num[2]),
+    p_v_num1 = to_hex(p_v_num[1]),
     p_v_num_shr1 = p_v_num_shr[1],
-    p_v_num0 = p_v_num[0],
+    p_v_num0 = to_hex(p_v_num[0]),
     p_v_num_shr0 = p_v_num_shr[0],
-    p_v_denom2 = p_v_denom[2],
-    minus_p_v_denom1 = -p_v_denom[1],
+    p_v_denom2 = to_hex(p_v_denom[2]),
+    minus_p_v_denom1 = to_hex(-p_v_denom[1]),
     p_v_denom_shr1 = p_v_denom_shr[1],
-    p_v_denom0 = p_v_denom[0],
+    p_v_denom0 = to_hex(p_v_denom[0]),
     p_v_denom_shr0 = p_v_denom_shr[0],
     div_shl_v_plus_one = div_shl_v + 1
   )
