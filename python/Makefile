@@ -39,68 +39,94 @@ rgb_to_hsbk_srgb.py \
 rgb_to_hsbk_display_p3.py \
 rgb_to_hsbk_rec2020.py
 
-gamma_decode_srgb.py: ../prepare/gamma_decode_fit_srgb.yml
-	../prepare/gamma_decode_gen_py.py $^ srgb >$@
+gamma_decode_srgb.py: \
+../prepare/gamma_decode_fit_srgb.yml \
+gamma_decode_device.py.template
+	../prepare/gamma_decode_gen_py.py $< srgb <gamma_decode_device.py.template >$@
 	chmod a+x $@
 
-gamma_decode_rec2020.py: ../prepare/gamma_decode_fit_rec2020.yml
-	../prepare/gamma_decode_gen_py.py $^ rec2020 >$@
+gamma_decode_rec2020.py: \
+../prepare/gamma_decode_fit_rec2020.yml \
+gamma_decode_device.py.template
+	../prepare/gamma_decode_gen_py.py $< rec2020 <gamma_decode_device.py.template >$@
 	chmod a+x $@
 
-gamma_encode_srgb.py: ../prepare/gamma_encode_fit_srgb.yml
-	../prepare/gamma_encode_gen_py.py $^ srgb >$@
+gamma_encode_srgb.py: \
+../prepare/gamma_encode_fit_srgb.yml \
+gamma_encode_device.py.template
+	../prepare/gamma_encode_gen_py.py $< srgb <gamma_encode_device.py.template >$@
 	chmod a+x $@
 
-gamma_encode_rec2020.py: ../prepare/gamma_encode_fit_rec2020.yml
-	../prepare/gamma_encode_gen_py.py $^ rec2020 >$@
+gamma_encode_rec2020.py: \
+../prepare/gamma_encode_fit_rec2020.yml \
+gamma_encode_device.py.template
+	../prepare/gamma_encode_gen_py.py $< rec2020 <gamma_encode_device.py.template >$@
 	chmod a+x $@
 
-uv_to_rgb_srgb.py: ../monitor/srgb/model.yml
-	../prepare/uv_to_rgb_gen_py.py $^ srgb srgb >$@
+uv_to_rgb_srgb.py: \
+../monitor/srgb/model.yml \
+uv_to_rgb_device.py.template
+	../prepare/uv_to_rgb_gen_py.py $< srgb srgb <uv_to_rgb_device.py.template >$@
 	chmod a+x $@
 
-uv_to_rgb_display_p3.py: ../monitor/display_p3/model.yml
-	../prepare/uv_to_rgb_gen_py.py $^ srgb display_p3 >$@
+uv_to_rgb_display_p3.py: \
+../monitor/display_p3/model.yml \
+uv_to_rgb_device.py.template
+	../prepare/uv_to_rgb_gen_py.py $< srgb display_p3 <uv_to_rgb_device.py.template >$@
 	chmod a+x $@
 
-uv_to_rgb_rec2020.py: ../monitor/rec2020/model.yml
-	../prepare/uv_to_rgb_gen_py.py $^ rec2020 rec2020 >$@
+uv_to_rgb_rec2020.py: \
+../monitor/rec2020/model.yml \
+uv_to_rgb_device.py.template
+	../prepare/uv_to_rgb_gen_py.py $< rec2020 rec2020 <uv_to_rgb_device.py.template >$@
 	chmod a+x $@
 
-rgb_to_uv_srgb.py: ../monitor/srgb/model.yml
-	../prepare/rgb_to_uv_gen_py.py $^ srgb srgb >$@
+rgb_to_uv_srgb.py: \
+../monitor/srgb/model.yml \
+rgb_to_uv_device.py.template
+	../prepare/rgb_to_uv_gen_py.py $< srgb srgb <rgb_to_uv_device.py.template >$@
 	chmod a+x $@
 
-rgb_to_uv_display_p3.py: ../monitor/display_p3/model.yml
-	../prepare/rgb_to_uv_gen_py.py $^ srgb display_p3 >$@
+rgb_to_uv_display_p3.py: \
+../monitor/display_p3/model.yml \
+rgb_to_uv_device.py.template
+	../prepare/rgb_to_uv_gen_py.py $< srgb display_p3 <rgb_to_uv_device.py.template <rgb_to_uv_device.py.template >$@
 	chmod a+x $@
 
-rgb_to_uv_rec2020.py: ../monitor/rec2020/model.yml
-	../prepare/rgb_to_uv_gen_py.py $^ rec2020 rec2020 >$@
+rgb_to_uv_rec2020.py: \
+../monitor/rec2020/model.yml \
+rgb_to_uv_device.py.template
+	../prepare/rgb_to_uv_gen_py.py $< rec2020 rec2020 <rgb_to_uv_device.py.template >$@
 	chmod a+x $@
 
-mired_to_rgb_srgb.py: ../prepare/mired_to_rgb_fit_srgb.yml
-	../prepare/mired_to_rgb_gen_py.py $^ srgb >$@
+mired_to_rgb_srgb.py: \
+../prepare/mired_to_rgb_fit_srgb.yml \
+mired_to_rgb_device.py.template
+	../prepare/mired_to_rgb_gen_py.py $< srgb <mired_to_rgb_device.py.template >$@
 	chmod a+x $@
 
-mired_to_rgb_display_p3.py: ../prepare/mired_to_rgb_fit_display_p3.yml
-	../prepare/mired_to_rgb_gen_py.py $^ display_p3 >$@
+mired_to_rgb_display_p3.py: \
+../prepare/mired_to_rgb_fit_display_p3.yml \
+mired_to_rgb_device.py.template
+	../prepare/mired_to_rgb_gen_py.py $< display_p3 <mired_to_rgb_device.py.template >$@
 	chmod a+x $@
 
-mired_to_rgb_rec2020.py: ../prepare/mired_to_rgb_fit_rec2020.yml
-	../prepare/mired_to_rgb_gen_py.py $^ rec2020 >$@
+mired_to_rgb_rec2020.py: \
+../prepare/mired_to_rgb_fit_rec2020.yml \
+mired_to_rgb_device.py.template
+	../prepare/mired_to_rgb_gen_py.py $< rec2020 <mired_to_rgb_device.py.template >$@
 	chmod a+x $@
 
-rtheta_to_xy.py: ../prepare/rtheta_to_xy_fit.yml
-	../prepare/rtheta_to_xy_gen_py.py $^ >$@
+rtheta_to_xy.py: ../prepare/rtheta_to_xy_fit.yml rtheta_to_xy.py.template
+	../prepare/rtheta_to_xy_gen_py.py $< <$@.template >$@
 	chmod a+x $@
 
-xy_to_rtheta.py: ../prepare/xy_to_rtheta_fit.yml
-	../prepare/xy_to_rtheta_gen_py.py $^ >$@
+xy_to_rtheta.py: ../prepare/xy_to_rtheta_fit.yml xy_to_rtheta.py.template
+	../prepare/xy_to_rtheta_gen_py.py $< <$@.template >$@
 	chmod a+x $@
 
-xy_to_r.py: ../prepare/xy_to_r_fit.yml
-	../prepare/xy_to_r_gen_py.py $^ >$@
+xy_to_r.py: ../prepare/xy_to_r_fit.yml xy_to_r.py.template
+	../prepare/xy_to_r_gen_py.py $< <$@.template >$@
 	chmod a+x $@
 
 # most generator scripts live in ../prepare, but this one is special,
