@@ -62,29 +62,26 @@ p = numpy.array(p, numpy.double)
 
 sys.stdout.write(
   sys.stdin.read().format(
-    device,
-    ','.join(
+    device = device,
+    post_factor = ','.join(
       [
         f'\n  {post_factor[i]:.8e}f'
         for i in range(post_factor.shape[0])
       ]
     ),
-    str(gamma_a),
-    str(gamma_b),
-    str(gamma_a),
-    str(gamma_c),
-    str(gamma_d),
-    str(gamma_e),
-    str(2. - gamma_c),
-    str(2. - gamma_c),
-    err,
-    device,
-    gamma_a * gamma_b,
-    1. / gamma_a,
-    gamma_c,
-    exp1 + 1,
-    p[-1],
-    ''.join(
+    str_gamma_a = str(gamma_a),
+    str_gamma_b = str(gamma_b),
+    str_gamma_c = str(gamma_c),
+    str_gamma_d = str(gamma_d),
+    str_gamma_e = str(gamma_e),
+    two_minus_gamma_c = str(2. - gamma_c),
+    err = err,
+    gamma_a_gamma_b = gamma_a * gamma_b,
+    gamma_a_recip = 1. / gamma_a,
+    gamma_c = gamma_c,
+    exp1_plus_one = exp1 + 1,
+    p_last = p[-1],
+    p = ''.join(
       [
         '  y = y * x {0:s} {1:.8e}f;\n'.format(
           '-' if p[i] < 0. else '+',
@@ -93,7 +90,6 @@ sys.stdout.write(
         for i in range(p.shape[0] - 2, -1, -1)
       ]
     ),
-    -exp0,
-    device
+    minus_exp0 = -exp0
   )
 )

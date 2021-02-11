@@ -22,24 +22,24 @@
 
 #include <assert.h>
 #include <math.h>
-#include "gamma_encode_{0:s}.h"
+#include "gamma_encode_{device:s}.h"
 
-static float post_factor[] = {{{1:s}
+static float post_factor[] = {{{post_factor:s}
 }};
 
 // returns approximation to:
-//   x < {2:s}f ? x * {3:s}f : powf(x, 1.f / {4:s}f) * {5:s}f - {6:s}f
+//   x < {str_gamma_b:s}f ? x * {str_gamma_a:s}f : powf(x, 1.f / {str_gamma_e:s}f) * {str_gamma_d:s}f - {str_gamma_c:s}f
 // allowed domain (-inf, 2), recommended domain [-epsilon, 1 + epsilon)
 // do not call with argument >= 2 due to table lookup overflow (unchecked)
-// minimax error is up to {7:e} relative
-float gamma_encode_{8:s}(float x) {{
-  if (x < {9:.8e}f)
-    return x * {10:.8e}f;
+// minimax error is up to {err:e} relative
+float gamma_encode_{device:s}(float x) {{
+  if (x < {gamma_b:.8e}f)
+    return x * {gamma_a:.8e}f;
   int exp;
   x = frexpf(x, &exp);
-  assert(exp < {11:d});
-  float y = {12:.8e}f;
-{13:s}  return y * post_factor[exp + {14:d}] - {15:.8e}f;
+  assert(exp < {exp1_plus_one:d});
+  float y = {p_last:.8e}f;
+{p:s}  return y * post_factor[exp + {minus_exp0:d}] - {gamma_c:.8e}f;
 }}
 
 #ifdef STANDALONE
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {{
   }}
   float x = atof(argv[1]);
 
-  float y = gamma_encode_{16:s}(x);
+  float y = gamma_encode_{device:s}(x);
   printf("linear %.6f -> gamma encoded %.6f\n", x, y);
 
   return EXIT_SUCCESS;

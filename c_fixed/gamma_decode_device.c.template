@@ -20,22 +20,22 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#include "gamma_decode_{0:s}.h"
+#include "gamma_decode_{device:s}.h"
 
-static int32_t post_factor[] = {{{1:s}
+static int32_t post_factor[] = {{{post_factor:s}
 }};
 
 // argument and result in 2:30 fixed point
 // returns approximation to:
-//   x < {2:s}f * {3:s}f ? x / {4:s}f : powf((x + {5:s}f) / {6:s}f, {7:s}f)
-// allowed domain (-inf, {8:s}), recommended domain [-epsilon, 1 + epsilon)
-// do not call with argument >= {9:s} due to table lookup overflow (unchecked)
-// minimax error is up to {10:e} relative
-int32_t gamma_decode_{11:s}(int32_t x) {{
-  if (x < {12:s})
-    return (int32_t)((x * {13:s}LL + {14:s}LL) >> {15:d});
-  x += {16:s};
-  int exp = {17:d};
+//   x < {str_gamma_a:s}f * {str_gamma_b:s}f ? x / {str_gamma_a:s}f : powf((x + {str_gamma_c:s}f) / {str_gamma_d:s}f, {str_gamma_e:s}f)
+// allowed domain (-inf, {two_minus_gamma_c:s}), recommended domain [-epsilon, 1 + epsilon)
+// do not call with argument >= {two_minus_gamma_c:s} due to table lookup overflow (unchecked)
+// minimax error is up to {err:e} relative
+int32_t gamma_decode_{device:s}(int32_t x) {{
+  if (x < {gamma_a_gamma_b:s})
+    return (int32_t)((x * {gamma_a_recip:s}LL + {gamma_a_recip_half:s}LL) >> {gamma_a_recip_shr:d});
+  x += {gamma_c:s};
+  int exp = {one_minus_exp0:d};
   if ((x & 0x78000000) == 0) {{
     x <<= 4;
     exp -= 4;
@@ -48,8 +48,8 @@ int32_t gamma_decode_{11:s}(int32_t x) {{
     x <<= 1;
     exp -= 1;
   }}
-  int32_t y = {18:s};
-{19:s}  return (int32_t)(((int64_t)y * post_factor[exp] + {20:s}LL) >> {21:d});
+  int32_t y = {p_last:s};
+{p:s}  return (int32_t)(((int64_t)y * post_factor[exp] + {y_half:s}LL) >> {y_shr:d});
 }}
 
 #ifdef STANDALONE
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {{
   }}
   int32_t x = (int32_t)roundf(ldexpf(atof(argv[1]), 30));
 
-  int32_t y = gamma_decode_{22:s}(x);
+  int32_t y = gamma_decode_{device:s}(x);
   printf("gamma encoded %.6f -> linear %.6f\n", ldexpf(x, -30), ldexpf(y, -30));
 
   return EXIT_SUCCESS;

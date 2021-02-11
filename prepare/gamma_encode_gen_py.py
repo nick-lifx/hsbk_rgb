@@ -62,24 +62,24 @@ p = numpy.array(p, numpy.double)
 
 sys.stdout.write(
   sys.stdin.read().format(
-    ','.join(
+    post_factor = ','.join(
       [
         f'\n    {post_factor[i]:.16e}'
         for i in range(post_factor.shape[0])
       ]
     ),
-    str(gamma_a),
-    str(gamma_b),
-    str(gamma_e),
-    str(gamma_d),
-    str(gamma_c),
-    err,
-    device,
-    gamma_b,
-    gamma_a,
-    exp1 + 1,
-    p[-1],
-    ''.join(
+    str_gamma_a = str(gamma_a),
+    str_gamma_b = str(gamma_b),
+    str_gamma_e = str(gamma_e),
+    str_gamma_d = str(gamma_d),
+    str_gamma_c = str(gamma_c),
+    err = err,
+    device = device,
+    gamma_b = gamma_b,
+    gamma_a = gamma_a,
+    exp1_plus_one = exp1 + 1,
+    p_last = p[-1],
+    p = ''.join(
       [
         '  y = y * x {0:s} {1:.16e}\n'.format(
           '-' if p[i] < 0. else '+',
@@ -88,8 +88,7 @@ sys.stdout.write(
         for i in range(p.shape[0] - 2, -1, -1)
       ]
     ),
-    -exp0,
-    gamma_c,
-    device
+    minus_exp0 = -exp0,
+    gamma_c = gamma_c
   )
 )

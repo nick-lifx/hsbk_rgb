@@ -20,17 +20,17 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#include "mired_to_rgb_{0:s}.h"
+#include "mired_to_rgb_{device:s}.h"
 
-const struct mired_to_rgb mired_to_rgb_{1:s} = {{
-  {2:.8e}f,
-  {3:.8e}f,
-  {4:.8e}f,
-  {5:.8e}f,
-  {{{6:s}}},
-  {{{7:s}}},
-  {{{8:s}}},
-  {{{9:s}}}
+const struct mired_to_rgb mired_to_rgb_{device:s} = {{
+  {b_red:.8e}f,
+  {b_green:.8e}f,
+  {b_blue:.8e}f,
+  {c_blue:.8e}f,
+  {{{p_red_ab:s}}},
+  {{{p_green_ab:s}}},
+  {{{p_green_bd:s}}},
+  {{{p_blue_bc:s}}}
 }};
 
 #ifdef STANDALONE
@@ -43,7 +43,7 @@ void mired_to_rgb_standalone(
 );
 
 int main(int argc, char **argv) {{
-  mired_to_rgb_standalone(&mired_to_rgb_{10:s}, argc, argv);
+  mired_to_rgb_standalone(&mired_to_rgb_{device:s}, argc, argv);
 
   return EXIT_SUCCESS;
 }}

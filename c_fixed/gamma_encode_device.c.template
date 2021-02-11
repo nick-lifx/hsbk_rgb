@@ -20,20 +20,20 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#include "gamma_encode_{0:s}.h"
+#include "gamma_encode_{device:s}.h"
 
-static int32_t post_factor[] = {{{1:s}
+static int32_t post_factor[] = {{{post_factor:s}
 }};
 
 // argument and result in 2:30 fixed point
 // returns approximation to:
-//   x < {2:s}f ? x * {3:s}f : powf(x, 1.f / {4:s}f) * {5:s}f - {6:s}f
+//   x < {str_gamma_b:s}f ? x * {str_gamma_a:s}f : powf(x, 1.f / {str_gamma_e:s}f) * {str_gamma_d:s}f - {str_gamma_c:s}f
 // allowed domain [-2, 2), recommended domain [-epsilon, 1 + epsilon)
-// minimax error is up to {7:e} relative
-int32_t gamma_encode_{8:s}(int32_t x) {{
-  if (x < {9:s})
-    return (int32_t)((x * {10:s}LL + {11:s}LL) >> {12:d});
-  int exp = {13:d};
+// minimax error is up to {err:e} relative
+int32_t gamma_encode_{device:s}(int32_t x) {{
+  if (x < {gamma_b:s})
+    return (int32_t)((x * {gamma_a:s}LL + {gamma_a_half:s}LL) >> {gamma_a_shr:d});
+  int exp = {one_minus_exp0:d};
   if ((x & 0x7f800000) == 0) {{
     x <<= 8;
     exp -= 8;
@@ -50,8 +50,8 @@ int32_t gamma_encode_{8:s}(int32_t x) {{
     x <<= 1;
     exp -= 1;
   }}
-  int32_t y = {14:s};
-{15:s}  return (int32_t)(((int64_t)y * post_factor[exp] - {16:s}LL) >> {17:d});
+  int32_t y = {p_last:s};
+{p:s}  return (int32_t)(((int64_t)y * post_factor[exp] - {gamma_c_shl_minus_y_half:s}LL) >> {y_shr:d});
 }}
 
 #ifdef STANDALONE
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {{
   }}
   int32_t x = (int32_t)roundf(ldexpf(atof(argv[1]), 30));
 
-  int32_t y = gamma_encode_{18:s}(x);
+  int32_t y = gamma_encode_{device:s}(x);
   printf("gamma encoded %.6f -> linear %.6f\n", ldexpf(x, -30), ldexpf(y, -30));
 
   return EXIT_SUCCESS;

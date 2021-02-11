@@ -57,13 +57,13 @@ q = numpy.array(q, numpy.double)
 
 sys.stdout.write(
   sys.stdin.read().format(
-    p_err,
-    q_err,
-    math.pi,
-    -math.pi,
-    .5 * math.pi,
-    p[-1],
-    ''.join(
+    p_err = p_err,
+    q_err = q_err,
+    pi = math.pi,
+    minus_pi = -math.pi,
+    half_pi = .5 * math.pi,
+    p_last = p[-1],
+    p = ''.join(
       [
         '  r = r * slope2 {0:s} {1:.16e}\n'.format(
           '-' if p[i] < 0. else '+',
@@ -72,8 +72,8 @@ sys.stdout.write(
         for i in range(p.shape[0] - 2, -1, -1)
       ]
     ),
-    q[-1],
-    ''.join(
+    q_last = q[-1],
+    q = ''.join(
       [
         '  s = s * slope2 {0:s} {1:.16e}\n'.format(
           '-' if q[i] < 0. else '+',

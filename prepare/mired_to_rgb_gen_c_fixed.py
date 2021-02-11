@@ -106,20 +106,18 @@ p_blue_bc, p_blue_bc_shr, _ = poly_fixed(
 
 sys.stdout.write(
   sys.stdin.read().format(
-    device,
-    device,
-    to_fixed(b_red, MIRED_EXP),
-    to_fixed(b_green, MIRED_EXP),
-    to_fixed(b_blue, MIRED_EXP),
-    to_fixed(c_blue, MIRED_EXP),
-    ', '.join([f'{to_hex(p_red_ab[i]):s}LL' for i in range(p_red_ab.shape[0])]),
-    ', '.join([f'{to_hex(p_green_ab[i]):s}LL' for i in range(p_green_ab.shape[0])]),
-    ', '.join([f'{to_hex(p_green_bd[i]):s}LL' for i in range(p_green_bd.shape[0])]),
-    ', '.join([f'{to_hex(p_blue_bc[i]):s}LL' for i in range(p_blue_bc.shape[0])]),
-    ', '.join([str(p_red_ab_shr[i]) for i in range(p_red_ab_shr.shape[0])]),
-    ', '.join([str(p_green_ab_shr[i]) for i in range(p_green_ab_shr.shape[0])]),
-    ', '.join([str(p_green_bd_shr[i]) for i in range(p_green_bd_shr.shape[0])]),
-    ', '.join([str(p_blue_bc_shr[i]) for i in range(p_blue_bc_shr.shape[0])]),
-    device
+    device = device,
+    b_red = to_fixed(b_red, MIRED_EXP),
+    b_green = to_fixed(b_green, MIRED_EXP),
+    b_blue = to_fixed(b_blue, MIRED_EXP),
+    c_blue = to_fixed(c_blue, MIRED_EXP),
+    p_red_ab = ', '.join([f'{to_hex(p_red_ab[i]):s}LL' for i in range(p_red_ab.shape[0])]),
+    p_green_ab = ', '.join([f'{to_hex(p_green_ab[i]):s}LL' for i in range(p_green_ab.shape[0])]),
+    p_green_bd = ', '.join([f'{to_hex(p_green_bd[i]):s}LL' for i in range(p_green_bd.shape[0])]),
+    p_blue_bc = ', '.join([f'{to_hex(p_blue_bc[i]):s}LL' for i in range(p_blue_bc.shape[0])]),
+    p_red_ab_shr = ', '.join([str(p_red_ab_shr[i]) for i in range(p_red_ab_shr.shape[0])]),
+    p_green_ab_shr = ', '.join([str(p_green_ab_shr[i]) for i in range(p_green_ab_shr.shape[0])]),
+    p_green_bd_shr = ', '.join([str(p_green_bd_shr[i]) for i in range(p_green_bd_shr.shape[0])]),
+    p_blue_bc_shr = ', '.join([str(p_blue_bc_shr[i]) for i in range(p_blue_bc_shr.shape[0])])
   )
 )

@@ -37,18 +37,18 @@ EPSILON = 1e-8
 # returns approximation to:
 #   math.sqrt(x ** 2 + y ** 2), atan2(y, x)
 # x and y cannot both be 0 (minimum r is approximately EPSILON)
-# minimax error is up to {0:e} relative resp. {1:e} absolute
+# minimax error is up to {p_err:e} relative resp. {q_err:e} absolute
 def xy_to_rtheta(xy):
   x = xy[XY_x]
   y = xy[XY_y]
 
   theta = 0.
   if y >= x:
-    theta = {2:.16e} if y >= 0. else {3:.16e}
+    theta = {pi:.16e} if y >= 0. else {minus_pi:.16e}
     x = -x
     y = -y
   if y < -x:
-    theta -= {4:.16e}
+    theta -= {half_pi:.16e}
     x, y = -y, x
 
   if x < EPSILON:
@@ -57,10 +57,10 @@ def xy_to_rtheta(xy):
   slope = y / x
   slope2 = slope * slope
 
-  r = {5:.16e}
-{6:s}
-  s = {7:.16e}
-{8:s}  s *= slope
+  r = {p_last:.16e}
+{p:s}
+  s = {q_last:.16e}
+{q:s}  s *= slope
 
   return numpy.array([x * r, theta + s], numpy.double)
 

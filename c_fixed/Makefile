@@ -237,6 +237,9 @@ mired_to_rgb_device.c.template
 kelv_to_uv: kelv_to_uv_standalone.o
 	${CC} ${CFLAGS} -o $@ $^ -lm
 
+kelv_to_uv.c: kelv_to_uv.c.template
+	../prepare/kelv_to_uv_gen_c_fixed.py <$< >$@
+
 #kelv_to_uv_deriv: kelv_to_uv_deriv_standalone.o
 #	${CC} ${CFLAGS} -o $@ $^ -lm
 

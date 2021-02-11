@@ -70,11 +70,11 @@ q = numpy.array(
 
 sys.stdout.write(
   sys.stdin.read().format(
-    p_err,
-    q_err,
-    theta_scale,
-    p[-1],
-    ''.join(
+    p_err = p_err,
+    q_err = q_err,
+    theta_scale = theta_scale,
+    p_last = p[-1],
+    p = ''.join(
       [
         '  x = x * theta2 {0:s} {1:.16e}\n'.format(
           '-' if p[i] < 0. else '+',
@@ -83,8 +83,8 @@ sys.stdout.write(
         for i in range(p.shape[0] - 2, -1, -1)
       ]
     ),
-    q[-1],
-    ''.join(
+    q_last = q[-1],
+    q = ''.join(
       [
         '  y = y * theta2 {0:s} {1:.16e}\n'.format(
           '-' if q[i] < 0. else '+',

@@ -34,20 +34,20 @@ N_RTHETA = 2
 
 # returns approximation to:
 #   r * math.cos(theta), r * math.sin(theta)
-# minimax error is up to {0:e} resp. {1:e} on domain [-pi/4, pi/4)
+# minimax error is up to {p_err:e} resp. {q_err:e} on domain [-pi/4, pi/4)
 def rtheta_to_xy(rtheta):
   r = rtheta[RTHETA_r]
   theta = rtheta[RTHETA_theta]
 
-  theta *= {2:.16e}
+  theta *= {theta_scale:.16e}
   i = int(round(theta))
   theta -= i
   theta2 = theta * theta
 
-  x = {3:.16e}
-{4:s}
-  y = {5:.16e}
-{6:s}  y *= theta
+  x = {p_last:.16e}
+{p:s}
+  y = {q_last:.16e}
+{q:s}  y *= theta
 
   if i & 1:
     x, y = -y, x

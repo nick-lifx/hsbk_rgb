@@ -24,19 +24,19 @@
 import numpy
 from mired_to_rgb import MiredToRGB
 
-mired_to_rgb_{0:s} = MiredToRGB(
-  {1:.16e},
-  {2:.16e},
-  {3:.16e},
-  {4:.16e},
-  numpy.array([{5:s}]),
-  numpy.array([{6:s}]),
-  numpy.array([{7:s}]),
-  numpy.array([{8:s}])
+mired_to_rgb_{device:s} = MiredToRGB(
+  {b_red:.16e},
+  {b_green:.16e},
+  {b_blue:.16e},
+  {c_blue:.16e},
+  numpy.array([{p_red_ab:s}]),
+  numpy.array([{p_green_ab:s}]),
+  numpy.array([{p_green_bd:s}]),
+  numpy.array([{p_blue_bc:s}])
 )
 
 # standalone
 if __name__ == '__main__':
   import mired_to_rgb
 
-  mired_to_rgb.standalone(mired_to_rgb_{9:s})
+  mired_to_rgb.standalone(mired_to_rgb_{device:s})

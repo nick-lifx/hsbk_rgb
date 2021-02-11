@@ -79,31 +79,28 @@ y_shr = -30 - p_exp[0] - post_factor_exp
 
 sys.stdout.write(
   sys.stdin.read().format(
-    device,
-    ','.join(
+    device = device,
+    post_factor = ','.join(
       [
         f'\n  {to_hex(post_factor[i]):s}'
         for i in range(post_factor.shape[0])
       ]
     ),
-    str(gamma_a),
-    str(gamma_b),
-    str(gamma_a),
-    str(gamma_c),
-    str(gamma_d),
-    str(gamma_e),
-    str(2. - gamma_c),
-    str(2. - gamma_c),
-    err,
-    device,
-    to_fixed(gamma_a * gamma_b, -30),
-    to_fixed(1. / gamma_a, -34),
-    to_hex(1 << 33),
-    34,
-    to_fixed(gamma_c, -30),
-    1 - exp0, # 2:30 argument has exponent -1 when viewed in 1:31 fixed point
-    to_hex(p[-1]),
-    ''.join(
+    str_gamma_a = str(gamma_a),
+    str_gamma_b = str(gamma_b),
+    str_gamma_c = str(gamma_c),
+    str_gamma_d = str(gamma_d),
+    str_gamma_e = str(gamma_e),
+    two_minus_gamma_c = str(2. - gamma_c),
+    err = err,
+    gamma_a_gamma_b = to_fixed(gamma_a * gamma_b, -30),
+    gamma_a_recip = to_fixed(1. / gamma_a, -34),
+    gamma_a_recip_half = to_hex(1 << 33),
+    gamma_a_recip_shr = 34,
+    gamma_c = to_fixed(gamma_c, -30),
+    one_minus_exp0 = 1 - exp0, # 2:30 argument has exponent -1 when viewed in 1:31 fixed point
+    p_last = to_hex(p[-1]),
+    p = ''.join(
       [
         '  y = (int32_t)(((int64_t)y * x {0:s} 0x{1:x}LL) >> {2:d});\n'.format(
           '-' if p[i] < 0. else '+',
@@ -113,8 +110,7 @@ sys.stdout.write(
         for i in range(p.shape[0] - 2, -1, -1)
       ]
     ),
-    to_hex(1 << (y_shr - 1)),
-    y_shr,
-    device
+    y_half = to_hex(1 << (y_shr - 1)),
+    y_shr = y_shr
   )
 )

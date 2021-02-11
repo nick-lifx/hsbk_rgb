@@ -20,6 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# put utils into path
+# temporary until we have proper Python packaging
+import os.path
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.append(os.path.join(dirname, '..'))
+
 import math
 import mpmath
 import numpy
@@ -38,14 +45,14 @@ KELV_MAX = 15000.
 UV_EXP = -30
 
 p_u_num, p_u_num_shr, p_exp_u_num = poly_fixed(
-  mpmath.matrix([.860117757, 1.54118254e-4, 1.28641212e-7])
+  mpmath.matrix([.860117757, 1.54118254e-4, 1.28641212e-7]),
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
   31
 )
 p_u_denom, p_u_denom_shr, p_exp_u_denom = poly_fixed(
-  mpmath.matrix([1., 8.42420235e-4, 7.08145163e-7])
+  mpmath.matrix([1., 8.42420235e-4, 7.08145163e-7]),
   KELV_MIN,
   KELV_MAX,
   KELV_EXP,
@@ -75,29 +82,29 @@ assert div_shl_v >= 0 and div_shl_v < 32
 
 sys.stdout.write(
   sys.stdin.read().format(
-    int(round(math.ldexp(KELV_MIN * (1. - EPSILON), -KELV_EXP))),
-    int(round(math.ldexp(KELV_MAX * (1. + EPSILON), -KELV_EXP))),
-    p_u_num[2],
-    p_u_num[1],
-    p_u_num_shr[1],
-    p_u_num[0],
-    p_u_num_shr[0],
-    p_u_denom[2],
-    p_u_denom[1],
-    p_u_denom_shr[1],
-    p_u_denom[0],
-    p_u_denom_shr[0],
-    div_shl_u + 1,
-    p_v_num[2],
-    p_v_num[1],
-    p_v_num_shr[1],
-    p_v_num[0],
-    p_v_num_shr[0],
-    p_v_denom[2],
-    -p_v_denom[1],
-    p_v_denom_shr[1],
-    p_v_denom[0],
-    p_v_denom_shr[0],
-    div_shl_v + 1
+    kelv_min = int(round(math.ldexp(KELV_MIN * (1. - EPSILON), -KELV_EXP))),
+    kelv_max = int(round(math.ldexp(KELV_MAX * (1. + EPSILON), -KELV_EXP))),
+    p_u_num2 = p_u_num[2],
+    p_u_num1 = p_u_num[1],
+    p_u_num_shr1 = p_u_num_shr[1],
+    p_u_num0 = p_u_num[0],
+    p_u_num_shr0 = p_u_num_shr[0],
+    p_u_denom2 = p_u_denom[2],
+    p_u_denom1 = p_u_denom[1],
+    p_u_denom_shr1 = p_u_denom_shr[1],
+    p_u_denom0 = p_u_denom[0],
+    p_u_denom_shr0 = p_u_denom_shr[0],
+    div_shl_u_plus_one = div_shl_u + 1,
+    p_v_num2 = p_v_num[2],
+    p_v_num1 = p_v_num[1],
+    p_v_num_shr1 = p_v_num_shr[1],
+    p_v_num0 = p_v_num[0],
+    p_v_num_shr0 = p_v_num_shr[0],
+    p_v_denom2 = p_v_denom[2],
+    minus_p_v_denom1 = -p_v_denom[1],
+    p_v_denom_shr1 = p_v_denom_shr[1],
+    p_v_denom0 = p_v_denom[0],
+    p_v_denom_shr0 = p_v_denom_shr[0],
+    div_shl_v_plus_one = div_shl_v + 1
   )
 )

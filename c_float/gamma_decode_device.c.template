@@ -22,24 +22,24 @@
 
 #include <assert.h>
 #include <math.h>
-#include "gamma_decode_{0:s}.h"
+#include "gamma_decode_{device:s}.h"
 
-static float post_factor[] = {{{1:s}
+static float post_factor[] = {{{post_factor:s}
 }};
 
 // returns approximation to:
-//   x < {2:s}f * {3:s}f ? x / {4:s}f : powf((x + {5:s}f) / {6:s}f, {7:s}f)
-// allowed domain (-inf, {8:s}), recommended domain [-epsilon, 1 + epsilon)
-// do not call with argument >= {9:s} due to table lookup overflow (unchecked)
-// minimax error is up to {10:e} relative
-float gamma_decode_{11:s}(float x) {{
-  if (x < {12:.8e}f)
-    return x * {13:.8e}f;
+//   x < {str_gamma_a:s}f * {str_gamma_b:s}f ? x / {str_gamma_a:s}f : powf((x + {str_gamma_c:s}f) / {str_gamma_d:s}f, {str_gamma_e:s}f)
+// allowed domain (-inf, {two_minus_gamma_c:s}), recommended domain [-epsilon, 1 + epsilon)
+// do not call with argument >= {two_minus_gamma_c:s} due to table lookup overflow (unchecked)
+// minimax error is up to {err:e} relative
+float gamma_decode_{device:s}(float x) {{
+  if (x < {gamma_a_gamma_b:.8e}f)
+    return x * {gamma_a_recip:.8e}f;
   int exp;
-  x = frexpf(x + {14:.8e}f, &exp);
-  assert(exp < {15:d});
-  float y = {16:.8e}f;
-{17:s}  return y * post_factor[exp + {18:d}];
+  x = frexpf(x + {gamma_c:.8e}f, &exp);
+  assert(exp < {exp1_plus_one:d});
+  float y = {p_last:.8e}f;
+{p:s}  return y * post_factor[exp + {minus_exp0:d}];
 }}
 
 #ifdef STANDALONE
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {{
   }}
   float x = atof(argv[1]);
 
-  float y = gamma_decode_{19:s}(x);
+  float y = gamma_decode_{device:s}(x);
   printf("gamma encoded %.6f -> linear %.6f\n", x, y);
 
   return EXIT_SUCCESS;

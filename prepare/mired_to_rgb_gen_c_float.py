@@ -68,16 +68,14 @@ p_blue_bc = numpy.array(p_blue_bc, numpy.double)
 
 sys.stdout.write(
   sys.stdin.read().format(
-    device,
-    device,
-    b_red,
-    b_green,
-    b_blue,
-    c_blue,
-    ', '.join([f'{p_red_ab[i]:.8e}f' for i in range(p_red_ab.shape[0])]),
-    ', '.join([f'{p_green_ab[i]:.8e}f' for i in range(p_green_ab.shape[0])]),
-    ', '.join([f'{p_green_bd[i]:.8e}f' for i in range(p_green_bd.shape[0])]),
-    ', '.join([f'{p_blue_bc[i]:.8e}f' for i in range(p_blue_bc.shape[0])]),
-    device
+    device = device,
+    b_red = b_red,
+    b_green = b_green,
+    b_blue = b_blue,
+    c_blue = c_blue,
+    p_red_ab = ', '.join([f'{p_red_ab[i]:.8e}f' for i in range(p_red_ab.shape[0])]),
+    p_green_ab = ', '.join([f'{p_green_ab[i]:.8e}f' for i in range(p_green_ab.shape[0])]),
+    p_green_bd = ', '.join([f'{p_green_bd[i]:.8e}f' for i in range(p_green_bd.shape[0])]),
+    p_blue_bc = ', '.join([f'{p_blue_bc[i]:.8e}f' for i in range(p_blue_bc.shape[0])])
   )
 )
