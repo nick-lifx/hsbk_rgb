@@ -18,18 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-all: python c_float c_fixed monitor prepare
+all: c_fixed c_float monitor prepare protocol python
 
-.PHONY: python
-python: prepare
+.PHONY: c_fixed
+c_fixed: prepare
 	${MAKE} -C $@
 
 .PHONY: c_float
 c_float: prepare
-	${MAKE} -C $@
-
-.PHONY: c_fixed
-c_fixed: prepare
 	${MAKE} -C $@
 
 .PHONY: monitor
@@ -40,10 +36,18 @@ monitor:
 prepare: monitor
 	${MAKE} -C $@
 
+.PHONY: protocol
+protocol:
+	${MAKE} -C $@
+
+.PHONY: python
+python: prepare
+	${MAKE} -C $@
+
 clean:
-	${MAKE} -C python clean
-	${MAKE} -C c_float clean
 	${MAKE} -C c_fixed clean
+	${MAKE} -C c_float clean
 	${MAKE} -C monitor clean
 	${MAKE} -C prepare clean
-	${MAKE} -C monitor clean
+	${MAKE} -C protocol clean
+	${MAKE} -C python clean

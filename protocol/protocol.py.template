@@ -1,0 +1,163 @@
+import struct
+
+class Enum:
+  pass
+
+class Struct:
+  def serialize(self):
+    raise NotImplementedError
+  def deserialize(self, data):
+    raise NotImplementedError
+
+class Empty(Struct):
+  def serialize(self):
+    return b''
+  def deserialize(self, data):
+    pass
+
+# the below FrameHeader, FrameAddress, Protocolheader will be defined in a
+# fairly dumb way, similarly to the automatically generated ones but allowing
+# bit-fields (which conceptually can be done in the automatically generated
+# ones as well, but has not been so far), however, this container class is a
+# bit smarter, as it will deal with the length and type fields automatically
+class Frame(Struct):
+  def __init__(
+    self,
+    frame_header = None,
+    frame_address = None,
+    protocol_header = None,
+    payload = None
+  ):
+    self.frame_header = (
+      FrameHeader()
+    if frame_header is None else
+      frame_header
+    )
+    self.frame_address = (
+      FrameAddress()
+    if frame_address is None else
+      frame_address
+    )
+    self.protocol_header = (
+      ProtocolHeader()
+    if protocol_header is None else
+      protocol_header
+    )
+    self.payload = (
+      packet_type_to_type.get(self.protocol_header.type, Empty)()
+    if payload is None else
+      payload
+    )
+  def serialize(self):
+    assert isinstance(
+      self.payload,
+      packet_type_to_type.get(self.protocol_header.type, Empty)
+    )
+    serialized_payload = self.payload.serialize()
+    self.frame_header.length = 36 + len(serialized_payload)
+    return b''.join(
+      [
+        self.frame_header.serialize(),
+        self.frame_address.serialize(),
+        self.protocol_header.serialize(),
+        serialized_payload
+      ]
+    )
+  def deserialize(self, data):
+    self.frame_header.deserialize(data[0:16])
+    self.frame_address.deserialize(data[8:24])
+    self.protocol_header.deserialize(data[24:36])
+    self.payload = packet_type_to_type.get(self.protocol_header.type, Empty)()
+    self.payload.deserialize(data[36:])
+
+class FrameHeader(Struct):
+  def __init__(
+    self,
+    length = 0,
+    protocol = 1024,
+    addressable = True,
+    tagged = False,
+    origin = 0,
+    source = 0
+  ):
+    self.length = length
+    self.protocol = protocol
+    self.addressable = addressable
+    self.tagged = tagged
+    self.origin = origin
+    self.source = source
+  def serialize(self):
+    return b''.join(
+      [
+        int.to_bytes(self.length, 2, 'little'),
+        int.to_bytes(
+          self.protocol |
+            (int(self.addressable) << 12) |
+            (int(self.tagged) << 13) |
+            (self.origin << 14),
+          2,
+          'little'
+        ),
+        int.to_bytes(self.source, 4, 'little')
+      ]
+    )
+  def deserialize(self, data):
+    self.length = int.from_bytes(data[0:2], 'little')
+    x = int.from_bytes(data[2:4], 'little')
+    self.protocol = x & 0xfff
+    self.addressable = ((x >> 12) & 1) != 0
+    self.tagged = ((x >> 13) & 1) != 0
+    self.origin = (x >> 14) & 3
+    self.source = int.from_bytes(data[4:8], 'little')
+
+class FrameAddress(Struct):
+  def __init__(
+    self,
+    target = bytes(8),
+    res_required = False,
+    ack_required = False,
+    sequence = 0
+  ):
+    self.target = target
+    self.res_required = res_required
+    self.ack_required = ack_required
+    self.sequence = sequence
+  def serialize(self):
+    return b''.join(
+      [
+        self.target,
+        bytes(6),
+        int.to_bytes(
+          int(self.res_required) |
+            (int(self.ack_required) << 1),
+          1,
+          'little'
+        ),
+        int.to_bytes(self.sequence, 1, 'little')
+      ]
+    )
+  def deserialize(self, data):
+    self.target = data[0:8]
+    x = int.from_bytes(data[14:15], 'little')
+    self.res_required = (x & 1) != 0
+    self.ack_required = ((x >> 1) & 1) != 0
+    self.sequence = int.from_bytes(data[15:16], 'little')
+
+class ProtocolHeader(Struct):
+  def __init__(
+    self,
+    _type = 0
+  ):
+    self.type = _type
+  def serialize(self):
+    return b''.join(
+      [
+        bytes(8),
+        int.to_bytes(self.type, 2, 'little'),
+        bytes(2)
+      ]
+    )
+  def deserialize(self, data):
+    self.type = int.from_bytes(data[8:10], 'little')
+
+# the remainder of the file is automatically generated from protocol.yml
