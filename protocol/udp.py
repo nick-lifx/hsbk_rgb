@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import numpy
 import protocol
 import random
 import select
@@ -15,6 +16,9 @@ GET_SERVICE_TIMEOUT = .1
 
 GET_VERSION_TRIES = 5
 GET_VERSION_TIMEOUT = .1
+
+GET_COLOR_TRIES = 5
+GET_COLOR_TIMEOUT = .1
 
 SET_COLOR_TRIES = 5
 SET_COLOR_TIMEOUT = .1
@@ -123,6 +127,57 @@ class UDP:
                 protocol.PacketType.DEVICE_STATE_VERSION
           ):
             return frame.payload
+        now = time.monotonic()
+    raise UDPException()
+
+  def get_color(self, mac, addr):
+    target = (bytes.fromhex(mac) + bytes(8))[:8]
+    self.sequence = (self.sequence + 1) & 0xff
+    out_data = protocol.Frame(
+      frame_header = protocol.FrameHeader(
+        source = self.source
+      ),
+      frame_address = protocol.FrameAddress(
+        target = target,
+        res_required = True,
+        sequence = self.sequence
+      ),
+      protocol_header = protocol.ProtocolHeader(
+        _type = protocol.PacketType.LIGHT_GET
+      )
+    ).serialize()
+
+    now = time.monotonic()
+    timeout = now
+    for i in range(GET_COLOR_TRIES):
+      self.socket.sendto(out_data, addr)
+
+      timeout += GET_COLOR_TIMEOUT
+      while now < timeout:
+        r, _, _ = select.select([self.socket], [], [], timeout - now)
+        if len(r):
+          in_data, in_addr = self.socket.recvfrom(0x1000)
+          frame = protocol.Frame()
+          frame.deserialize(in_data)
+          if (
+            in_addr == addr and
+            frame.frame_header.protocol == 1024 and
+              frame.frame_header.addressable and
+              frame.frame_header.source == self.source and
+              frame.frame_address.target == target and
+              frame.frame_address.sequence == self.sequence and
+              frame.protocol_header.type ==
+                protocol.PacketType.LIGHT_STATE
+          ):
+            return numpy.array(
+              [
+                frame.payload.color.hue * (360. / 0xffff),
+                frame.payload.color.saturation * (1. / 0xffff),
+                frame.payload.color.brightness * (1. / 0xffff),
+                frame.payload.color.kelvin
+              ],
+              numpy.double
+            )
         now = time.monotonic()
     raise UDPException()
 

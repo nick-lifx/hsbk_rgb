@@ -29,10 +29,10 @@ sys.path.append(os.path.join(dirname, '../python'))
 
 import numpy
 import ctypes
+import protocol
+import random
 import sdl2
-import sdl2.sdlimage
-#import sdl2.sdlttf
-import udp
+import time
 from gamma_decode_rec2020 import gamma_decode_rec2020
 from gamma_decode_srgb import gamma_decode_srgb
 from gamma_encode_rec2020 import gamma_encode_rec2020
@@ -41,6 +41,7 @@ from hsbk_to_rgb_display_p3 import hsbk_to_rgb_display_p3
 from hsbk_to_rgb_rec2020 import hsbk_to_rgb_rec2020
 from hsbk_to_rgb_srgb import hsbk_to_rgb_srgb
 from hue_wheel import HueWheel
+from udp import UDP
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -61,27 +62,19 @@ XY_x = 0
 XY_y = 1
 N_XY = 2
 
+SET_COLOR_TIMEOUT = .1
+
 device = 'srgb'
+mac = None
+hsbk = None
 if len(sys.argv) >= 3 and sys.argv[1] == '--device':
   device = sys.argv[2]
   del sys.argv[1:3]
-if len(sys.argv) < 5:
-  print(f'usage: {sys.argv[0]:s} [--device device] hue sat br kelv')
-  print('device in {display_p3, rec2020, srgb}, default srgb')
-  print('hue = hue in degrees (0 to 360)')
-  print('sat = saturation as fraction (0 to 1)')
-  print('br = brightness as fraction (0 to 1)')
-  print('kelv = white point in degrees Kelvin')
-  sys.exit(EXIT_FAILURE)
-hsbk = numpy.array(
-  [
-    float(sys.argv[1]),
-    float(sys.argv[2]),
-    float(sys.argv[3]),
-    float(sys.argv[4])
-  ],
-  numpy.double
-)
+if len(sys.argv) >= 3 and sys.argv[1] == '--mac':
+  mac = sys.argv[2]
+  del sys.argv[1:3]
+if len(sys.argv) >= 5:
+  hsbk = numpy.array([float(i) for i in sys.argv[1:5]], numpy.double)
 
 gamma_decode, gamma_encode, hsbk_to_rgb = {
   'display_p3': (
@@ -103,9 +96,29 @@ gamma_decode, gamma_encode, hsbk_to_rgb = {
 
 hue_wheel = HueWheel(gamma_decode, gamma_encode, hsbk_to_rgb, 120, 15)
 
+class Light:
+  def __init__(self, mac, addr):
+    self.mac = mac
+    self.addr = addr
+    self.sequence = random.randint(0, 0xff)
+    self.timeout = None # if not None, send out_data when time reaches this
+    self.out_data = None # if not None, indicates light is dirty and how to set
+
+udp = UDP()
+lights = {
+  mac: Light(mac, addr)
+  for mac, (addr, services) in udp.get_service(mac).items() # mac may be None
+  if protocol.DeviceService.UDP in services
+}
+
+if hsbk is None:
+  if len(lights):
+    light = list(lights.values())[0]
+    hsbk = udp.get_color(light.mac, light.addr)
+  else:
+    hsbk = numpy.array([0., 0., 1., 3500], numpy.double)
+
 assert sdl2.SDL_Init(sdl2.SDL_INIT_TIMER | sdl2.SDL_INIT_VIDEO) == 0
-assert sdl2.sdlimage.IMG_Init(sdl2.sdlimage.IMG_INIT_PNG) #== 0
-#assert sdl2.sdlttf.TTF_Init() == 0
 
 window = sdl2.SDL_CreateWindow(
   b'Color',
@@ -118,13 +131,9 @@ window = sdl2.SDL_CreateWindow(
 sdl2.SDL_ShowWindow(window)
 
 renderer = sdl2.SDL_CreateRenderer(window, -1, sdl2.SDL_RENDERER_ACCELERATED)
-#font = sdl2.sdlttf.TTF_OpenFont(
-#  b'/usr/share/fonts/truetype/msttcorefonts/Arial.ttf',
-#  14
-#)
 
 # takes image as a numpy array of float, shape is (y_size, x_size, N_RGBA)
-# returns surface, data, user must keep data alive for lifetime of surface
+# returns surface, data; user must keep data alive for lifetime of surface
 def image_to_surface(image):
   y_size, x_size, channels = image.shape
   assert channels == N_RGBA
@@ -146,10 +155,12 @@ wheel_surface, wheel_data = image_to_surface(
   hue_wheel.render_wheel(hsbk[HSBK_BR:])
 )
 wheel_texture = sdl2.SDL_CreateTextureFromSurface(renderer, wheel_surface)
+sdl2.SDL_FreeSurface(wheel_surface)
+del wheel_data
 
+event = sdl2.SDL_Event()
 while True:
   sdl2.SDL_SetRenderTarget(renderer, None)
-  #sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff)
   sdl2.SDL_RenderClear(renderer)
 
   sdl2.SDL_RenderCopy(renderer,
@@ -164,6 +175,8 @@ while True:
     hue_wheel.render_dot(hsbk, xy_frac[XY_x], xy_frac[XY_y])
   )
   dot_texture = sdl2.SDL_CreateTextureFromSurface(renderer, dot_surface)
+  sdl2.SDL_FreeSurface(dot_surface)
+  del dot_data
   sdl2.SDL_RenderCopy(renderer,
     dot_texture,
     None,
@@ -175,28 +188,78 @@ while True:
     )
   )
   sdl2.SDL_DestroyTexture(dot_texture)
-  sdl2.SDL_FreeSurface(dot_surface)
-  del dot_data
 
   sdl2.SDL_RenderPresent(renderer)
 
-  event = sdl2.SDL_Event()
   while True:
-    sdl2.SDL_WaitEvent(ctypes.byref(event))
+    # timer service in between events or upon timeout waiting for event
+    try:
+      in_data, in_addr = udp.socket.recvfrom(0x1000)
+      frame = protocol.Frame()
+      frame.deserialize(in_data)
+      mac = frame.frame_address.target[:6].hex()
+      light = lights.get(mac)
+      if (
+        light is not None and
+          in_addr == light.addr and
+          frame.frame_header.protocol == 1024 and
+          frame.frame_header.addressable and
+          frame.frame_header.source == udp.source and
+          frame.frame_address.sequence == light.sequence and
+          frame.protocol_header.type ==
+            protocol.PacketType.DEVICE_ACKNOWLEDGEMENT
+      ):
+        light.timeout = None
+        light.out_data = None
+    except BlockingIOError:
+      pass
+
+    now = time.monotonic()
+    for light in lights.values():
+      if light.timeout is not None and now >= light.timeout:
+        light.timeout += SET_COLOR_TIMEOUT
+        udp.socket.sendto(light.out_data, light.addr)
+
+    event.type = -1
+    sdl2.SDL_WaitEventTimeout(ctypes.byref(event), 1)
     if event.type == sdl2.SDL_QUIT:
-      #sdl2.sdlttf.TTF_Quit()
-      sdl2.sdlimage.IMG_Quit()
       sdl2.SDL_Quit()
       sys.exit(EXIT_SUCCESS)
-
-    if event.type == sdl2.SDL_MOUSEMOTION:
+    elif event.type == sdl2.SDL_MOUSEMOTION:
       if event.motion.state & sdl2.SDL_BUTTON_LMASK:
-        hs, within = hue_wheel.xy_to_hs(
+        hs, dist = hue_wheel.xy_to_hs(
           numpy.array(
             [event.motion.x - 12, event.motion.y - 120],
             numpy.double
           )
         )
-        if True: #within:
+        if dist < 60.:
           hsbk[:HSBK_BR] = hs
+          now = time.monotonic()
+          for light in lights.values():
+            target = (bytes.fromhex(light.mac) + bytes(8))[:8]
+            light.sequence = (light.sequence + 1) & 0xff
+            light.out_data = protocol.Frame(
+              frame_header = protocol.FrameHeader(
+                source = udp.source
+              ),
+              frame_address = protocol.FrameAddress(
+                target = target,
+                ack_required = True,
+                sequence = light.sequence
+              ),
+              protocol_header = protocol.ProtocolHeader(
+                _type = protocol.PacketType.LIGHT_SET_COLOR
+              ),
+              payload = protocol.LightSetColor(
+                color = protocol.LightHsbk(
+                  hue = int(round((hsbk[HSBK_HUE] % 360.) * (0xffff / 360.))),
+                  saturation = int(round(hsbk[HSBK_SAT] * 0xffff)),
+                  brightness = int(round(hsbk[HSBK_BR] * 0xffff)),
+                  kelvin = int(round(hsbk[HSBK_KELV]))
+                )
+              )
+            ).serialize()
+            if True: #light.timeout is None:
+              light.timeout = now
           break

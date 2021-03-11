@@ -136,8 +136,8 @@ class HueWheel:
           image1[i, j, RGBA_ALPHA]
         )
 
-  # finds hue and saturation corresponding to e.g. mouse position
-  # also returns True if position is within circle or False if clipped
+  # finds hue and saturation corresponding to e.g. mouse position,
+  # also distance from wheel (nonzero if position was clipped to wheel)
   # coordinates are relative to centre of top left pixel of wheel image
   def xy_to_hs(self, xy):
     x = xy[XY_x] - self.wheel_outer_radius0
@@ -153,13 +153,20 @@ class HueWheel:
     )
     within = True
     if sat < 0.:
-      within = False
       sat = 0.
     elif sat > 1.:
-      within = False
       sat = 1.
     sat = sat_decode(sat)
-    return numpy.array([hue, sat], numpy.double), within
+    return (
+      numpy.array([hue, sat], numpy.double),
+      (
+        self.wheel_inner_radius - r
+      if r < self.wheel_inner_radius else
+        0.
+      if r < self.wheel_outer_radius else
+        r - self.wheel_outer_radius
+      )
+    )
 
   # opposite of xy_to_hs(), except we know it must be within circle
   def hs_to_xy(self, hs):
