@@ -23,8 +23,8 @@
 import math
 import numpy
 import sys
+from indicator_dot import IndicatorDot
 from rtheta_to_xy import rtheta_to_xy
-from xy_to_r import xy_to_r
 from xy_to_rtheta import xy_to_rtheta
 
 EXIT_SUCCESS = 0
@@ -74,82 +74,51 @@ def sat_decode(x):
 def sat_encode(x):
   return x / ((1. - SAT_ENCODE_GAMMA) * x + SAT_ENCODE_GAMMA)
 
-class HueWheel:
+class HueWheel(IndicatorDot):
   def __init__(
     self,
     gamma_decode,
     gamma_encode,
     hsbk_to_rgb,
-    wheel_size,
+    size,
     dot_size,
     dot_rgb_mid = numpy.array([1., 1., 1.], numpy.double),
     dot_rgb_outer = numpy.array([0., 0., 0.], numpy.double)
   ):
-    self.gamma_decode = gamma_decode
-    self.gamma_encode = gamma_encode
+    IndicatorDot.__init__(
+      self,
+      gamma_decode,
+      gamma_encode,
+      dot_size,
+      dot_rgb_mid,
+      dot_rgb_outer
+    )
     self.hsbk_to_rgb = hsbk_to_rgb
 
     # perform all calculations with pixel centres
     # a pixel will appear fully bright when its centre is inside the radius0
     # calculated here, therefore the radius will appear half a pixel larger;
     # alpha blending will operate when it is between the radius0 and radius1
-    self.wheel_image_size = wheel_size * 2 + 1
-    self.wheel_inner_radius = wheel_size * .5
-    self.wheel_inner_radius0 = self.wheel_inner_radius - .5
-    self.wheel_inner_radius1 = self.wheel_inner_radius + .5
-    self.wheel_outer_radius = wheel_size
-    self.wheel_outer_radius0 = self.wheel_outer_radius - .5
-    self.wheel_outer_radius1 = self.wheel_outer_radius + .5
-
-    self.dot_image_size = dot_size * 2 + 1
-    self.dot_inner_radius = dot_size * .75
-    self.dot_inner_radius0 = self.dot_inner_radius - .5
-    self.dot_inner_radius1 = self.dot_inner_radius + .5
-    self.dot_mid_radius = dot_size * .85
-    self.dot_mid_radius0 = self.dot_mid_radius - .5
-    self.dot_mid_radius1 = self.dot_mid_radius + .5
-    self.dot_outer_radius = dot_size
-    self.dot_outer_radius0 = self.dot_outer_radius - .5
-    self.dot_outer_radius1 = self.dot_outer_radius + .5
-
-    self.dot_rgb_mid = dot_rgb_mid
-    self.dot_rgb_outer = dot_rgb_outer
-
-  # this computes a linear blend in an SRGB image with correct gamma handling
-  def blend(self, rgb0, rgb1, alpha):
-    rgb = numpy.zeros((N_RGB,), numpy.double)
-    for i in range(N_RGB):
-      v0 = self.gamma_decode(rgb0[i])
-      v1 = self.gamma_decode(rgb1[i])
-      rgb[i] = self.gamma_encode(v0 + alpha * (v1 - v0))
-    return rgb
-
-  # this calls blend over an area, and implements PNG alpha semantics -- the
-  # first (background) image must be RGB and the second (superimposed) image
-  # must be RGBA, the x_off and y_off are relative to top left of background
-  def composit(self, image0, image1, x_off, y_off):
-    for i in range(image1.shape[0]):
-      for j in range(image1.shape[1]):
-        image0[i + y_off, j + x_off] = self.blend(
-          image0[i + y_off, j + x_off],
-          image1[i, j, :RGBA_ALPHA],
-          image1[i, j, RGBA_ALPHA]
-        )
+    self.size = size
+    self.image_size = size * 2 + 1
+    self.inner_radius = size * .5
+    self.outer_radius = size
 
   # finds hue and saturation corresponding to e.g. mouse position,
-  # also distance from wheel (nonzero if position was clipped to wheel)
-  # coordinates are relative to centre of top left pixel of wheel image
+  # distance from nearest wheel boundary (positive if clipped to wheel)
+  # coordinates are relative to bottom left of bottom left pixel,
+  # so caller should add (.5, .5) for the centre of bottom left pixel
   def xy_to_hs(self, xy):
-    x = xy[XY_x] - self.wheel_outer_radius0
-    y = xy[XY_y] - self.wheel_outer_radius0
-    rtheta = xy_to_rtheta(numpy.array([x, -y], numpy.double))
+    x = xy[XY_x] - self.size
+    y = xy[XY_y] - self.size
+    rtheta = xy_to_rtheta(numpy.array([x, y], numpy.double))
     r = rtheta[RTHETA_r]
     theta = rtheta[RTHETA_theta]
 
     hue = theta * 180. / math.pi
     sat = (
-      (r - self.wheel_inner_radius) /
-        (self.wheel_outer_radius - self.wheel_inner_radius)
+      (r - self.inner_radius) /
+        (self.outer_radius - self.inner_radius)
     )
     within = True
     if sat < 0.:
@@ -159,13 +128,7 @@ class HueWheel:
     sat = sat_decode(sat)
     return (
       numpy.array([hue, sat], numpy.double),
-      (
-        self.wheel_inner_radius - r
-      if r < self.wheel_inner_radius else
-        0.
-      if r < self.wheel_outer_radius else
-        r - self.wheel_outer_radius
-      )
+      max(r - self.outer_radius, self.inner_radius - r)
     )
 
   # opposite of xy_to_hs(), except we know it must be within circle
@@ -174,120 +137,40 @@ class HueWheel:
     sat = hs[HS_SAT]
     r = (
       sat_encode(sat) *
-        (self.wheel_outer_radius - self.wheel_inner_radius) +
-          self.wheel_inner_radius
+        (self.outer_radius - self.inner_radius) +
+          self.inner_radius
     )
     theta = hue * math.pi / 180.
 
     return (
-      rtheta_to_xy(numpy.array([r, -theta], numpy.double)) +
-        numpy.array(
-          [self.wheel_outer_radius0, self.wheel_outer_radius0],
-          numpy.double
-        )
+      rtheta_to_xy(numpy.array([r, theta], numpy.double)) +
+        numpy.array([self.size, self.size], numpy.double)
     )
 
   # returns (size * 2 + 1, size * 2 + 1) by size sent to constructor
   # x_off and y_off are in the range [0, 1] and specify subpixel position
-  # when both are 0 the image is left- and top-justified and will not use
-  # right column or bottom row, similarly both 1 will not use top or left
+  # when both are 0 the image is left-, bottom -justified and will not use
+  # right column or top row, similarly both 1 will not use bottom or right
   def render_wheel(self, bk, x_off = 0., y_off = 0.):
     br = bk[BK_BR]
     kelv = bk[BK_KELV]
 
-    # coordinates are taken to be 0, 1, ..., size * 2
-    # but we want to not use the last one (when x_off, y_off = 0) and take
-    # the centre to be size - .5 and have radius size - .5 (as mentioned it
-    # seem to be expanded by half a pixel on each side when actually viewed)
-    x_off += self.wheel_outer_radius0
-    y_off += self.wheel_outer_radius0
+    xy = numpy.zeros((N_XY,), numpy.double)
+    hsbk = numpy.zeros((N_HSBK,), numpy.double)
+    hsbk[HSBK_BR:] = bk
 
     image = numpy.zeros(
-      (self.wheel_image_size, self.wheel_image_size, N_RGBA),
+      (self.image_size, self.image_size, N_RGBA),
       numpy.double
     )
-    for i in range(self.wheel_image_size):
-      x = i - x_off
-      for j in range(self.wheel_image_size):
-        y = j - x_off
-
-        rtheta = xy_to_rtheta(numpy.array([x, -y], numpy.double))
-        r = rtheta[RTHETA_r]
-        theta = rtheta[RTHETA_theta]
-
-        if self.wheel_inner_radius0 <= r < self.wheel_outer_radius1:
-          hue = theta * 180. / math.pi
-          sat = (
-            (r - self.wheel_inner_radius) /
-              (self.wheel_outer_radius - self.wheel_inner_radius)
-          )
-          if sat < 0.:
-            sat = 0.
-          elif sat > 1.:
-            sat = 1.
-          sat = sat_decode(sat)
-          image[j, i, :RGBA_ALPHA] = self.hsbk_to_rgb.convert(
-            numpy.array([hue, sat, br, kelv], numpy.double)
-          )
-          image[j, i, RGBA_ALPHA] = (
-            r - self.wheel_inner_radius0
-          if r < self.wheel_inner_radius1 else
-            1.
-          if r < self.wheel_outer_radius0 else
-            self.wheel_outer_radius1 - r
-          )
-    return image
-
-  # returns (size * 2 + 1, size * 2 + 1) by size sent to constructor
-  # x_off and y_off are in the range [0, 1] and specify subpixel position
-  # when both are 0 the image is left- and top-justified and will not use
-  # right column or bottom row, similarly both 1 will not use top or left
-  def render_dot(self, hsbk, x_off = 0., y_off = 0.):
-    # coordinates are taken to be 0, 1, ..., size * 2
-    # but we want to not use the last one (when x_off, y_off = 0) and take
-    # the centre to be size - .5 and have radius size - .5 (as mentioned it
-    # seem to be expanded by half a pixel on each side when actually viewed)
-    x_off += self.dot_outer_radius0
-    y_off += self.dot_outer_radius0
-
-    rgb_inner = self.hsbk_to_rgb.convert(hsbk)
-
-    image = numpy.zeros(
-      (self.dot_image_size, self.dot_image_size, N_RGBA),
-      numpy.double
-    )
-    for i in range(self.dot_image_size):
-      x = i - x_off
-      for j in range(self.dot_image_size):
-        y = j - y_off
-
-        r = xy_to_r(numpy.array([x, y], numpy.double))
-
-        if r < self.dot_outer_radius1:
-          image[j, i, :RGBA_ALPHA] = (
-            rgb_inner
-          if r < self.dot_inner_radius0 else
-            self.blend(
-              rgb_inner,
-              self.dot_rgb_mid,
-              r - self.dot_inner_radius0
-            )
-          if r < self.dot_inner_radius1 else
-            self.dot_rgb_mid
-          if r < self.dot_mid_radius0 else
-            self.blend(
-              self.dot_rgb_mid,
-              self.dot_rgb_outer,
-              r - self.dot_mid_radius0
-            )
-          if r < self.dot_mid_radius1 else
-            self.dot_rgb_outer
-          )
-          image[j, i, RGBA_ALPHA] = (
-            1.
-          if r < self.dot_outer_radius0 else
-            self.dot_outer_radius1 - r
-          )
+    for i in range(self.image_size):
+      xy[XY_y] = i + .5 - y_off
+      for j in range(self.image_size):
+        xy[XY_x] = j + .5 - x_off
+        hsbk[:HSBK_BR], dist = self.xy_to_hs(xy)
+        if dist < .5:
+          image[i, j, :RGBA_ALPHA] = self.hsbk_to_rgb.convert(hsbk)
+          image[i, j, RGBA_ALPHA] = 1. if dist < -.5 else .5 - dist
     return image
 
 if __name__ == '__main__':
@@ -312,17 +195,9 @@ if __name__ == '__main__':
     print('br = brightness as fraction (0 to 1)')
     print('kelv = white point in degrees Kelvin')
     print('image_out = name of PNG file to create (will be overwritten)')
-    print('creates 272 x 480 x 3 image with colour wheel and indicator circle')
+    print('creates 272 x 480 x 3 image with colour wheel and indicator dot')
     sys.exit(EXIT_FAILURE)
-  hsbk = numpy.array(
-    [
-      float(sys.argv[1]),
-      float(sys.argv[2]),
-      float(sys.argv[3]),
-      float(sys.argv[4])
-    ],
-    numpy.double
-  )
+  hsbk = numpy.array([float(i) for i in sys.argv[1:5]], numpy.double)
   image_out = sys.argv[5]
 
   gamma_decode, gamma_encode, hsbk_to_rgb = {
@@ -343,7 +218,13 @@ if __name__ == '__main__':
     )
   }[device]
 
-  hue_wheel = HueWheel(gamma_decode, gamma_encode, hsbk_to_rgb, 120, 15)
+  hue_wheel = HueWheel(
+    gamma_decode,
+    gamma_encode,
+    hsbk_to_rgb,
+    120,
+    15
+  )
 
   image = numpy.zeros((480, 272, 3), numpy.double)
   hue_wheel.composit(
@@ -352,13 +233,21 @@ if __name__ == '__main__':
     16,
     120
   )
+
   xy = hue_wheel.hs_to_xy(hsbk[:HSBK_BR])
   xy_frac, xy_int = numpy.modf(xy)
   hue_wheel.composit(
     image,
-    hue_wheel.render_dot(hsbk, xy_frac[XY_x], xy_frac[XY_y]),
+    hue_wheel.render_dot( 
+      hsbk_to_rgb.convert(hsbk),
+      xy_frac[XY_x],
+      xy_frac[XY_y]
+    ),
     16 - 15 + int(xy_int[XY_x]),
     120 - 15 + int(xy_int[XY_y])
   )
 
-  imageio.imwrite(image_out, numpy.round(image * 255.).astype(numpy.uint8))
+  imageio.imwrite(
+    image_out,
+    numpy.round(image[::-1, :, :] * 255.).astype(numpy.uint8)
+  )
