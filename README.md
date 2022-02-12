@@ -42,7 +42,7 @@ There are a number of command-line utilities to try:
 * `hsbk_to_rgb_srgb` -- this takes an HSBK tuple where hue is in degrees, saturation
   and brightness are fractional and Kelvin is in the range 1500 to 9000, and
   converts to a gamma-encoded (R,G,B) value in the SRGB colour space, using
-  the 'mired_to_rgb` algorithm as a backend for the Kelvin computation. If you
+  the `mired_to_rgb` algorithm as a backend for the Kelvin computation. If you
   don't provide a Kelvin value it will default to 6504K and thus convert an HSV
   tuple as used by Photoshop or Gimp to RGB in a fairly compatible way.
 
@@ -120,7 +120,7 @@ There are also some test programs:
   turned on full and thus is the sum of hues 0 and 120), and the corruption
   of chromaticity values that occurs when mixing in a gamma-encoded space.
 
-For the utilities you can use `--device display_p3` to access the Display P3
+For some utilities you can use `--device display_p3` to access the Display P3
 version, or `--device rec2020` to access the rec.2020 version. (The basic test
 programs that only test the result of a single conversion or function call are
 given in separate executables for each monitor, whereas the more sophisticated
@@ -140,7 +140,7 @@ and the white point, are placed in e.g.  `/monitor/srgb/rgbw_to_xy.yml` and
 these are processed into a more convenient form during the `make` process.
 The processed output is in e.g. `/monitor/srgb/model.yml` and can be tested
 using the utilities `/monitor/rgb_to_uvL.py` and `/monitor/uvL_to_rgb.py`.
-The '/monitor/*/model.yml` files form inputs to the processing in `/prepare`.
+The `/monitor/*/model.yml` files form inputs to the processing in `/prepare`.
 
 ### Running from the command line
 
@@ -296,7 +296,7 @@ generated specifically per monitor, but it is straightforward to generate.
 
 If you are making an app of some kind or a piece of hardware for controlling
 the LIFX lights, you will probably want to present a user-interface to let the
-user control hue, saturation and Kelvins. With this in mind, I have created a
+user control hue, saturation and Kelvins. I have created a
 demo of how this could be done, using the subroutines given above as building
 blocks. The code is written on the assumption that we could use our efficient
 conversion routines to generate the hue wheel in real time as settings change.
