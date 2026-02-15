@@ -75,7 +75,7 @@ post_factor = (
 
 # final int64_t result will have exponent p_exp[0] + post_factor_exp
 # we want it to be -30, hence we will shift right by the difference
-y_shr = -30 - p_exp[0] - post_factor_exp
+y_shr = int(-30 - p_exp[0] - post_factor_exp) # note: cannot be numpy int32
 
 sys.stdout.write(
   sys.stdin.read().format(
